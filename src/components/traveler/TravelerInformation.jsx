@@ -19,10 +19,11 @@ export default function TravelerInformation() {
   const { session } = useVerification();
   const profile = getProfile(session.documentType);
 
-  // Separate MRZ from other regular fields if present in profile
-  const regularFields = profile.travelerFields.filter((f) => f.key !== 'mrz');
+  // Defensively filter traveler fields from profile
+  const allFields = Array.isArray(profile?.travelerFields) ? profile.travelerFields.filter(Boolean) : [];
+  const regularFields = allFields.filter((f) => f && f.key && f.key !== 'mrz');
   const mrzValue = session.traveler?.mrz;
-  const hasMRZ = profile.travelerFields.some((f) => f.key === 'mrz') || Boolean(mrzValue);
+  const hasMRZ = allFields.some((f) => f && f.key === 'mrz') || Boolean(mrzValue);
 
   return (
     <div className={styles.section} aria-label="Traveler identity dossier">
@@ -50,22 +51,22 @@ export default function TravelerInformation() {
         <div className={styles.primaryIdentity}>
           <div className={styles.primaryItem}>
             <span className={styles.fieldLabel}>FULL NAME</span>
-            <span className={`${styles.primaryVal} ${!session.traveler.name ? styles.empty : ''}`}>
-              {session.traveler.name || '— — — — — —'}
+            <span className={`${styles.primaryVal} ${!session.traveler?.name ? styles.empty : ''}`}>
+              {session.traveler?.name || '— — — — — —'}
             </span>
           </div>
 
           <div className={styles.docNumRow}>
             <div className={styles.primaryItem}>
               <span className={styles.fieldLabel}>DOCUMENT NUMBER</span>
-              <span className={`${styles.docNumVal} ${!session.traveler.docNumber ? styles.empty : ''}`}>
-                {session.traveler.docNumber || '— — — — —'}
+              <span className={`${styles.docNumVal} ${!session.traveler?.docNumber ? styles.empty : ''}`}>
+                {session.traveler?.docNumber || '— — — — —'}
               </span>
             </div>
             <div className={styles.primaryItem}>
               <span className={styles.fieldLabel}>NATIONALITY</span>
-              <span className={`${styles.primaryVal} ${!session.traveler.nationality ? styles.empty : ''}`}>
-                {session.traveler.nationality || '— — —'}
+              <span className={`${styles.primaryVal} ${!session.traveler?.nationality ? styles.empty : ''}`}>
+                {session.traveler?.nationality || '— — —'}
               </span>
             </div>
           </div>
@@ -75,16 +76,16 @@ export default function TravelerInformation() {
       {/* Field Grid for remaining parameters */}
       <dl className={styles.fieldGrid}>
         {regularFields
-          .filter((f) => !['name', 'docNumber', 'nationality'].includes(f.key))
+          .filter((f) => f && f.key && !['name', 'docNumber', 'nationality'].includes(f.key))
           .map((field) => {
-            const value = session.traveler[field.key];
-            const isEmpty = !value || value.trim() === '';
+            const rawValue = session.traveler?.[field.key];
+            const isEmpty = rawValue === null || rawValue === undefined || String(rawValue).trim() === '';
 
             return (
               <div key={field.key} className={styles.fieldItem}>
-                <dt className={styles.fieldLabel}>{field.label}</dt>
+                <dt className={styles.fieldLabel}>{field.label || field.key}</dt>
                 <dd className={`${styles.fieldValue} ${isEmpty ? styles.empty : ''}`}>
-                  {isEmpty ? '—' : value}
+                  {isEmpty ? '—' : String(rawValue)}
                 </dd>
               </div>
             );

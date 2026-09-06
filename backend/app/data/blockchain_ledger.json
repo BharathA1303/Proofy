@@ -1186,65 +1186,65 @@
   {
     "block_index": 71,
     "previous_hash": "dda08c15a313d892e6e68071566dec09acc20af3c06c5b0d59cd261ef6c71d6a",
-    "block_hash": "810225af48bb0adad67ddd33a8b9825415f3655a6e3c24647f596e9e345ec0cd",
-    "timestamp": 1788697427.5137181,
-    "target_id": "CASE-SIH-001",
+    "block_hash": "3221480664d1e5ba07b8718ebf835be2008f2a8a30e24250a3ec38b9672a71d9",
+    "timestamp": 1788698427.2157578,
+    "target_id": "CASE-20260906-D01F43",
     "event_type": "CASE_CREATED",
     "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     "record_version": "1.0.0",
     "system_version": "1.0.0-phase12",
     "metadata": {
-      "notes": "SIH Demo Scenario A - Clean",
-      "case_id": "CASE-SIH-001",
-      "timestamp_iso": "2026-09-06T12:23:47Z"
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-D01F43",
+      "timestamp_iso": "2026-09-06T12:40:27Z"
     }
   },
   {
     "block_index": 72,
-    "previous_hash": "810225af48bb0adad67ddd33a8b9825415f3655a6e3c24647f596e9e345ec0cd",
-    "block_hash": "b653c09cfdc45d1e4972383ba87ba15578eb0c8ba11ea3835967b824d4afa2ff",
-    "timestamp": 1788697427.5317628,
-    "target_id": "CASE-SIH-002",
+    "previous_hash": "3221480664d1e5ba07b8718ebf835be2008f2a8a30e24250a3ec38b9672a71d9",
+    "block_hash": "712e94ce332ddb47943cb3999a186d2204c433a0aa97c69de179e763fdc95974",
+    "timestamp": 1788698427.2296321,
+    "target_id": "CASE-20260906-877A88",
     "event_type": "CASE_CREATED",
     "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     "record_version": "1.0.0",
     "system_version": "1.0.0-phase12",
     "metadata": {
-      "notes": "SIH Demo Scenario B - Tampered",
-      "case_id": "CASE-SIH-002",
-      "timestamp_iso": "2026-09-06T12:23:47Z"
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-877A88",
+      "timestamp_iso": "2026-09-06T12:40:27Z"
     }
   },
   {
     "block_index": 73,
-    "previous_hash": "b653c09cfdc45d1e4972383ba87ba15578eb0c8ba11ea3835967b824d4afa2ff",
-    "block_hash": "7451548619ae9de4d642075b7dcfb9eb897ae3b6d715ba9f6295ff07a22021f8",
-    "timestamp": 1788697427.549723,
-    "target_id": "CASE-SIH-003",
+    "previous_hash": "712e94ce332ddb47943cb3999a186d2204c433a0aa97c69de179e763fdc95974",
+    "block_hash": "5b71b81cb44dc78704442259c804f1de66b82c3d6f2c07370953e40d130d9756",
+    "timestamp": 1788698428.344405,
+    "target_id": "CASE-20260906-19B0D6",
     "event_type": "CASE_CREATED",
     "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     "record_version": "1.0.0",
     "system_version": "1.0.0-phase12",
     "metadata": {
-      "notes": "SIH Demo Scenario C - Mismatch",
-      "case_id": "CASE-SIH-003",
-      "timestamp_iso": "2026-09-06T12:23:47Z"
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-19B0D6",
+      "timestamp_iso": "2026-09-06T12:40:28Z"
     }
   },
   {
     "block_index": 74,
-    "previous_hash": "7451548619ae9de4d642075b7dcfb9eb897ae3b6d715ba9f6295ff07a22021f8",
-    "block_hash": "143100e7eef32ef2ae7ac3ebcb62c6cb21649c88e2e06824ea8ef35c39a45fbc",
-    "timestamp": 1788697427.5646968,
-    "target_id": "CASE-SIH-004",
+    "previous_hash": "5b71b81cb44dc78704442259c804f1de66b82c3d6f2c07370953e40d130d9756",
+    "block_hash": "09f43ab85525980d2fe4f46344cc5e255dd3782318ee76da1fa5e5d5f68868cb",
+    "timestamp": 1788698428.3520715,
+    "target_id": "CASE-20260906-90ADB5",
     "event_type": "CASE_CREATED",
     "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     "record_version": "1.0.0",
     "system_version": "1.0.0-phase12",
     "metadata": {
-      "notes": "SIH Demo Scenario D - Registry Down",
-      "case_id": "CASE-SIH-004",
-      "timestamp_iso": "2026-09-06T12:23:47Z"
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-90ADB5",
+      "timestamp_iso": "2026-09-06T12:40:28Z"
     }
   }
 ]

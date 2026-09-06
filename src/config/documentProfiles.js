@@ -63,6 +63,7 @@ const COMMON_FIELDS = {
   permitType:  { key: 'permitType',  label: 'Permit Type',      placeholder: '—' },
   portOfEntry: { key: 'portOfEntry', label: 'Port of Entry',    placeholder: '—' },
   passportNumber: { key: 'passportNumber', label: 'Linked Passport #', placeholder: '—' },
+  visaType:       { key: 'visaType',       label: 'Visa Type / Class', placeholder: '—' },
   entries:        { key: 'entries',        label: 'Entries',          placeholder: '—' },
   durationOfStay: { key: 'durationOfStay', label: 'Duration of Stay', placeholder: '—' },
   bloodGroup:     { key: 'bloodGroup',     label: 'Blood Group',      placeholder: '—' },
