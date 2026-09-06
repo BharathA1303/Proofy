@@ -14,7 +14,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVerification } from '../../state/verification/useVerification.js';
-import { CHECK_STATUS } from '../../state/verification/initialState.js';
+import { CHECK_STATUS, SESSION_STATUS } from '../../state/verification/initialState.js';
 import { verifyBiometrics, runRegistryVerification } from '../../services/verificationApi.js';
 import SectionHeader from '../common/SectionHeader.jsx';
 import styles from './BiometricStatus.module.css';
