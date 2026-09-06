@@ -1246,5 +1246,133 @@
       "case_id": "CASE-20260906-90ADB5",
       "timestamp_iso": "2026-09-06T12:40:28Z"
     }
+  },
+  {
+    "block_index": 75,
+    "previous_hash": "09f43ab85525980d2fe4f46344cc5e255dd3782318ee76da1fa5e5d5f68868cb",
+    "block_hash": "e83cfbd77072d223ecd70ef5b255623a8aeafb2468d5e9ccc1ffcd9386922ae7",
+    "timestamp": 1788700387.4250095,
+    "target_id": "CASE-20260906-824392",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-824392",
+      "timestamp_iso": "2026-09-06T13:13:07Z"
+    }
+  },
+  {
+    "block_index": 76,
+    "previous_hash": "e83cfbd77072d223ecd70ef5b255623a8aeafb2468d5e9ccc1ffcd9386922ae7",
+    "block_hash": "22091a48eeeefd97be65cfd7c1d31572bfe520a7dbafe8c4b710faa073b30456",
+    "timestamp": 1788700387.4291985,
+    "target_id": "CASE-20260906-F22BF5",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-F22BF5",
+      "timestamp_iso": "2026-09-06T13:13:07Z"
+    }
+  },
+  {
+    "block_index": 77,
+    "previous_hash": "22091a48eeeefd97be65cfd7c1d31572bfe520a7dbafe8c4b710faa073b30456",
+    "block_hash": "2d09f12507cb4d8ce922ca8514367ee8a17e33f6528daf55370e47b1cb597f75",
+    "timestamp": 1788701088.002244,
+    "target_id": "CASE-20260906-0AA810",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-0AA810",
+      "timestamp_iso": "2026-09-06T13:24:48Z"
+    }
+  },
+  {
+    "block_index": 78,
+    "previous_hash": "2d09f12507cb4d8ce922ca8514367ee8a17e33f6528daf55370e47b1cb597f75",
+    "block_hash": "68231bdff6a341793eb02c48b7d0cc4648ce33a5bf376f2f7d65fe947281631e",
+    "timestamp": 1788701088.0098875,
+    "target_id": "CASE-20260906-0900D0",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-0900D0",
+      "timestamp_iso": "2026-09-06T13:24:48Z"
+    }
+  },
+  {
+    "block_index": 79,
+    "previous_hash": "68231bdff6a341793eb02c48b7d0cc4648ce33a5bf376f2f7d65fe947281631e",
+    "block_hash": "73646d02351c814194da666f21bc324db9827d0c21fe893859385ca45c57f636",
+    "timestamp": 1788704462.6228476,
+    "target_id": "CASE-20260906-ECF03F",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-ECF03F",
+      "timestamp_iso": "2026-09-06T14:21:02Z"
+    }
+  },
+  {
+    "block_index": 80,
+    "previous_hash": "73646d02351c814194da666f21bc324db9827d0c21fe893859385ca45c57f636",
+    "block_hash": "0cfc04f51c47d25b0b0710e9252e1565b45ed958516390beb6d5b5c036a5df6c",
+    "timestamp": 1788704462.6407466,
+    "target_id": "CASE-20260906-F9F5BD",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-F9F5BD",
+      "timestamp_iso": "2026-09-06T14:21:02Z"
+    }
+  },
+  {
+    "block_index": 81,
+    "previous_hash": "0cfc04f51c47d25b0b0710e9252e1565b45ed958516390beb6d5b5c036a5df6c",
+    "block_hash": "dc164909a4c8f086294d7de6f4ead9fa5879d95993a7f5c429276afe40e538f5",
+    "timestamp": 1788706092.8763773,
+    "target_id": "CASE-20260906-26A35D",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-26A35D",
+      "timestamp_iso": "2026-09-06T14:48:12Z"
+    }
+  },
+  {
+    "block_index": 82,
+    "previous_hash": "dc164909a4c8f086294d7de6f4ead9fa5879d95993a7f5c429276afe40e538f5",
+    "block_hash": "f5e78ea221d4086f60ad825852035fc95841e442073bc88b1847952c2eaca12a",
+    "timestamp": 1788706092.9000845,
+    "target_id": "CASE-20260906-0D7131",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-0D7131",
+      "timestamp_iso": "2026-09-06T14:48:12Z"
+    }
   }
 ]

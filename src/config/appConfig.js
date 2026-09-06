@@ -6,10 +6,11 @@
  * Do NOT scatter the product name as literals throughout components.
  */
 
-export const APP_NAME = 'Document Verification System';
-export const APP_SHORT_NAME = 'DVS';
-export const APP_VERSION = '1.0.0-phase12';
-export const ENVIRONMENT = 'demonstration';
+export const APP_NAME = 'Proofy';
+export const APP_SHORT_NAME = 'Proofy';
+export const APP_TAGLINE = 'Intelligent Document & Identity Screening';
+export const APP_VERSION = '2.0';
+export const ENVIRONMENT = 'production';
 
 /**
  * API base URL — replace with real FastAPI endpoint in Phase 1.
