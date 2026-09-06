@@ -1,0 +1,240 @@
+/* PreviewAndExtractedCard.module.css */
+
+.rightColumnContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cardBox {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.boxHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.95rem;
+}
+
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.headerIconBox {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boxTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.expandBtn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.expandBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Document preview area */
+.previewContentArea {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  min-height: 165px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.emptyPreviewState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.placeholderIconBox {
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+}
+
+.emptyText {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.imagePreviewWrapper {
+  width: 100%;
+  max-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.documentImage {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Extracted info area */
+.extractedContentArea {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  min-height: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem;
+}
+
+.emptyExtractedState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.fieldsGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+.fieldItem {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.fullWidth {
+  grid-column: span 2;
+}
+
+.fieldLabel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+.fieldValue {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-top: 1px;
+}
+
+.fieldValueHighlight {
+  font-size: 0.78rem;
+  font-family: monospace;
+  font-weight: 700;
+  color: #2563eb;
+  margin-top: 1px;
+}
+
+.mrzCodeBlock {
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: #334155;
+  background-color: #f1f5f9;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0 0 0;
+  overflow-x: auto;
+  letter-spacing: 0.05em;
+}
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  padding: 2rem;
+}
+
+.modalBox {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeModalBtn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #f1f5f9;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modalImage {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+}

@@ -1,0 +1,202 @@
+/* HeroStatsBar.module.css */
+
+.heroSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 0 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 520px;
+}
+
+.greetingTitle {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.waveHand {
+  display: inline-block;
+  animation: wave 2.2s infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  20%, 60% { transform: rotate(14deg); }
+  40%, 80% { transform: rotate(-8deg); }
+}
+
+.greetingSubtitle {
+  font-size: 0.84rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.heroRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Date & Time Widget */
+.timeCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.calendarIconBox {
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeTextGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeDate {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.timeClock {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* Common KPI Tile */
+.kpiCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 12px;
+  min-width: 120px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
+}
+
+.kpiIconBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpiContent {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.kpiValue {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.kpiLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Color Themes */
+/* 1. Blue KPI */
+.kpiBlue {
+  background-color: #eff6ff;
+  border-color: #dbeafe;
+}
+.kpiBlue .kpiIconBox {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+.kpiBlue .kpiValue {
+  color: #1e40af;
+}
+.kpiBlue .kpiLabel {
+  color: #3b82f6;
+}
+
+/* 2. Green KPI */
+.kpiGreen {
+  background-color: #ecfdf5;
+  border-color: #d1fae5;
+}
+.kpiGreen .kpiIconBox {
+  background-color: #d1fae5;
+  color: #059669;
+}
+.kpiGreen .kpiValue {
+  color: #065f46;
+}
+.kpiGreen .kpiLabel {
+  color: #10b981;
+}
+
+/* 3. Amber KPI */
+.kpiAmber {
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+}
+.kpiAmber .kpiIconBox {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+.kpiAmber .kpiValue {
+  color: #92400e;
+}
+.kpiAmber .kpiLabel {
+  color: #b45309;
+}
+
+/* 4. Red KPI */
+.kpiRed {
+  background-color: #fef2f2;
+  border-color: #fee2e2;
+}
+.kpiRed .kpiIconBox {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+.kpiRed .kpiValue {
+  color: #991b1b;
+}
+.kpiRed .kpiLabel {
+  color: #ef4444;
+}

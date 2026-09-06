@@ -1,0 +1,213 @@
+/* PipelineProgressCard.module.css */
+
+.pipelineCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardTitle {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.autoRunControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.autoRunLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.toggleSwitch {
+  width: 34px;
+  height: 18px;
+  border-radius: 9999px;
+  background-color: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+  padding: 2px;
+}
+
+.toggleOn {
+  background-color: #2563eb;
+}
+
+.toggleKnob {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(16px);
+}
+
+/* Timeline steps */
+.timelineList {
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  position: relative;
+  min-height: 52px;
+}
+
+.nodeColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  align-self: stretch;
+}
+
+.nodeCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  z-index: 2;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.nodePending {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.nodeRunning {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.nodePassed {
+  background-color: #10b981;
+  color: #ffffff;
+  border: 1px solid #059669;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.connectingLine {
+  width: 2px;
+  flex: 1;
+  background-color: #e2e8f0;
+  margin: 3px 0;
+}
+
+.lineDone {
+  background-color: #10b981;
+}
+
+.stepContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0.75rem;
+}
+
+.stepTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.stepDescription {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin: 2px 0 0 0;
+  line-height: 1.25;
+}
+
+.statusCol {
+  flex-shrink: 0;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.statusDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.badgePending {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+.badgePending .statusDot {
+  background-color: #94a3b8;
+}
+
+.badgeRunning {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+.badgeRunning .statusDot {
+  background-color: #2563eb;
+  animation: pulse 1.5s infinite;
+}
+
+.badgePassed {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+.badgePassed .statusDot {
+  background-color: #10b981;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

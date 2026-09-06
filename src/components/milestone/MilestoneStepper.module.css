@@ -1,176 +1,80 @@
 /* MilestoneStepper.module.css */
 
-.container {
+.stepperContainer {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 2rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.stepsWrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   width: 100%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-5);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: var(--space-4);
-  transition: all var(--transition-normal);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.titleGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-}
-
-.activeStageBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: var(--font-weight-semibold);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-accent-light);
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent-border);
-}
-
-.stepperRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   position: relative;
-  gap: var(--space-2);
 }
 
-.stepItem {
+.stepBlock {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  flex: 1;
   position: relative;
-  z-index: 2;
-  min-width: 0;
 }
 
-.stepIconBox {
-  width: 38px;
-  height: 38px;
+.nodeRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  justify-content: center;
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--space-2);
-  transition: all var(--transition-fast);
-  background-color: var(--color-surface-subtle);
-  border: 2px solid var(--color-border);
-  color: var(--color-text-tertiary);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xs);
+  font-size: 0.92rem;
+  font-weight: 700;
+  z-index: 2;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.stepConnector {
-  position: absolute;
-  top: 19px;
-  height: 2px;
-  width: 100%;
-  left: 50%;
-  background-color: var(--color-border-subtle);
-  z-index: 1;
-  transition: background-color var(--transition-normal);
+/* 1. Idle state (Light slate) */
+.circleIdle {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
 }
 
-.connectorPassed {
-  background-color: var(--color-success);
+/* 2. Active / Current state (Solid Vibrant Blue) */
+.circleActive {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
-.connectorRunning {
-  background: linear-gradient(90deg, var(--color-success) 0%, var(--color-accent) 100%);
+/* 3. Running state (Blue pulsing) */
+.circleRunning {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
-.labelGroup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  max-width: 120px;
-}
-
-.stepName {
-  font-size: 12px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stepDesc {
-  font-size: 10px;
-  color: var(--color-text-tertiary);
-  line-height: 1.2;
-}
-
-/* ── Status Variations ── */
-
-/* IDLE */
-.step_idle .stepIconBox {
-  background-color: var(--color-surface-subtle);
-  border-color: var(--color-border);
-  color: var(--color-text-tertiary);
-}
-
-/* RUNNING / ACTIVE */
-.step_running .stepIconBox {
-  background-color: #EFF6FF;
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-  animation: pulseGlow 1.5s infinite ease-in-out;
-}
-
-.step_running .stepName {
-  color: var(--color-accent);
-  font-weight: var(--font-weight-bold);
-}
-
-/* PASSED */
-.step_passed .stepIconBox {
-  background-color: #ECFDF5;
-  border-color: #10B981;
-  color: #059669;
-}
-
-.step_passed .stepName {
-  color: var(--color-text-primary);
-}
-
-/* WARNING / REVIEW */
-.step_warning .stepIconBox {
-  background-color: #FFFBEB;
-  border-color: #F59E0B;
-  color: #D97706;
-}
-
-/* FAILED */
-.step_failed .stepIconBox {
-  background-color: #FEF2F2;
-  border-color: #EF4444;
-  color: #DC2626;
+/* 4. Passed state (Emerald Green) */
+.circlePassed {
+  background-color: #10b981;
+  color: #ffffff;
+  border: 2px solid #059669;
 }
 
 .spinner {
@@ -182,24 +86,56 @@
   to { transform: rotate(360deg); }
 }
 
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.3); }
-  70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+/* Connecting Horizontal Line between Steps */
+.connectorLine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
-@media (max-width: 768px) {
-  .stepDesc {
+.linePassed {
+  background-color: #10b981;
+}
+
+.labelWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 0.65rem;
+  line-height: 1.25;
+}
+
+.stepTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.titleActive {
+  color: #2563eb;
+}
+
+.stepSubtitle {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .stepsWrapper {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .connectorLine {
     display: none;
-  }
-  .stepName {
-    font-size: 10px;
-  }
-  .stepIconBox {
-    width: 30px;
-    height: 30px;
-  }
-  .stepConnector {
-    top: 15px;
   }
 }

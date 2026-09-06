@@ -1,12 +1,17 @@
 /**
  * VerificationPage.jsx
  *
- * The root page of the application.
- * Composes: Clean enterprise header + DocumentSelector tabs + Unified DocumentWorkspace.
+ * Replicates the exact layout from the reference image:
+ * 1. TopNavBar: Brand, Tagline, Theme toggle, SIH Sandbox pill, System Operational, Inspector avatar
+ * 2. HeroStatsBar: Welcome greeting, real-time clock, 4 KPI stats (128 Verified, 122 Clear, 5 Review, 1 High Risk)
+ * 3. DocumentWorkspace:
+ *    - 6-step horizontal milestone process flow
+ *    - 3-column workstation grid (UploadSection | PipelineProgressCard | PreviewAndExtractedCard)
+ *    - Bottom dashboard row (RecentVerificationsTable | SystemStatusCard)
  */
 import { useState } from 'react';
-import { APP_NAME, APP_SHORT_NAME, APP_VERSION } from '../config/appConfig.js';
-import DocumentSelector from '../components/document/DocumentSelector.jsx';
+import TopNavBar from '../components/dashboard/TopNavBar.jsx';
+import HeroStatsBar from '../components/dashboard/HeroStatsBar.jsx';
 import DocumentWorkspace from '../components/document/DocumentWorkspace.jsx';
 import VerificationCase from '../components/case/VerificationCase.jsx';
 import styles from './VerificationPage.module.css';
@@ -16,76 +21,47 @@ export default function VerificationPage() {
 
   return (
     <div className={styles.page}>
-      {/* Clean enterprise header */}
-      <header className={styles.header} role="banner">
-        <div className={styles.headerInner}>
-          <div className={styles.brand}>
-            <div className={styles.brandBadge}>
-              <span className={styles.brandMark} aria-hidden="true">
-                {APP_SHORT_NAME}
-              </span>
-            </div>
-            <div className={styles.brandText}>
-              <h1 className={styles.brandName}>{APP_NAME}</h1>
-              <span className={styles.brandVersion}>Automated Screening Terminal · {APP_VERSION}</span>
-            </div>
-          </div>
+      {/* ── 1. Top Navigation Bar ── */}
+      <TopNavBar />
 
-          <div className={styles.headerRight}>
-            {/* Mode Switcher */}
-            <div className={styles.modeSwitcher} role="tablist" aria-label="Screening Workspace Mode">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={workspaceMode === 'single'}
-                className={`${styles.modeButton} ${workspaceMode === 'single' ? styles.modeButtonActive : ''}`}
-                onClick={() => setWorkspaceMode('single')}
-                id="tab-single-doc-mode"
-              >
-                Single Document
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={workspaceMode === 'case'}
-                className={`${styles.modeButton} ${workspaceMode === 'case' ? styles.modeButtonActive : ''}`}
-                onClick={() => setWorkspaceMode('case')}
-                id="tab-case-mode"
-              >
-                Multi-Doc Case (M1–M12)
-              </button>
-            </div>
-
-            <span className={styles.sandboxPill} title="SIH Evaluation Sandbox · Blockchain Ledger Active">
-              <span className={styles.sandboxDot} aria-hidden="true" />
-              <span>SIH Sandbox</span>
-            </span>
-
-            <span className={styles.systemIndicator} role="status" aria-label="System status: Operational">
-              <span className={styles.statusDot} aria-hidden="true" />
-              <span>System Operational</span>
-            </span>
+      {/* ── 2. Main Content Container ── */}
+      <main className={styles.main} id="main-content">
+        {/* Workspace Mode Switcher Ribbon */}
+        <div className={styles.modeBar}>
+          <div className={styles.modeSwitcher} role="tablist" aria-label="Screening Workspace Mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={workspaceMode === 'single'}
+              className={`${styles.modeButton} ${workspaceMode === 'single' ? styles.modeButtonActive : ''}`}
+              onClick={() => setWorkspaceMode('single')}
+              id="tab-single-doc-mode"
+            >
+              Single Document Screening
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={workspaceMode === 'case'}
+              className={`${styles.modeButton} ${workspaceMode === 'case' ? styles.modeButtonActive : ''}`}
+              onClick={() => setWorkspaceMode('case')}
+              id="tab-case-mode"
+            >
+              Multi-Doc Case (M1–M12)
+            </button>
           </div>
         </div>
-      </header>
 
-      {workspaceMode === 'single' ? (
-        <>
-          {/* Document type tab bar */}
-          <DocumentSelector />
+        {/* Hero Greeting & Live KPI Metrics */}
+        <HeroStatsBar />
 
-          {/* Main verification workspace */}
-          <main className={styles.main} id="main-content">
-            <DocumentWorkspace />
-          </main>
-        </>
-      ) : (
-        <main className={styles.main} id="main-content">
+        {/* Core Workspace */}
+        {workspaceMode === 'single' ? (
+          <DocumentWorkspace />
+        ) : (
           <VerificationCase />
-        </main>
-      )}
+        )}
+      </main>
     </div>
   );
 }
-
-
