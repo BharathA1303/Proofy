@@ -358,7 +358,7 @@ export default function BiometricStatus() {
     }
   };
 
-  const isModuleReady = checks.faceVerification === 'ready' || checks.faceVerification === CHECK_STATUS.READY;
+  const isModuleReady = Boolean(session.file || session.status !== SESSION_STATUS.STANDBY);
   const hasCompletedResult = Boolean(session.faceDetail || biometrics.overallAssessment);
 
   // Status text & styling for telemetry cards
@@ -476,11 +476,11 @@ export default function BiometricStatus() {
               </svg>
             </div>
             <div className={styles.standbyText}>
-              <span className={styles.standbyTitle}>Module 4: Face Verification</span>
+              <span className={styles.standbyTitle}>Module 4: Live Face Verification (ArcFace + MiniFASNet)</span>
               <span className={styles.standbyDesc}>
                 {isModuleReady
-                  ? 'Passport extraction complete. Ready to compare traveler against passport photograph.'
-                  : 'Awaiting credential intake and forensic checks before initiating live capture.'}
+                  ? 'Document loaded. Launch browser webcam to scan the standing traveler and match against the document photograph.'
+                  : 'Awaiting document upload before initiating live camera capture.'}
               </span>
             </div>
           </div>
@@ -491,13 +491,13 @@ export default function BiometricStatus() {
               className={styles.startBtn}
               onClick={handleStartCamera}
               disabled={!isModuleReady}
-              title={isModuleReady ? 'Initialize browser camera for live facial matching' : 'Upload and verify passport first'}
+              title={isModuleReady ? 'Initialize browser camera for live facial matching' : 'Upload or load a document first'}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
-              <span>Start Face Verification</span>
+              <span>Launch Live Camera Scan</span>
             </button>
           </div>
         </div>
