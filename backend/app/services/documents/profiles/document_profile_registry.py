@@ -124,6 +124,10 @@ class DocumentProfileRegistry:
         """Return list of all registered document profiles."""
         return list(self._profiles.values())
 
+    def list_operational(self) -> List[DocumentProfile]:
+        """Return list of operational (available) document profiles."""
+        return [p for p in self._profiles.values() if p.is_available()]
+
     def get_all_profiles_metadata(self) -> List[Dict[str, Any]]:
         """Return serialized list of profiles for client metadata endpoint."""
         return [p.to_dict() for p in self._profiles.values()]

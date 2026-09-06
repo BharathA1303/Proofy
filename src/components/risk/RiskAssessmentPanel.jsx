@@ -212,9 +212,19 @@ export default function RiskAssessmentPanel({ data, loading }) {
     );
   }
 
-  const ra = data.risk_assessment;
-  const level = ra.risk_level;
-  const completePct = Math.round(ra.completeness * 100);
+  const ra = data?.risk_assessment || data;
+  if (!ra || typeof ra !== 'object') {
+    return (
+      <div className={styles.panel}>
+        <div className={styles.placeholder}>
+          Run all verification steps first, then click "Assess Risk".
+        </div>
+      </div>
+    );
+  }
+
+  const level = ra.risk_level || 'LOW';
+  const completePct = Math.round((ra.completeness ?? 1) * 100);
 
   return (
     <div className={styles.panel} id="risk-assessment-panel" aria-label="Module 6 Risk Assessment">

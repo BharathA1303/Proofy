@@ -1182,5 +1182,69 @@
       "case_id": "CASE-SIH-004",
       "timestamp_iso": "2026-09-06T11:33:49Z"
     }
+  },
+  {
+    "block_index": 71,
+    "previous_hash": "dda08c15a313d892e6e68071566dec09acc20af3c06c5b0d59cd261ef6c71d6a",
+    "block_hash": "810225af48bb0adad67ddd33a8b9825415f3655a6e3c24647f596e9e345ec0cd",
+    "timestamp": 1788697427.5137181,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-06T12:23:47Z"
+    }
+  },
+  {
+    "block_index": 72,
+    "previous_hash": "810225af48bb0adad67ddd33a8b9825415f3655a6e3c24647f596e9e345ec0cd",
+    "block_hash": "b653c09cfdc45d1e4972383ba87ba15578eb0c8ba11ea3835967b824d4afa2ff",
+    "timestamp": 1788697427.5317628,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-06T12:23:47Z"
+    }
+  },
+  {
+    "block_index": 73,
+    "previous_hash": "b653c09cfdc45d1e4972383ba87ba15578eb0c8ba11ea3835967b824d4afa2ff",
+    "block_hash": "7451548619ae9de4d642075b7dcfb9eb897ae3b6d715ba9f6295ff07a22021f8",
+    "timestamp": 1788697427.549723,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-06T12:23:47Z"
+    }
+  },
+  {
+    "block_index": 74,
+    "previous_hash": "7451548619ae9de4d642075b7dcfb9eb897ae3b6d715ba9f6295ff07a22021f8",
+    "block_hash": "143100e7eef32ef2ae7ac3ebcb62c6cb21649c88e2e06824ea8ef35c39a45fbc",
+    "timestamp": 1788697427.5646968,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-06T12:23:47Z"
+    }
   }
 ]

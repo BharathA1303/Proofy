@@ -27,7 +27,7 @@ class SystemService:
 
     @staticmethod
     def get_system_health() -> Dict[str, Any]:
-        profiles = document_profile_registry.list_operational()
+        profiles = document_profile_registry.get_all_profiles()
         ledger_valid, ledger_msg = blockchain_ledger.verify_chain()
 
         return {

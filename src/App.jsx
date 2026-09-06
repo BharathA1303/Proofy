@@ -15,17 +15,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { VerificationProvider } from './state/verification/VerificationContext.jsx';
 import VerificationPage from './pages/VerificationPage.jsx';
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <VerificationProvider>
-        <Routes>
-          <Route path="/" element={<VerificationPage />} />
-          {/* Redirect any unknown path back to root */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </VerificationProvider>
+      <ErrorBoundary title="System Encountered An Unexpected Error">
+        <VerificationProvider>
+          <Routes>
+            <Route path="/" element={<VerificationPage />} />
+            {/* Redirect any unknown path back to root */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </VerificationProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
