@@ -94,6 +94,16 @@ export function createInitialSession(documentType = DOCUMENT_TYPES.PASSPORT) {
 
     status: SESSION_STATUS.STANDBY,
 
+    /** Active pipeline milestone: 0 = standby, 1 = extraction, 2 = validation, 3 = forensics, 4 = biometrics, 5 = registryRisk */
+    activeMilestone: 0,
+    milestones: {
+      extraction:   { id: 1, label: 'OCR & Intake',        status: 'idle', desc: 'Text & MRZ extraction' },
+      validation:   { id: 2, label: 'Format Validation',    status: 'idle', desc: 'Rules & check digits' },
+      forensics:    { id: 3, label: 'Forensic Tampering',   status: 'idle', desc: 'ELA & splicing scan' },
+      biometrics:   { id: 4, label: 'Facial Biometrics',   status: 'idle', desc: 'Liveness & face gate' },
+      registryRisk: { id: 5, label: 'Decision & Registry', status: 'idle', desc: 'Risk matrix & ledger' },
+    },
+
     /** The File object selected by the user. null = nothing selected. */
     file: null,
 

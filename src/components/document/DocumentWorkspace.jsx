@@ -13,7 +13,7 @@ import TravelerInformation from '../traveler/TravelerInformation.jsx';
 import VerificationResult from '../verification/VerificationResult.jsx';
 import VerificationChecks from '../verification/VerificationChecks.jsx';
 import BiometricStatus from '../biometric/BiometricStatus.jsx';
-import ForensicEvidence from '../forensic/ForensicEvidence.jsx';
+import MilestoneStepper from '../milestone/MilestoneStepper.jsx';
 import styles from './DocumentWorkspace.module.css';
 
 function getTechnicalSpec(docType) {
@@ -75,6 +75,9 @@ export default function DocumentWorkspace() {
         </div>
       </div>
 
+      {/* Sequential Milestone Pipeline Stepper */}
+      <MilestoneStepper />
+
       {/* Unified Master Grid: Consolidated Process & Components */}
       <div className={styles.workbenchGrid}>
         {/* ── Left Master Card: Document Credential & Traveler Identity ── */}
@@ -119,10 +122,7 @@ export default function DocumentWorkspace() {
             <VerificationResult />
             <hr className={styles.divider} />
             <VerificationChecks />
-            <hr className={styles.divider} />
             <BiometricStatus />
-            <hr className={styles.divider} />
-            <ForensicEvidence />
           </div>
         </section>
       </div>

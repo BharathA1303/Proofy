@@ -175,11 +175,6 @@ export default function UploadPanel() {
 
   return (
     <div className={styles.section} aria-label="Document ingestion">
-      <SectionHeader
-        title="Document Ingestion"
-        subtitle="Upload or ingest border credential"
-        level={3}
-      />
 
       {/* Error message */}
       {session.error && (
@@ -298,7 +293,7 @@ export default function UploadPanel() {
           type="button"
           disabled={isSubmitting}
         >
-          <span>Verify Document</span>
+          <span>Run Verification Pipeline</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />

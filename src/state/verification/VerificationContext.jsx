@@ -137,6 +137,12 @@ export function VerificationProvider({ children }) {
       []
     ),
 
+    /** Update active milestone and milestone states */
+    setMilestone: useCallback(
+      (payload) => dispatch({ type: ACTIONS.SET_MILESTONE, payload }),
+      []
+    ),
+
     /** Store backend-assigned session ID */
     setSessionId: useCallback(
       (id) => dispatch({ type: ACTIONS.SET_SESSION_ID, payload: id }),

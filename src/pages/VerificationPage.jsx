@@ -56,6 +56,11 @@ export default function VerificationPage() {
               </button>
             </div>
 
+            <span className={styles.sandboxPill} title="SIH Evaluation Sandbox · Blockchain Ledger Active">
+              <span className={styles.sandboxDot} aria-hidden="true" />
+              <span>SIH Sandbox</span>
+            </span>
+
             <span className={styles.systemIndicator} role="status" aria-label="System status: Operational">
               <span className={styles.statusDot} aria-hidden="true" />
               <span>System Operational</span>
@@ -63,19 +68,6 @@ export default function VerificationPage() {
           </div>
         </div>
       </header>
-
-      {/* SIH Evaluation Sandbox & Demonstration Banner */}
-      <div className={styles.sandboxBanner} role="status">
-        <div className={styles.sandboxInner}>
-          <span className={styles.sandboxBadge}>DEMONSTRATION / SANDBOX MODE</span>
-          <span className={styles.sandboxDetails}>
-            <strong>Environment:</strong> SIH Evaluation Sandbox &bull;{' '}
-            <strong>Registry:</strong> Development Mock &bull;{' '}
-            <strong>Blockchain Audit:</strong> Local Cryptographic Ledger &bull;{' '}
-            <strong>System:</strong> AI-Assisted Decision Support (Non-Autonomous)
-          </span>
-        </div>
-      </div>
 
       {workspaceMode === 'single' ? (
         <>

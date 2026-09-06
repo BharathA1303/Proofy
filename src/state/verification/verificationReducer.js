@@ -42,6 +42,7 @@ export const ACTIONS = {
 
   SET_FORENSIC_EVIDENCE: 'SET_FORENSIC_EVIDENCE',
   SET_RISK:              'SET_RISK',
+  SET_MILESTONE:         'SET_MILESTONE',
   SET_SESSION_ID:        'SET_SESSION_ID',
   SET_ERROR:             'SET_ERROR',
   CLEAR_ERROR:           'CLEAR_ERROR',
@@ -254,8 +255,31 @@ export function verificationReducer(state, action) {
       };
 
     /**
+     * SET_MILESTONE
+     * Updates activeMilestone number and individual milestone status/description.
+     * payload: { step?: number, key?: string, status?: string, desc?: string }
+     */
+    case ACTIONS.SET_MILESTONE: {
+      const { step, key, status, desc } = action.payload || {};
+      return {
+        ...state,
+        activeMilestone: step !== undefined ? step : state.activeMilestone,
+        milestones: {
+          ...state.milestones,
+          ...(key && state.milestones?.[key] ? {
+            [key]: {
+              ...state.milestones[key],
+              ...(status ? { status } : {}),
+              ...(desc ? { desc } : {}),
+            }
+          } : {})
+        }
+      };
+    }
+
+    /**
      * SET_SESSION_ID
-     * Stores the backend-assigned job/session ID for status polling.
+     * Stores the backend verification/job ID.
      *
      * payload: string
      */

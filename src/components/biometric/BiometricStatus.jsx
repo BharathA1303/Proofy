@@ -372,14 +372,9 @@ export default function BiometricStatus() {
     else matchBadgeClass = styles.badgeWarn;
   }
 
-  let livenessBadgeText = 'STANDBY';
-  let livenessBadgeClass = '';
-  if (biometrics.antiSpoof?.status) {
-    const s = biometrics.antiSpoof.status;
-    livenessBadgeText = s.replace(/_/g, ' ').toUpperCase();
-    if (s === 'pass') livenessBadgeClass = styles.badgeMatch;
-    else if (s === 'suspected_spoof') livenessBadgeClass = styles.badgeMismatch;
-    else livenessBadgeClass = styles.badgeWarn;
+  // Hide empty standby placeholders when no document has been selected/processed
+  if (session.status === SESSION_STATUS.STANDBY && !cameraActive && !hasCompletedResult) {
+    return null;
   }
 
   return (
