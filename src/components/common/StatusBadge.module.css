@@ -1,0 +1,146 @@
+/* StatusBadge.module.css */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  padding: 0.2em 0.65em;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: all var(--transition-fast);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.label {
+  line-height: 1;
+}
+
+/* Size modifiers */
+.sm {
+  font-size: var(--font-size-2xs);
+  padding: 0.15em 0.5em;
+}
+
+.md {
+  font-size: var(--font-size-xs);
+}
+
+/* Modern light theme status pills */
+.pending {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.pending .dot {
+  background-color: var(--color-text-tertiary);
+}
+
+.ready {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.ready .dot {
+  background-color: #2563eb;
+}
+
+.passed {
+
+  background-color: var(--color-success-light);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.passed .dot {
+  background-color: var(--color-success);
+}
+
+.failed {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.failed .dot {
+  background-color: var(--color-danger);
+}
+
+.warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.warning .dot {
+  background-color: var(--color-warning);
+}
+
+.skipped {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-tertiary);
+  border: 1px solid var(--color-border);
+}
+
+.skipped .dot {
+  background-color: var(--color-text-tertiary);
+}
+
+.running {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.running .dot {
+  background-color: #3b82f6;
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.completed {
+  background-color: var(--color-success-light);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.completed .dot {
+  background-color: var(--color-success);
+}
+
+.notApplicable {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-tertiary);
+  border: 1px dashed var(--color-border);
+}
+
+.notApplicable .dot {
+  background-color: var(--color-text-tertiary);
+}
+
+.unavailable {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px dashed #fecaca;
+}
+
+.unavailable .dot {
+  background-color: #dc2626;
+}
+
+
+

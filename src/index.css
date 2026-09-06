@@ -1,0 +1,241 @@
+/* =============================================================
+   Document Verification System (DVS) — Global Stylesheet
+   Modern Enterprise Light Theme
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Typography */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
+
+  --font-size-2xs: 0.6875rem; /* 11px */
+  --font-size-xs:  0.75rem;   /* 12px */
+  --font-size-sm:  0.8125rem; /* 13px */
+  --font-size-base:0.875rem;  /* 14px */
+  --font-size-md:  1rem;      /* 16px */
+  --font-size-lg:  1.125rem;  /* 18px */
+  --font-size-xl:  1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:  1.25;
+  --line-height-normal: 1.5;
+
+  /* Colour — Modern Light Palette */
+  --color-bg:              #F8FAFC;   /* Slate-50 page background */
+  --color-surface:         #FFFFFF;   /* Pure white card surface */
+  --color-surface-subtle:  #F1F5F9;   /* Slate-100 secondary surface */
+  --color-surface-elevated:#E2E8F0;   /* Slate-200 border/active */
+  --color-surface-card:    #FFFFFF;
+
+  /* Colour — Refined Borders */
+  --color-border:          #E2E8F0;   /* Slate-200 crisp border */
+  --color-border-subtle:   #F1F5F9;
+  --color-border-strong:   #CBD5E1;   /* Slate-300 */
+  --color-border-accent:   #BFDBFE;   /* Blue-200 */
+
+  /* Colour — High-Contrast Modern Typography */
+  --color-text-primary:    #0F172A;   /* Slate-900 */
+  --color-text-secondary:  #475569;   /* Slate-600 */
+  --color-text-tertiary:   #94A3B8;   /* Slate-400 */
+  --color-text-muted:      #64748B;   /* Slate-500 */
+  --color-text-inverse:    #FFFFFF;
+
+  /* Colour — Royal Blue Accent */
+  --color-accent:          #2563EB;   /* Blue-600 */
+  --color-accent-hover:    #1D4ED8;   /* Blue-700 */
+  --color-accent-light:    #EFF6FF;   /* Blue-50 */
+  --color-accent-border:   #BFDBFE;   /* Blue-200 */
+  --color-accent-text:     #1D4ED8;
+
+  /* Colour — State: Success (Emerald) */
+  --color-success:         #059669;
+  --color-success-light:   #ECFDF5;
+  --color-success-border:  #A7F3D0;
+  --color-success-text:    #065F46;
+
+  /* Colour — State: Warning (Amber) */
+  --color-warning:         #D97706;
+  --color-warning-light:   #FFFBEB;
+  --color-warning-border:  #FDE68A;
+  --color-warning-text:    #92400E;
+
+  /* Colour — State: Danger (Red) */
+  --color-danger:          #DC2626;
+  --color-danger-light:    #FEF2F2;
+  --color-danger-border:   #FECACA;
+  --color-danger-text:     #991B1B;
+
+  /* Colour — State: Pending / Neutral */
+  --color-pending:         #64748B;
+  --color-pending-light:   #F8FAFC;
+  --color-pending-border:  #E2E8F0;
+  --color-pending-text:    #64748B;
+
+  /* Spacing Scale */
+  --space-1:  0.25rem;   /* 4px */
+  --space-2:  0.5rem;    /* 8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+
+  /* Border Radius */
+  --radius-xs: 0.25rem;  /* 4px */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 0.75rem;  /* 12px */
+  --radius-xl: 1rem;     /* 16px */
+  --radius-full: 9999px;
+
+  /* Soft Natural Shadows */
+  --shadow-xs:  0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm:  0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-normal: 200ms ease;
+
+  /* Layout */
+  --header-height:  58px;
+  --content-max-w:  1600px;
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  background-color: var(--color-bg);
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ---------- Typography Reset ---------- */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+p {
+  color: var(--color-text-secondary);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* ---------- Form Controls ---------- */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  background-color: #FFFFFF;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ---------- Accessibility Helper ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Root Container ---------- */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,126 @@
+/* DocumentSelector.module.css */
+
+.nav {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-6);
+}
+
+.container {
+  max-width: var(--content-max-w);
+  margin: 0 auto;
+}
+
+.tabList {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabList::-webkit-scrollbar {
+  display: none;
+}
+
+.tabItem {
+  flex-shrink: 0;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.tabLabel {
+  line-height: 1;
+}
+
+.standardTag {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  padding: 1px 5px;
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-subtle);
+}
+
+.tab:hover .iconWrapper {
+  color: var(--color-text-primary);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.tab.active {
+  color: var(--color-accent-text);
+  background-color: var(--color-accent-light);
+  border-color: var(--color-accent-border);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab.active .iconWrapper {
+  color: var(--color-accent);
+}
+
+.tab.active .standardTag {
+  background-color: #FFFFFF;
+  border-color: var(--color-accent-border);
+  color: var(--color-accent-text);
+}
+
+.tab.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tab.disabled:hover {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.comingSoonTag {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  padding: 1px 4px;
+  background-color: var(--color-surface-subtle);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+
+

@@ -1,0 +1,48 @@
+# Backend .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Sensitive uploads (never commit real documents)
+uploads/
+tmp_uploads/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.pdf
+# Exception: keep the synthetic test asset
+!tests/assets/
+
+# Environment files
+.env
+.env.local
+
+# PaddleOCR model cache (large, downloaded on first run)
+inference/
+.paddleocr/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# pytest cache
+.pytest_cache/

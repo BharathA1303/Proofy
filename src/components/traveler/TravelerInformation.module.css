@@ -1,0 +1,202 @@
+/* TravelerInformation.module.css */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+/* ---------- Dossier Top: Photo + Core Identity ---------- */
+
+.dossierTop {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.photoFrame {
+  width: 88px;
+  height: 108px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.portraitIcon {
+  color: var(--color-text-tertiary);
+}
+
+.photoLabel {
+  font-size: 10px;
+  font-family: var(--font-family-mono);
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.primaryIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.primaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: var(--font-size-2xs);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.primaryVal {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.docNumRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.docNumVal {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.primaryVal.empty,
+.docNumVal.empty {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* ---------- Field Grid ---------- */
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: 0;
+}
+
+.fieldItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.fieldValue {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  min-height: 1.2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.fieldValue.empty {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* ---------- Machine Readable Zone (MRZ) Strip ---------- */
+
+.mrzContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.mrzHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mrzTitle {
+  font-size: var(--font-size-2xs);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.mrzStandard {
+  font-size: var(--font-size-2xs);
+  font-family: var(--font-family-mono);
+  color: var(--color-accent);
+  letter-spacing: 0.03em;
+  font-weight: var(--font-weight-medium);
+}
+
+.mrzBox {
+  padding: var(--space-2);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  overflow-x: auto;
+}
+
+.mrzText {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.mrzPlaceholder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mrzPlaceholder code {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
+}
