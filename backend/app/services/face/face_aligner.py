@@ -80,7 +80,7 @@ class FaceAligner:
             image_bgr,
             matrix,
             target_size,
-            flags=cv2.INTER_LINEAR,
+            flags=cv2.INTER_LANCZOS4,
             borderMode=cv2.BORDER_CONSTANT,
             borderValue=0.0,
         )
@@ -112,4 +112,30 @@ class FaceAligner:
         if crop.size == 0:
             crop = image_bgr[max(0, y):min(img_h, y + h), max(0, x):min(img_w, x + w)]
 
-        return cv2.resize(crop, target_size, interpolation=cv2.INTER_LINEAR)
+        return cv2.resize(crop, target_size, interpolation=cv2.INTER_LANCZOS4)
+
+    @staticmethod
+    def enhance_document_face(face_bgr: np.ndarray) -> np.ndarray:
+        """
+        Normalize illumination, boost edge contrast, and suppress print halftone/scanning raster
+        from low-resolution or aged printed credential portraits.
+        """
+        if face_bgr is None or face_bgr.size == 0:
+            return face_bgr
+
+        try:
+            # 1. Bilateral filter: smooths scanning halftone print noise while preserving facial edges
+            denoised = cv2.bilateralFilter(face_bgr, d=5, sigmaColor=35, sigmaSpace=35)
+
+            # 2. CLAHE on L-channel in LAB color space: local contrast equalization
+            lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
+            clahe = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8, 8))
+            lab[:, :, 0] = clahe.apply(lab[:, :, 0])
+            enhanced = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+
+            # 3. Unsharp masking: restores crisp facial landmark contours (eyes, nose, mouth)
+            blurred = cv2.GaussianBlur(enhanced, (0, 0), sigmaX=1.5)
+            sharpened = cv2.addWeighted(enhanced, 1.35, blurred, -0.35, 0)
+            return sharpened
+        except Exception:
+            return face_bgr

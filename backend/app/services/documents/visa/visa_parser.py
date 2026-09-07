@@ -70,11 +70,13 @@ def parse_visa(
     # ── Step 1: Detect optional MRV lines ─────────────────────────────────────
     mrv_candidates = []
     for r in regions:
-        txt = r.text.strip().replace(" ", "")
-        # Look for typical MRV prefixes: V< or lines consisting of [A-Z0-9<] of length 35-46
-        if len(txt) in (36, 44) and "<" in txt and (txt.startswith("V<") or txt.startswith("V")):
+        txt = r.text.strip().replace(" ", "").upper()
+        if any(kw in txt for kw in ("MACHINE", "READABLE", "ZONE", "IMMIGRATION", "CONTROL")):
+            continue
+        # Look for typical MRV prefixes: V< or VN or lines consisting of [A-Z0-9<] of length 35-46
+        if len(txt) in range(35, 46) and "<" in txt and (txt.startswith("V<") or txt.startswith("V")):
             mrv_candidates.append(r)
-        elif len(txt) in (36, 44) and txt.count("<") >= 3:
+        elif len(txt) in range(35, 46) and txt.count("<") >= 3:
             mrv_candidates.append(r)
 
     if len(mrv_candidates) >= 2:
@@ -186,12 +188,13 @@ def parse_visa(
                 norm_val = normalize_visa_date(m_iss.group(1))
                 if norm_val:
                     result.issuedDate = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_iss.group(1))
-            elif "ISSUE" in clean_upper and "DATE" in clean_upper and idx + 1 < len(lines):
-                # Only look at next line if next line doesn't have EXPIRY
-                if "EXPIR" not in lines[idx + 1][0].upper():
-                    norm_val = normalize_visa_date(lines[idx + 1][0])
+            elif any(kw in clean_upper for kw in ("ISSUE DATE", "DATE OF ISSUE", "VALID FROM")):
+                for look in range(1, min(5, len(lines) - idx)):
+                    txt_cand = lines[idx + look][0]
+                    norm_val = normalize_visa_date(txt_cand)
                     if norm_val:
-                        result.issuedDate = VisaField(value=norm_val, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=lines[idx + 1][0])
+                        result.issuedDate = VisaField(value=norm_val, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=txt_cand)
+                        break
 
         # Expiry Date
         if not result.expiry.value:
@@ -200,10 +203,13 @@ def parse_visa(
                 norm_val = normalize_visa_date(m_exp.group(1))
                 if norm_val:
                     result.expiry = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_exp.group(1))
-            elif "EXPIR" in clean_upper and idx + 1 < len(lines):
-                norm_val = normalize_visa_date(lines[idx + 1][0])
-                if norm_val:
-                    result.expiry = VisaField(value=norm_val, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=lines[idx + 1][0])
+            elif any(kw in clean_upper for kw in ("EXPIRY", "VALID UNTIL", "EXPIRES")):
+                for look in range(1, min(5, len(lines) - idx)):
+                    txt_cand = lines[idx + look][0]
+                    norm_val = normalize_visa_date(txt_cand)
+                    if norm_val:
+                        result.expiry = VisaField(value=norm_val, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=txt_cand)
+                        break
 
         # Entries
         if not result.entries.value:
@@ -251,3 +257,19 @@ def _extract_from_mrv(
         doc_no = line2[0:9].replace("<", "").strip()
         if doc_no and not data.docNumber.value:
             data.docNumber = VisaField(value=doc_no, confidence=conf2, raw=doc_no)
+
+        # DOB: positions 13-19 (YYMMDD)
+        dob_raw = line2[13:19]
+        if re.match(r"^\d{6}$", dob_raw) and not data.dob.value:
+            yy, mm, dd = dob_raw[0:2], dob_raw[2:4], dob_raw[4:6]
+            yr = int(yy)
+            full_yr = (1900 + yr) if yr >= 30 else (2000 + yr)
+            data.dob = VisaField(value=f"{full_yr}-{mm}-{dd}", confidence=conf2, raw=dob_raw)
+
+        # Expiry: positions 21-27 (YYMMDD)
+        exp_raw = line2[21:27]
+        if re.match(r"^\d{6}$", exp_raw) and not data.expiry.value:
+            yy, mm, dd = exp_raw[0:2], exp_raw[2:4], exp_raw[4:6]
+            yr = int(yy)
+            full_yr = 2000 + yr
+            data.expiry = VisaField(value=f"{full_yr}-{mm}-{dd}", confidence=conf2, raw=exp_raw)

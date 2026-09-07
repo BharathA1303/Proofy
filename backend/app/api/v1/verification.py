@@ -19,11 +19,13 @@ from __future__ import annotations
 import logging
 import uuid
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.core.config import settings
+from app.services.documents.classifier import classify_and_guard_document_type
 from app.core.exceptions import (
     BiometricVerificationError,
     DocumentIngestionError,
@@ -161,6 +163,18 @@ async def ocr_document(
     if not regions:
         logger.warning("OCR returned zero regions for id=%s", verification_id)
         raise OCRNoTextError()
+
+    # ── Step 3.5: Strict Document Type Isolation Guard ───────────────────
+    type_guard = classify_and_guard_document_type(regions, profile.document_type)
+    if type_guard.is_mismatch:
+        logger.warning(
+            "STRICT REJECTION - Document type mismatch for id=%s: declared=%s detected=%s",
+            verification_id, profile.document_type, type_guard.detected_type,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=type_guard.error_message,
+        )
 
     # ── Step 4: Document-specific parsing ────────────────────────────────────
     parsed_passport = None
@@ -422,170 +436,336 @@ async def ocr_document(
 
 @router.get(
     "/sample/passport",
-    summary="Serve the synthetic test passport sample",
-    description=(
-        "Returns the synthetic (non-real) passport test image for development testing. "
-        "This image is clearly labelled 'SYNTHETIC TEST DOCUMENT'. "
-        "It is intended for end-to-end UI testing of the OCR pipeline only."
-    ),
+    summary="Serve synthetic passport sample by variant (official, blacklist, defective)",
     response_class=FileResponse,
     tags=["Verification"],
 )
-async def get_sample_passport() -> FileResponse:
-    """
-    Serve the synthetic test passport image for the frontend 'Load Sample' button.
+async def get_sample_passport(variant: str = "official") -> FileResponse:
+    """Serve synthetic test passport image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("passport_official.jpg", "Passport_Aarav_Sharma_Official.jpg"),
+        "genuine": ("passport_official.jpg", "Passport_Aarav_Sharma_Official.jpg"),
+        "blacklist": ("passport_blacklist.jpg", "Passport_Vikram_Malhotra_Blacklisted.jpg"),
+        "blacklisted": ("passport_blacklist.jpg", "Passport_Vikram_Malhotra_Blacklisted.jpg"),
+        "defective": ("passport_defective.jpg", "Passport_Rohit_Verma_Defective.jpg"),
+        "fake": ("passport_defective.jpg", "Passport_Rohit_Verma_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("passport_official.jpg", "Passport_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_passport.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"Passport sample '{variant}' not found."})
 
-    The sample image lives at: backend/tests/assets/sample_passport.jpg
-    It is a generated image with fictional data — no real person's information.
-    """
-    sample_path = Path(__file__).parent.parent.parent.parent / "tests" / "assets" / "sample_passport.jpg"
-
-    if not sample_path.exists():
-        logger.warning("Sample passport image not found at: %s", sample_path)
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Sample document not found. Run tests/create_synthetic_passport.py to generate it."},
-        )
-
-    return FileResponse(
-        path=str(sample_path),
-        media_type="image/jpeg",
-        filename="Sample_Passport.jpg",
-        headers={"Cache-Control": "no-cache"},
-    )
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
 
 @router.get(
     "/sample/visa",
-    summary="Serve the synthetic test visa sample",
-    description=(
-        "Returns the synthetic (non-real) visa test image for development testing. "
-        "This image is clearly labelled 'SYNTHETIC TEST DOCUMENT'. "
-        "It is intended for end-to-end UI testing of the Visa pipeline only."
-    ),
+    summary="Serve synthetic visa sample by variant (official, blacklist, defective)",
     response_class=FileResponse,
     tags=["Verification"],
 )
-async def get_sample_visa() -> FileResponse:
-    """
-    Serve the synthetic test visa image for the frontend 'Load Sample' button.
+async def get_sample_visa(variant: str = "official") -> FileResponse:
+    """Serve synthetic test visa image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("visa_official.jpg", "Visa_Aarav_Sharma_Official.jpg"),
+        "genuine": ("visa_official.jpg", "Visa_Aarav_Sharma_Official.jpg"),
+        "blacklist": ("visa_blacklist.jpg", "Visa_Vikram_Malhotra_Blacklisted.jpg"),
+        "blacklisted": ("visa_blacklist.jpg", "Visa_Vikram_Malhotra_Blacklisted.jpg"),
+        "defective": ("visa_defective.jpg", "Visa_Rohit_Verma_Defective.jpg"),
+        "fake": ("visa_defective.jpg", "Visa_Rohit_Verma_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("visa_official.jpg", "Visa_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_visa.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"Visa sample '{variant}' not found."})
 
-    The sample image lives at: backend/tests/assets/sample_visa.jpg
-    It is a generated image with fictional data — no real person's information.
-    """
-    sample_path = Path(__file__).parent.parent.parent.parent / "tests" / "assets" / "sample_visa.jpg"
-
-    if not sample_path.exists():
-        logger.warning("Sample visa image not found at: %s", sample_path)
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Sample document not found. Run tests/create_synthetic_visa.py to generate it."},
-        )
-
-    return FileResponse(
-        path=str(sample_path),
-        media_type="image/jpeg",
-        filename="Sample_Visa.jpg",
-        headers={"Cache-Control": "no-cache"},
-    )
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
 
 @router.get(
     "/sample/driving_license",
-    summary="Serve the synthetic test driving license sample",
-    description=(
-        "Returns the synthetic (non-real) driving license test image for development testing. "
-        "This image is clearly labelled 'SYNTHETIC TEST DOCUMENT'. "
-        "It is intended for end-to-end UI testing of the Driving License pipeline only."
-    ),
-    response_class=FileResponse,
+    summary="Serve synthetic driving license sample by variant",
     tags=["Verification"],
 )
-async def get_sample_driving_license() -> FileResponse:
-    """
-    Serve the synthetic test driving license image for the frontend 'Load Sample' button.
+@router.get(
+    "/sample/drivingLicense",
+    summary="Serve synthetic driving license sample (camelCase alias)",
+    tags=["Verification"],
+)
+async def get_sample_driving_license(variant: str = "official") -> FileResponse:
+    """Serve synthetic test driving license image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("dl_official.jpg", "DL_Priya_Sundar_Official.jpg"),
+        "genuine": ("dl_official.jpg", "DL_Priya_Sundar_Official.jpg"),
+        "bharath": ("dl_bharath_a_genuine.jpg", "DL_Bharath_A_TamilNadu_Genuine.jpg"),
+        "blacklist": ("dl_blacklist.jpg", "DL_Kabir_Mehta_Blacklisted.jpg"),
+        "blacklisted": ("dl_blacklist.jpg", "DL_Kabir_Mehta_Blacklisted.jpg"),
+        "defective": ("dl_defective.jpg", "DL_Anil_Kumar_Defective.jpg"),
+        "fake": ("dl_defective.jpg", "DL_Anil_Kumar_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("dl_official.jpg", "DL_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_driving_license.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"Driving license sample '{variant}' not found."})
 
-    The sample image lives at: backend/tests/assets/sample_driving_license.jpg
-    It is a generated image with fictional data — no real person's information.
-    """
-    sample_path = Path(__file__).parent.parent.parent.parent / "tests" / "assets" / "sample_driving_license.jpg"
-
-    if not sample_path.exists():
-        logger.warning("Sample driving license image not found at: %s", sample_path)
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Sample document not found. Run tests/create_synthetic_driving_license.py to generate it."},
-        )
-
-    return FileResponse(
-        path=str(sample_path),
-        media_type="image/jpeg",
-        filename="Sample_Driving_License.jpg",
-        headers={"Cache-Control": "no-cache"},
-    )
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
 
 @router.get(
     "/sample/national_id",
-    summary="Serve the synthetic test national id sample",
-    description=(
-        "Returns the synthetic (non-real) national id test image for development testing. "
-        "This image is clearly labelled 'SYNTHETIC TEST NATIONAL ID'. "
-        "It is intended for end-to-end UI testing of the National ID pipeline only."
-    ),
-    response_class=FileResponse,
+    summary="Serve synthetic national id sample by variant",
     tags=["Verification"],
 )
-async def get_sample_national_id() -> FileResponse:
-    """
-    Serve the synthetic test national id image for the frontend 'Load Sample' button.
+@router.get(
+    "/sample/nationalId",
+    summary="Serve synthetic national id sample (camelCase alias)",
+    tags=["Verification"],
+)
+async def get_sample_national_id(variant: str = "official") -> FileResponse:
+    """Serve synthetic test national id image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("national_id_official.jpg", "NationalID_Sneha_Patel_Official.jpg"),
+        "genuine": ("national_id_official.jpg", "NationalID_Sneha_Patel_Official.jpg"),
+        "blacklist": ("national_id_blacklist.jpg", "NationalID_Tariq_Ahmed_Blacklisted.jpg"),
+        "blacklisted": ("national_id_blacklist.jpg", "NationalID_Tariq_Ahmed_Blacklisted.jpg"),
+        "defective": ("national_id_defective.jpg", "NationalID_Devraj_Singh_Defective.jpg"),
+        "fake": ("national_id_defective.jpg", "NationalID_Devraj_Singh_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("national_id_official.jpg", "NationalID_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_national_id.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"National ID sample '{variant}' not found."})
 
-    The sample image lives at: backend/tests/assets/sample_national_id.jpg
-    It is a generated image with fictional data — no real person's information.
-    """
-    sample_path = Path(__file__).parent.parent.parent.parent / "tests" / "assets" / "sample_national_id.jpg"
-
-    if not sample_path.exists():
-        logger.warning("Sample national id image not found at: %s", sample_path)
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Sample document not found. Run tests/create_synthetic_national_id.py to generate it."},
-        )
-
-    return FileResponse(
-        path=str(sample_path),
-        media_type="image/jpeg",
-        filename="Sample_National_ID.jpg",
-        headers={"Cache-Control": "no-cache"},
-    )
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
 
 @router.get(
     "/sample/border_permit",
-    summary="Serve the synthetic test border permit sample",
-    description=(
-        "Returns the synthetic (non-real) border permit test image for development testing. "
-        "This image is clearly labelled 'SYNTHETIC TEST BORDER PERMIT'. "
-        "It is intended for end-to-end UI testing of the Border Permit pipeline only."
-    ),
-    response_class=FileResponse,
+    summary="Serve synthetic border / work permit sample by variant",
     tags=["Verification"],
 )
-async def get_sample_border_permit() -> FileResponse:
-    sample_path = Path(__file__).parent.parent.parent.parent / "tests" / "assets" / "sample_border_permit.jpg"
+@router.get(
+    "/sample/borderPermit",
+    summary="Serve synthetic border permit sample (camelCase alias)",
+    tags=["Verification"],
+)
+async def get_sample_border_permit(variant: str = "official") -> FileResponse:
+    """Serve synthetic test border permit image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("border_permit_official.jpg", "Permit_Elena_Rostova_Official.jpg"),
+        "genuine": ("border_permit_official.jpg", "Permit_Elena_Rostova_Official.jpg"),
+        "blacklist": ("border_permit_blacklist.jpg", "Permit_Marcus_Vance_Blacklisted.jpg"),
+        "blacklisted": ("border_permit_blacklist.jpg", "Permit_Marcus_Vance_Blacklisted.jpg"),
+        "defective": ("border_permit_defective.jpg", "Permit_John_Doe_Defective.jpg"),
+        "fake": ("border_permit_defective.jpg", "Permit_John_Doe_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("border_permit_official.jpg", "Permit_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_border_permit.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"Border permit sample '{variant}' not found."})
 
-    if not sample_path.exists():
-        logger.warning("Sample border permit image not found at: %s", sample_path)
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Sample document not found. Run tests/create_synthetic_border_permit.py to generate it."},
-        )
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
-    return FileResponse(
-        path=str(sample_path),
-        media_type="image/jpeg",
-        filename="Sample_Border_Permit.jpg",
-        headers={"Cache-Control": "no-cache"},
+
+@router.get(
+    "/sample/options",
+    summary="List available sample documents from the backend",
+    tags=["Verification"],
+)
+async def get_sample_options() -> JSONResponse:
+    """Returns 3 pre-populated test vectors (Official, Blacklist, Defective) for all 5 document categories."""
+    passport_samples = [
+        {
+            "id": "passport_official",
+            "label": "Official Passport (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "Passport_Aarav_Sharma_Official.jpg",
+            "url": "/api/v1/verification/sample/passport?variant=official",
+            "description": "Authentic passport: Aarav Sharma (Z1234567). Status: ACTIVE in official registry with valid ICAO TD3 MRZ.",
+        },
+        {
+            "id": "passport_blacklist",
+            "label": "Blacklisted Passport (Watchlist)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "Passport_Vikram_Malhotra_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/passport?variant=blacklist",
+            "description": "Passport for Vikram Malhotra (Z7654321). Status: REVOKED on national fraud & border watchlist.",
+        },
+        {
+            "id": "passport_defective",
+            "label": "Defective / Fake Passport",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "Passport_Rohit_Verma_Defective.jpg",
+            "url": "/api/v1/verification/sample/passport?variant=defective",
+            "description": "Tampered passport for Rohit Verma (Z9999999). Failed check digits & expiry precedes issue date.",
+        },
+    ]
+
+    visa_samples = [
+        {
+            "id": "visa_official",
+            "label": "Official Entry Visa (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "Visa_Aarav_Sharma_Official.jpg",
+            "url": "/api/v1/verification/sample/visa?variant=official",
+            "description": "Consular entry visa for Aarav Sharma (V1002003). Valid multi-entry bound to passport Z1234567.",
+        },
+        {
+            "id": "visa_blacklist",
+            "label": "Blacklisted Visa (Revoked)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "Visa_Vikram_Malhotra_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/visa?variant=blacklist",
+            "description": "Consular visa for Vikram Malhotra (V7008009). Status: REVOKED in immigration registry.",
+        },
+        {
+            "id": "visa_defective",
+            "label": "Defective / Fake Visa",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "Visa_Rohit_Verma_Defective.jpg",
+            "url": "/api/v1/verification/sample/visa?variant=defective",
+            "description": "Defective visa (V999) with missed details (passport reference missing, issue date missing).",
+        },
+    ]
+
+    dl_samples = [
+        {
+            "id": "dl_bharath",
+            "label": "Bharath A - Tamil Nadu DL (Genuine Original)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "bharath",
+            "filename": "DL_Bharath_A_TamilNadu_Genuine.jpg",
+            "url": "/api/v1/verification/sample/driving_license?variant=bharath",
+            "description": "Original Indian Driving Licence: BHARATH A (TN05 20250014128). Issued by Govt of Tamil Nadu. Status: ACTIVE in transport registry.",
+        },
+        {
+            "id": "dl_official",
+            "label": "Official Driving License (Priya Sundar)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "DL_Priya_Sundar_Official.jpg",
+            "url": "/api/v1/verification/sample/driving_license?variant=official",
+            "description": "Original driving license: Priya Sundar (DL-0420230012345). Active and verified in Sarathi registry.",
+        },
+        {
+            "id": "dl_blacklist",
+            "label": "Blacklisted DL (Revoked)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "DL_Kabir_Mehta_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/driving_license?variant=blacklist",
+            "description": "Driving license for Kabir Mehta (DL-0120180099887). Status: REVOKED for fraudulent documentation.",
+        },
+        {
+            "id": "dl_defective",
+            "label": "Defective / Fake DL",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "DL_Anil_Kumar_Defective.jpg",
+            "url": "/api/v1/verification/sample/driving_license?variant=defective",
+            "description": "Tampered DL (INVALID-DL-12): Issue date 2005 precedes DOB 2012; missing vehicle classes & authority.",
+        },
+    ]
+
+    nid_samples = [
+        {
+            "id": "national_id_official",
+            "label": "Official National ID (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "NationalID_Sneha_Patel_Official.jpg",
+            "url": "/api/v1/verification/sample/national_id?variant=official",
+            "description": "Official 12-digit Indian National ID for Sneha Patel (8472 9103 8473). Valid Verhoeff check digit & registered.",
+        },
+        {
+            "id": "national_id_blacklist",
+            "label": "Blacklisted National ID (Suspended)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "NationalID_Tariq_Ahmed_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/national_id?variant=blacklist",
+            "description": "National ID for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate watchlist.",
+        },
+        {
+            "id": "national_id_defective",
+            "label": "Defective / Fake National ID",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "NationalID_Devraj_Singh_Defective.jpg",
+            "url": "/api/v1/verification/sample/national_id?variant=defective",
+            "description": "Defective National ID (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.",
+        },
+    ]
+
+    bp_samples = [
+        {
+            "id": "border_permit_official",
+            "label": "Official Work/Border Permit (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "Permit_Elena_Rostova_Official.jpg",
+            "url": "/api/v1/verification/sample/border_permit?variant=official",
+            "description": "Official cross-border entry & work permit: Elena Rostova (BP-2026-880011) bound to passport Z1234567.",
+        },
+        {
+            "id": "border_permit_blacklist",
+            "label": "Blacklisted Permit (Revoked)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "Permit_Marcus_Vance_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/border_permit?variant=blacklist",
+            "description": "Border permit for Marcus Vance (BP-2025-443322). Status: REVOKED in border management registry.",
+        },
+        {
+            "id": "border_permit_defective",
+            "label": "Defective / Fake Work Permit",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "Permit_John_Doe_Defective.jpg",
+            "url": "/api/v1/verification/sample/border_permit?variant=defective",
+            "description": "Tampered permit (PERMIT-XYZ): Valid To date precedes Valid From date; unbound passport field.",
+        },
+    ]
+
+    return JSONResponse(
+        content={
+            "driving_license": dl_samples,
+            "drivingLicense": dl_samples,
+            "passport": passport_samples,
+            "visa": visa_samples,
+            "national_id": nid_samples,
+            "nationalId": nid_samples,
+            "border_permit": bp_samples,
+            "borderPermit": bp_samples,
+            "work_permit": bp_samples,
+            "workpermit": bp_samples,
+        }
     )
 
 
@@ -653,7 +833,9 @@ async def validate_document(payload: DocumentValidationRequest) -> DocumentValid
 
     # ── Populate Risk Session Store for Module 6 (M2 evidence) ────────────────────
     try:
-        if hasattr(validation_summary.checks, "__dict__"):
+        if hasattr(validation_summary.checks, "model_dump"):
+            checks_dict = validation_summary.checks.model_dump()
+        elif hasattr(validation_summary.checks, "__dict__"):
             checks_dict = {
                 k: {"valid": getattr(v, "valid", None),
                     "status": getattr(v, "status", None),
@@ -1004,7 +1186,11 @@ async def registry_verification(
         risk_session_store.update_module(
             payload.verification_id, "m5_registry",
             {
-                "registry":      response.registry,
+                "registry": (
+                    response.registry.model_dump() if hasattr(response.registry, "model_dump")
+                    else response.registry.dict() if hasattr(response.registry, "dict")
+                    else (response.registry if isinstance(response.registry, dict) else {})
+                ) if response.registry else {},
                 "field_results": [
                     (
                         fr.model_dump() if hasattr(fr, "model_dump")
@@ -1019,7 +1205,11 @@ async def registry_verification(
                     )
                     for fr in (response.field_results or [])
                 ],
-                "provider_metadata": response.provider_metadata or {},
+                "provider_metadata": (
+                    response.provider_metadata.model_dump() if hasattr(response.provider_metadata, "model_dump")
+                    else response.provider_metadata.dict() if hasattr(response.provider_metadata, "dict")
+                    else (response.provider_metadata if isinstance(response.provider_metadata, dict) else {})
+                ) if response.provider_metadata else {},
             },
         )
     except Exception as _risk_exc:

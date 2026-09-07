@@ -110,18 +110,19 @@ class PassportParseResult:
 
 def _is_mrz_candidate(text: str) -> bool:
     """Return True if the text looks like a MRZ line."""
-    # Remove spaces before checking length (OCR often adds small spaces in MRZ)
     compact = text.replace(" ", "").upper()
     if len(compact) < _MRZ_MIN_LEN:
+        return False
+    # Exclude MRZ banner descriptions and header zone titles
+    if any(kw in compact for kw in ("MACHINE", "READABLE", "DOC9303", "ZONE", "PASSEPORT", "REPUBLIC")):
         return False
     # A TD3 MRZ line must contain filler characters '<' or digits (dates/check digits)
     has_filler = "<" in compact
     has_digits = any(c.isdigit() for c in compact)
     if not has_filler and not has_digits:
-        # Plain English text without fillers or digits (e.g. disclaimer banner) is not MRZ
         return False
     # If it starts with P< or contains filler markers <<, high probability MRZ candidate
-    if compact.startswith("P<") or "<<" in compact:
+    if compact.startswith("P<") or "<<" in compact or (compact.startswith("P") and "<" in compact):
         return True
     # High density of MRZ-valid characters
     valid_chars = sum(1 for c in compact if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<")
@@ -133,15 +134,13 @@ def _normalize_mrz_line(text: str) -> str:
     """
     Normalize a raw OCR MRZ line.
     - Collapse spaces (OCR may insert spaces within MRZ)
-    - Map common OCR confusions: O→0, I→1 in numeric positions (conservative)
-    - Uppercase
+    - Re-insert dropped separator if 'PIND...' OCR error
+    - Standardize length for TD3 format if trailing fillers merged
     """
-    # Remove whitespace
     normalized = re.sub(r"\s+", "", text.upper())
-    # Replace common OCR letter/digit confusions in MRZ context
-    # These are extremely common: 0/O, 1/I are often confused
-    # We only normalize if the resulting string has plausible MRZ structure
-    # (conservative: just uppercase and strip, do not guess substitutions)
+    # Correct dropped '<' after passport indicator (e.g. PINDSHARMA -> P<INDSHARMA)
+    if re.match(r"^P[A-Z]{3}", normalized) and not normalized.startswith("P<") and "<" in normalized:
+        normalized = f"P<{normalized[1:]}"
     return normalized
 
 
@@ -260,6 +259,20 @@ def _extract_mrz(
             norm1, norm2 = norm2, norm1
             r1, r2 = r2, r1
 
+        # Ensure TD3 Line 1 length is 44 if trailing fillers were merged
+        if norm1 and norm1.startswith("P<") and len(norm1) < 44:
+            norm1 = (norm1 + "<" * 44)[:44]
+
+        # Ensure TD3 Line 2 length is 44 if trailing fillers were merged
+        if norm2 and len(norm2) in range(35, 44) and "<" in norm2:
+            last_char = norm2[-1]
+            if last_char.isdigit() or last_char == "<":
+                body = norm2[:-1]
+                padded_body = (body + "<" * 43)[:43]
+                norm2 = f"{padded_body}{last_char}"
+            else:
+                norm2 = (norm2 + "<" * 44)[:44]
+
         line1 = ParsedField(value=norm1, confidence=r1.confidence, bbox=r1.bbox)
         line2 = ParsedField(value=norm2, confidence=r2.confidence, bbox=r2.bbox)
 
@@ -306,20 +319,26 @@ def _parse_mrz_fields(
         "expiry_from_mrz": None,
     }
 
-    if mrz_line1 and len(mrz_line1) >= 44:
-        # Name parsing from line 1
-        # Positions 6–44: SURNAME<<GIVEN<NAMES...
-        name_field = mrz_line1[5:44]
+    if mrz_line1 and len(mrz_line1) >= 8:
+        # Name parsing from line 1 (Positions 6–44)
+        name_field = mrz_line1[5:]
         if "<<" in name_field:
             parts = name_field.split("<<")
             surname = parts[0].replace("<", " ").strip()
             given = parts[1].replace("<", " ").strip() if len(parts) > 1 else ""
             full_name = f"{surname} {given}".strip() if given else surname
             parsed["name_from_mrz"] = full_name if full_name else None
+        elif "<" in name_field:
+            # When consecutive << merged into single <
+            parts = [p.strip() for p in name_field.split("<") if p.strip()]
+            if len(parts) >= 2:
+                parsed["name_from_mrz"] = f"{parts[0]} {parts[1]}"
+            elif parts:
+                parsed["name_from_mrz"] = parts[0]
         elif name_field:
             parsed["name_from_mrz"] = name_field.replace("<", " ").strip() or None
 
-    if mrz_line2 and len(mrz_line2) >= 43:
+    if mrz_line2 and len(mrz_line2) >= 9:
         # Doc number: positions 0–8 (9 chars, includes < filler)
         # Strip trailing < and whitespace
         doc_num_raw = mrz_line2[0:9].replace("<", "").strip()
@@ -389,6 +408,22 @@ def _extract_viz_fields(regions: list[OCRRegion]) -> dict[str, Optional[tuple[st
             for key, mapped in _GENDER_MAP.items():
                 if text_lower == key:
                     results.setdefault("gender", (mapped, region.confidence, region.bbox))
+
+    # Specific extraction for Surname + Given Name in VIZ
+    hit_surname = None
+    hit_given = None
+    for kw in ("surname", "nom"):
+        hit_surname = _get_text_below_keyword(sorted_regions, kw)
+        if hit_surname:
+            break
+    for kw in ("given name", "given names", "prénoms", "prenoms"):
+        hit_given = _get_text_below_keyword(sorted_regions, kw)
+        if hit_given:
+            break
+
+    if hit_surname and hit_given:
+        full_name = f"{hit_given[0]} {hit_surname[0]}".strip()
+        results["name"] = (full_name, min(hit_surname[1], hit_given[1]), hit_surname[2])
 
     # Keyword-guided extraction for dates, name, authority, etc.
     for field_name, keywords in _FIELD_KEYWORDS.items():

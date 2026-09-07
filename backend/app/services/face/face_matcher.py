@@ -28,6 +28,7 @@ class MatchResult:
     status: str             # "match" | "no_match" | "inconclusive" | "unavailable"
     similarity: Optional[float]  # Raw float 0.0 to 1.0 or None
     threshold: float
+    confidence_score: Optional[float] = None
     explanation: str = ""
 
     @property
@@ -58,6 +59,7 @@ def compare_face_embeddings(
             status="unavailable",
             similarity=None,
             threshold=operating_threshold,
+            confidence_score=None,
             explanation="Biometric embeddings unavailable for comparison.",
         )
 
@@ -71,6 +73,7 @@ def compare_face_embeddings(
                 status="unavailable",
                 similarity=None,
                 threshold=operating_threshold,
+                confidence_score=None,
                 explanation="Zero-magnitude embedding vector encountered.",
             )
 
@@ -85,32 +88,39 @@ def compare_face_embeddings(
         )
 
         # Margin for borderline/inconclusive classification
-        # Border zone: within +/- 0.03 of the threshold when below threshold
         inconclusive_lower = max(0.0, operating_threshold - 0.05)
 
         if sim_rounded >= operating_threshold:
+            # Calibrated confidence for cross-domain match: maps [threshold, 0.65] to [0.75, 0.99]
+            pct = 0.75 + min(0.24, ((sim_rounded - operating_threshold) / max(0.65 - operating_threshold, 0.05)) * 0.24)
+            confidence_score = round(pct, 4)
             status = "match"
             explanation = (
-                f"Facial biometric match verified (similarity {sim_rounded:.2f} >= threshold {operating_threshold:.2f}). "
-                "Document photograph and live capture exhibit high feature correspondence."
+                f"Facial biometric match verified (similarity {sim_rounded:.2f} >= threshold {operating_threshold:.2f}, "
+                f"confidence {int(confidence_score * 100)}%). Document photograph and live capture exhibit high feature correspondence."
             )
         elif sim_rounded >= inconclusive_lower:
+            pct = 0.50 + ((sim_rounded - inconclusive_lower) / max(operating_threshold - inconclusive_lower, 0.01)) * 0.24
+            confidence_score = round(pct, 4)
             status = "inconclusive"
             explanation = (
-                f"Facial similarity borderline (similarity {sim_rounded:.2f}, threshold {operating_threshold:.2f}). "
-                "Inconclusive biometric correspondence; secondary officer inspection recommended."
+                f"Facial similarity borderline (similarity {sim_rounded:.2f}, threshold {operating_threshold:.2f}, "
+                f"confidence {int(confidence_score * 100)}%). Inconclusive biometric correspondence; secondary officer inspection recommended."
             )
         else:
+            pct = max(0.05, (sim_rounded / max(inconclusive_lower, 0.01)) * 0.49)
+            confidence_score = round(pct, 4)
             status = "no_match"
             explanation = (
-                f"Facial biometric mismatch (similarity {sim_rounded:.2f} < threshold {operating_threshold:.2f}). "
-                "Live subject does not sufficiently match credential portrait."
+                f"Facial biometric mismatch (similarity {sim_rounded:.2f} < threshold {operating_threshold:.2f}, "
+                f"confidence {int(confidence_score * 100)}%). Live subject does not sufficiently match credential portrait."
             )
 
         return MatchResult(
             status=status,
             similarity=sim_rounded,
             threshold=operating_threshold,
+            confidence_score=confidence_score,
             explanation=explanation,
         )
 

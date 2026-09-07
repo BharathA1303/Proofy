@@ -87,8 +87,10 @@ def evaluate_face_quality(
         gray = face_crop
 
     # 1. Blur / Sharpness via Laplacian Variance
+    # Physical laminated cards / ID documents naturally have softer printed portrait dots
+    min_laplacian = 15.0 if is_document else settings.FACE_MIN_LAPLACIAN_VAR
     laplacian_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    blur_acceptable = laplacian_var >= settings.FACE_MIN_LAPLACIAN_VAR
+    blur_acceptable = laplacian_var >= min_laplacian
 
     # 2. Brightness via Mean Luminance
     mean_brightness = float(np.mean(gray))
@@ -101,7 +103,8 @@ def evaluate_face_quality(
     contrast_acceptable = contrast_val >= settings.FACE_MIN_CONTRAST
 
     # 4. Face Size
-    size_acceptable = (w >= settings.FACE_MIN_SIZE) and (h >= settings.FACE_MIN_SIZE)
+    min_face_dim = 50 if is_document else settings.FACE_MIN_SIZE
+    size_acceptable = (w >= min_face_dim) and (h >= min_face_dim)
 
     # 5. Aspect Ratio / Alignment
     aspect = w / max(1, h)
@@ -112,7 +115,7 @@ def evaluate_face_quality(
     specific_error: Optional[str] = None
 
     if not size_acceptable:
-        reasons.append(f"Face resolution too low ({w}x{h} < {settings.FACE_MIN_SIZE}x{settings.FACE_MIN_SIZE})")
+        reasons.append(f"Face resolution too low ({w}x{h} < {min_face_dim}x{min_face_dim})")
         specific_error = "FACE_TOO_SMALL"
     elif too_dark:
         reasons.append(f"Image is too dark (brightness {mean_brightness:.1f} < {settings.FACE_MIN_BRIGHTNESS:.1f})")
@@ -121,7 +124,7 @@ def evaluate_face_quality(
         reasons.append(f"Image is overexposed (brightness {mean_brightness:.1f} > {settings.FACE_MAX_BRIGHTNESS:.1f})")
         specific_error = "FACE_TOO_BRIGHT"
     elif not blur_acceptable:
-        reasons.append(f"Image is blurry (Laplacian variance {laplacian_var:.1f} < {settings.FACE_MIN_LAPLACIAN_VAR:.1f})")
+        reasons.append(f"Image is blurry (Laplacian variance {laplacian_var:.1f} < {min_laplacian:.1f})")
         specific_error = "FACE_TOO_BLURRY"
     elif not pose_acceptable:
         reasons.append(f"Abnormal aspect/alignment (w/h ratio {aspect:.2f})")

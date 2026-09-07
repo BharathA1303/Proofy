@@ -6,8 +6,8 @@
  * Do NOT scatter the product name as literals throughout components.
  */
 
-export const APP_NAME = 'Proofy';
-export const APP_SHORT_NAME = 'Proofy';
+export const APP_NAME = 'Avanza';
+export const APP_SHORT_NAME = 'Avanza';
 export const APP_TAGLINE = 'Intelligent Document & Identity Screening';
 export const APP_VERSION = '2.0';
 export const ENVIRONMENT = 'production';

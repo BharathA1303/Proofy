@@ -57,7 +57,10 @@ _INDIAN_STATE_CODES = {
     "WB": "West Bengal",
 }
 
-VALID_BLOOD_GROUPS = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}
+VALID_BLOOD_GROUPS = {
+    "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-",
+    "A1+", "A1-", "A1B+", "A1B-", "A2+", "A2-", "A2B+", "A2B-",
+}
 
 
 def normalize_license_number(raw: Optional[str]) -> Optional[str]:
@@ -148,7 +151,7 @@ def normalize_blood_group(raw: Optional[str]) -> Optional[str]:
     if not raw:
         return None
     c = raw.strip().upper().replace(" ", "").replace("VE", "").replace("POSITIVE", "+").replace("NEGATIVE", "-")
-    c = re.sub(r"[^ABO\+\-]", "", c)
+    c = re.sub(r"[^ABO0-9\+\-]", "", c)
     if c in VALID_BLOOD_GROUPS:
         return c
     return None

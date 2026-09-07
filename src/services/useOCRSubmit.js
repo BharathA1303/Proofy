@@ -235,22 +235,22 @@ export function useOCRSubmit() {
       });
 
       actions.setChecks({
-        faceVerification: 'passed',
+        faceVerification: 'pending',
       });
       actions.setBiometrics({
-        status: 'completed',
-        faceMatch: 96,
-        liveness: 98,
+        status: 'ready',
+        faceMatch: null,
+        liveness: null,
       });
 
       actions.setMilestone({
         step: 4,
         key: 'biometrics',
         status: 'passed',
-        desc: 'Portrait quality acceptable · Ready for live capture',
+        desc: 'Document portrait localized · Ready for live camera scan',
       });
 
-      await new Promise((r) => setTimeout(r, 220));
+      await new Promise((r) => setTimeout(r, 180));
 
       // ══════════════════════════════════════════════════════════════════
       // MILESTONE 5: REGISTRY CROSS-CHECK & RISK ASSESSMENT

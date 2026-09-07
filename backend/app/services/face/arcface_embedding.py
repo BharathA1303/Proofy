@@ -89,12 +89,29 @@ class ArcFaceEmbeddingModel(FaceEmbeddingModel):
             "available": self.is_available(),
         }
 
-    def get_embedding(self, aligned_face: np.ndarray) -> np.ndarray:
+    def _infer_single(self, face_bgr: np.ndarray) -> np.ndarray:
+        """Run single forward inference pass on 112x112 BGR face."""
+        if face_bgr.shape[:2] != (112, 112):
+            face_bgr = cv2.resize(face_bgr, (112, 112), interpolation=cv2.INTER_LANCZOS4)
+
+        rgb = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
+        blob = (rgb.astype(np.float32) - 127.5) / 128.0
+        tensor = blob.transpose(2, 0, 1)[np.newaxis, ...]
+
+        outputs = self._session.run(None, {self._input_name: tensor})
+        raw_feat = outputs[0].flatten().astype(np.float32)
+        norm = float(np.linalg.norm(raw_feat))
+        return (raw_feat / max(norm, 1e-10)).astype(np.float32)
+
+    def get_embedding(self, aligned_face: np.ndarray, use_tta: bool = True) -> np.ndarray:
         """
         Extract a 512-dimensional L2-normalized ArcFace embedding vector.
+        Supports InsightFace Test-Time Augmentation (TTA) via horizontal flipping,
+        canceling out lateral illumination imbalances and head tilt biases.
 
         Args:
             aligned_face: 112x112 BGR facial crop, geometrically aligned.
+            use_tta: If True, aggregates embeddings from original and mirrored faces.
 
         Returns:
             1D float32 NumPy array of shape (512,) where L2 norm equals 1.0.
@@ -108,24 +125,14 @@ class ArcFaceEmbeddingModel(FaceEmbeddingModel):
         if aligned_face is None or aligned_face.size == 0:
             raise ValueError("Invalid facial crop provided to ArcFace embedding model.")
 
-        # Ensure correct spatial dimensions (112x112)
-        if aligned_face.shape[:2] != (112, 112):
-            aligned_face = cv2.resize(aligned_face, (112, 112), interpolation=cv2.INTER_LINEAR)
+        feat_orig = self._infer_single(aligned_face)
+        if not use_tta:
+            return feat_orig
 
-        # Standard ArcFace preprocessing:
-        # 1. BGR to RGB
-        rgb = cv2.cvtColor(aligned_face, cv2.COLOR_BGR2RGB)
-        # 2. Pixel normalization to [-1.0, 1.0]: (x - 127.5) / 128.0
-        blob = (rgb.astype(np.float32) - 127.5) / 128.0
-        # 3. Transpose from HWC to NCHW: (1, 3, 112, 112)
-        tensor = blob.transpose(2, 0, 1)[np.newaxis, ...]
+        # Test-Time Augmentation (TTA): average original and horizontally flipped feature vectors
+        flipped = cv2.flip(aligned_face, 1)
+        feat_flip = self._infer_single(flipped)
 
-        # 4. Forward inference pass
-        outputs = self._session.run(None, {self._input_name: tensor})
-        raw_feat = outputs[0].flatten().astype(np.float32)
-
-        # 5. Strict Euclidean L2 Normalization: e = v / ||v||_2
-        norm = float(np.linalg.norm(raw_feat))
-        normalized_feat = raw_feat / max(norm, 1e-10)
-
-        return normalized_feat
+        combined = feat_orig + feat_flip
+        norm = float(np.linalg.norm(combined))
+        return (combined / max(norm, 1e-10)).astype(np.float32)

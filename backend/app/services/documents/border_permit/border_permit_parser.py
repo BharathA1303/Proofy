@@ -140,15 +140,26 @@ class BorderPermitParser:
         name_patterns = [
             r"(?:HOLDER\s*NAME|HOLDER|NAME|TRAVELER)\s*[:.-]?\s*([A-Z\s]{3,40})",
         ]
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
+            clean_u = text.upper()
             for pat in name_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
                 if m:
-                    raw_val = m.group(1)
-                    norm_name = normalize_holder_name(raw_val)
-                    if norm_name and not any(h in norm_name for h in ["BORDER", "PERMIT", "AUTHORITY", "GOVERNMENT"]):
-                        result.name = BorderPermitField(value=norm_name, confidence=conf, bbox=bbox, raw=raw_val)
-                        break
+                    cand = m.group(1).strip()
+                    if cand and not any(h in cand.upper() for h in ["BORDER", "PERMIT", "AUTHORITY", "GOVERNMENT", "DATE", "BIRTH"]):
+                        norm_name = normalize_holder_name(cand)
+                        if norm_name and len(norm_name) >= 3:
+                            result.name = BorderPermitField(value=norm_name, confidence=conf, bbox=bbox, raw=cand)
+                            break
+            if not result.name.value and any(clean_u == kw for kw in ("HOLDER NAME", "HOLDER NAME:", "NAME", "NAME:")):
+                # Look forward up to 3 lines
+                for look in range(1, min(4, len(lines) - idx)):
+                    cand_line = lines[idx + look][0]
+                    if not any(kw in cand_line.upper() for kw in ("DATE", "BIRTH", "VALID", "PERMIT", "PHOTO", "ENTRY", "ZONE", "PASSPORT")):
+                        norm_name = normalize_holder_name(cand_line)
+                        if norm_name and len(norm_name) >= 3:
+                            result.name = BorderPermitField(value=norm_name, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=cand_line)
+                            break
             if result.name.value:
                 break
 
@@ -156,12 +167,17 @@ class BorderPermitParser:
         passport_patterns = [
             r"(?:PASSPORT\s*(?:NO|NUMBER|#)?|PPT\s*NO|LINKED\s*PPT)\s*[:.-]?\s*([A-Z][0-9]{7,8}|[A-Z0-9]{6,9})",
         ]
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
             for pat in passport_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
                 if m:
                     raw_val = m.group(1).strip().upper()
                     result.passport_number = BorderPermitField(value=raw_val, confidence=conf, bbox=bbox, raw=raw_val)
+                    break
+            if not result.passport_number.value and any(text.upper() == kw for kw in ("PASSPORT NUMBER", "PASSPORT NO", "PPT NO")) and idx + 1 < len(lines):
+                cand_ppt = lines[idx + 1][0].strip().upper()
+                if re.match(r"^[A-Z0-9]{6,9}$", cand_ppt):
+                    result.passport_number = BorderPermitField(value=cand_ppt, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=cand_ppt)
                     break
             if result.passport_number.value:
                 break
@@ -170,7 +186,7 @@ class BorderPermitParser:
         dob_patterns = [
             r"(?:DOB|DATE\s*OF\s*BIRTH|BIRTH\s*DATE)\s*[:.-]?\s*([0-9A-Za-z\s/.-]{8,15})",
         ]
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
             for pat in dob_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
                 if m:
@@ -178,6 +194,13 @@ class BorderPermitParser:
                     iso_dob = normalize_border_date(raw_val)
                     if iso_dob:
                         result.dob = BorderPermitField(value=iso_dob, confidence=conf, bbox=bbox, raw=raw_val)
+                        break
+            if not result.dob.value and any(kw in text.upper() for kw in ("DATE OF BIRTH", "BIRTH DATE", "DOB")):
+                for look in range(1, min(4, len(lines) - idx)):
+                    cand_dt = lines[idx + look][0].strip()
+                    iso_dob = normalize_border_date(cand_dt)
+                    if iso_dob:
+                        result.dob = BorderPermitField(value=iso_dob, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=cand_dt)
                         break
             if result.dob.value:
                 break
@@ -187,7 +210,7 @@ class BorderPermitParser:
         from_patterns = [
             r"(?:VALID\s*(?:FROM)?|ISSUED|ISSUE\s*DATE|FROM)\s*[:.-]?\s*([0-9A-Za-z\s/.-]{8,15})",
         ]
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
             for pat in from_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
                 if m:
@@ -196,6 +219,13 @@ class BorderPermitParser:
                     if iso_date:
                         result.valid_from = BorderPermitField(value=iso_date, confidence=conf, bbox=bbox, raw=raw_val)
                         break
+            if not result.valid_from.value and any(kw in text.upper() for kw in ("VALID FROM", "ISSUE DATE", "ISSUED")):
+                for look in range(1, min(4, len(lines) - idx)):
+                    cand_dt = lines[idx + look][0].strip()
+                    iso_date = normalize_border_date(cand_dt)
+                    if iso_date:
+                        result.valid_from = BorderPermitField(value=iso_date, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=cand_dt)
+                        break
             if result.valid_from.value:
                 break
 
@@ -203,7 +233,7 @@ class BorderPermitParser:
         to_patterns = [
             r"(?:VALID\s*(?:TO|UNTIL|THRU|TILL)|EXPIRES?|EXPIRY|EXP\s*DATE|TO)\s*[:.-]?\s*([0-9A-Za-z\s/.-]{8,15})",
         ]
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
             for pat in to_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
                 if m:
@@ -213,8 +243,32 @@ class BorderPermitParser:
                         result.valid_to = BorderPermitField(value=iso_date, confidence=conf, bbox=bbox, raw=raw_val)
                         result.expiry = BorderPermitField(value=iso_date, confidence=conf, bbox=bbox, raw=raw_val)
                         break
+            if not result.valid_to.value and any(kw in text.upper() for kw in ("VALID TO", "EXPIRY", "VALID UNTIL", "EXPIRES")):
+                for look in range(1, min(4, len(lines) - idx)):
+                    cand_dt = lines[idx + look][0].strip()
+                    iso_date = normalize_border_date(cand_dt)
+                    if iso_date and (not result.valid_from.value or iso_date != result.valid_from.value):
+                        result.valid_to = BorderPermitField(value=iso_date, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=cand_dt)
+                        result.expiry = BorderPermitField(value=iso_date, confidence=lines[idx + look][1], bbox=lines[idx + look][2], raw=cand_dt)
+                        break
             if result.valid_to.value:
                 break
+
+        # Fallback date chronology if valid_from == valid_to or missing
+        all_dates = []
+        for text, conf, bbox in lines:
+            m = re.search(r"(\d{1,2}[\-\/\.]\d{1,2}[\-\/\.]\d{2,4})", text)
+            if m:
+                nd = normalize_border_date(m.group(1))
+                if nd:
+                    all_dates.append((nd, conf, bbox, m.group(1)))
+        if len(all_dates) >= 2:
+            all_dates.sort(key=lambda x: x[0])
+            if not result.valid_from.value:
+                result.valid_from = BorderPermitField(value=all_dates[-2][0], confidence=all_dates[-2][1], bbox=all_dates[-2][2], raw=all_dates[-2][3])
+            if not result.valid_to.value:
+                result.valid_to = BorderPermitField(value=all_dates[-1][0], confidence=all_dates[-1][1], bbox=all_dates[-1][2], raw=all_dates[-1][3])
+                result.expiry = result.valid_to
 
         # 7. Extract Permit Type
         type_patterns = [

@@ -40,6 +40,11 @@ export const ACTIONS = {
   RESET_BIOMETRICS:      'RESET_BIOMETRICS',
   SET_RESULT:            'SET_RESULT',
 
+  SET_WORKFLOW_STAGE:    'SET_WORKFLOW_STAGE',
+  SET_IS_MOCK_VECTOR:    'SET_IS_MOCK_VECTOR',
+  SET_CAPTURED_LIVE_IMAGE:'SET_CAPTURED_LIVE_IMAGE',
+  SET_DOCUMENT_FACE_IMAGE:'SET_DOCUMENT_FACE_IMAGE',
+
   SET_FORENSIC_EVIDENCE: 'SET_FORENSIC_EVIDENCE',
   SET_RISK:              'SET_RISK',
   SET_MILESTONE:         'SET_MILESTONE',
@@ -115,8 +120,16 @@ export function verificationReducer(state, action) {
      *
      * payload: string — one of SESSION_STATUS values
      */
-    case ACTIONS.SET_STATUS:
-      return { ...state, status: action.payload };
+    case ACTIONS.SET_STATUS: {
+      const nextStatus = action.payload;
+      const isCompleted = nextStatus === SESSION_STATUS.COMPLETED;
+      return {
+        ...state,
+        status: nextStatus,
+        maxUnlockedStage: isCompleted ? Math.max(state.maxUnlockedStage || 1, 2) : state.maxUnlockedStage,
+        workflowStage: (isCompleted && state.workflowStage === 1) ? 2 : state.workflowStage,
+      };
+    }
 
     /**
      * SET_TRAVELER
@@ -298,6 +311,24 @@ export function verificationReducer(state, action) {
         status: SESSION_STATUS.ERROR,
         error:  action.payload,
       };
+
+    case ACTIONS.SET_WORKFLOW_STAGE: {
+      const targetStage = action.payload;
+      return {
+        ...state,
+        workflowStage: targetStage,
+        maxUnlockedStage: Math.max(state.maxUnlockedStage || 1, targetStage),
+      };
+    }
+
+    case ACTIONS.SET_IS_MOCK_VECTOR:
+      return { ...state, isMockVector: Boolean(action.payload) };
+
+    case ACTIONS.SET_CAPTURED_LIVE_IMAGE:
+      return { ...state, capturedLiveImage: action.payload };
+
+    case ACTIONS.SET_DOCUMENT_FACE_IMAGE:
+      return { ...state, documentFaceImage: action.payload };
 
     /**
      * CLEAR_ERROR

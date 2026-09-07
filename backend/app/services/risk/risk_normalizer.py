@@ -312,7 +312,10 @@ def normalize_validation(m2_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
 
     if viz_status in ("failed", "warning"):
         for field_name, fdata in fields_data.items():
-            if fdata.get("match") is False:
+            f_match = fdata.get("match") if isinstance(fdata, dict) else getattr(fdata, "match", None)
+            if f_match is False:
+                f_viz = fdata.get("viz") if isinstance(fdata, dict) else getattr(fdata, "viz", None)
+                f_mrz = fdata.get("mrz") if isinstance(fdata, dict) else getattr(fdata, "mrz", None)
                 sev = (EvidenceSeverity.HIGH if field_name in ("document_number", "date_of_birth")
                        else EvidenceSeverity.MEDIUM)
                 signal = (
@@ -330,9 +333,9 @@ def normalize_validation(m2_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
                     severity=sev,
                     confidence=0.95,
                     explanation=f"VIZ/MRZ mismatch on '{field_name}': "
-                                f"VIZ={fdata.get('viz')}, MRZ={fdata.get('mrz')}.",
+                                f"VIZ={f_viz}, MRZ={f_mrz}.",
                     provenance=p({"check": "viz_mrz_consistency", "field": field_name,
-                                 "viz": fdata.get("viz"), "mrz": fdata.get("mrz")}),
+                                 "viz": f_viz, "mrz": f_mrz}),
                     correlation_group=cg,
                 ))
 
@@ -698,9 +701,27 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
                              "registry_engine")]
 
     items: List[RiskEvidenceItem] = []
-    registry = m5_data.get("registry", {})
+    raw_reg = m5_data.get("registry", {})
+    if hasattr(raw_reg, "model_dump"):
+        registry = raw_reg.model_dump()
+    elif hasattr(raw_reg, "dict"):
+        registry = raw_reg.dict()
+    elif isinstance(raw_reg, dict):
+        registry = raw_reg
+    else:
+        registry = {}
+
     field_results = m5_data.get("field_results", [])
-    provider_meta = m5_data.get("provider_metadata", {})
+    raw_meta = m5_data.get("provider_metadata", {})
+    if hasattr(raw_meta, "model_dump"):
+        provider_meta = raw_meta.model_dump()
+    elif hasattr(raw_meta, "dict"):
+        provider_meta = raw_meta.dict()
+    elif isinstance(raw_meta, dict):
+        provider_meta = raw_meta
+    else:
+        provider_meta = {}
+
     prov_base = {"source": "registry_engine", "module": "M5",
                  "provider": provider_meta.get("provider_id", "unknown"),
                  "source_type": provider_meta.get("source_type", "unknown")}

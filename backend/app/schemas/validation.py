@@ -81,14 +81,15 @@ class ValidationChecks(BaseModel):
     viz_mrz_consistency: VizMrzConsistencyReport
 
 
+from typing import Any, Optional, Union
+from pydantic import BaseModel, Field, model_validator
+
+
 class ValidationIssue(BaseModel):
     """An individual warning or failure issue found during validation."""
-    severity: str = Field(..., description="'critical' | 'failure' | 'warning' | 'info'")
-    check: str = Field(..., description="Key of the check that produced this issue")
-    message: str = Field(..., description="Human-readable explanation of the issue")
-
-
-from typing import Any, Optional, Union
+    severity: str = Field("warning", description="'critical' | 'failure' | 'warning' | 'info'")
+    check: str = Field("validation_check", description="Key of the check that produced this issue")
+    message: str = Field("", description="Human-readable explanation of the issue")
 
 
 class DocumentValidationSummary(BaseModel):
@@ -100,6 +101,22 @@ class DocumentValidationSummary(BaseModel):
     summary: str
     checks: Union[ValidationChecks, dict[str, Any]]
     issues: list[ValidationIssue] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_issues(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "issues" in data and isinstance(data["issues"], list):
+            normalized = []
+            for item in data["issues"]:
+                if isinstance(item, dict):
+                    chk = item.get("check") or item.get("issue_type") or item.get("field") or "validation_check"
+                    msg = item.get("message") or item.get("description") or item.get("details") or str(chk)
+                    sev = item.get("severity", "warning")
+                    normalized.append({"severity": sev, "check": str(chk), "message": str(msg)})
+                else:
+                    normalized.append(item)
+            data["issues"] = normalized
+        return data
 
 
 class DocumentValidationRequest(BaseModel):

@@ -195,7 +195,7 @@ def parse_national_id(
 
     # If still not found, check lines for a standalone date or YOB pattern
     if not result.dob.value and not result.year_of_birth.value:
-        for text, conf, bbox in lines:
+        for idx, (text, conf, bbox) in enumerate(lines):
             clean_upper = text.upper()
             if "DOB" in clean_upper or "BIRTH" in clean_upper:
                 dob_info = normalize_dob_or_yob(clean_upper)
@@ -221,6 +221,35 @@ def parse_national_id(
                         raw=clean_upper,
                     )
                     break
+                else:
+                    # Look ahead up to 3 lines for the date value
+                    for look in range(1, min(4, len(lines) - idx)):
+                        cand_text = lines[idx + look][0]
+                        cand_dob = normalize_dob_or_yob(cand_text)
+                        if cand_dob["date_of_birth"]:
+                            result.dob = NationalIdField(
+                                value=cand_dob["date_of_birth"],
+                                confidence=lines[idx + look][1],
+                                bbox=lines[idx + look][2],
+                                raw=cand_text,
+                            )
+                            result.year_of_birth = NationalIdField(
+                                value=str(cand_dob["year_of_birth"]),
+                                confidence=lines[idx + look][1],
+                                bbox=lines[idx + look][2],
+                                raw=str(cand_dob["year_of_birth"]),
+                            )
+                            break
+                        elif cand_dob["year_of_birth"]:
+                            result.year_of_birth = NationalIdField(
+                                value=str(cand_dob["year_of_birth"]),
+                                confidence=lines[idx + look][1],
+                                bbox=lines[idx + look][2],
+                                raw=cand_text,
+                            )
+                            break
+                    if result.dob.value or result.year_of_birth.value:
+                        break
 
     # ── Field 3: Gender ──────────────────────────────────────────────────────
     for text, conf, bbox in lines:

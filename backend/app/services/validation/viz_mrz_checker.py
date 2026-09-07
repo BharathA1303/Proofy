@@ -231,6 +231,19 @@ def compare_name_field(
             message="Holder name components align across VIZ and MRZ.",
         )
 
+    # Check if all viz tokens exist in mrz string (handles cases where OCR merged consecutive fillers between names)
+    combined_mrz = "".join(mrz_tokens)
+    combined_viz = "".join(viz_tokens)
+    if all(tok in combined_mrz for tok in viz_tokens) or all(tok in combined_viz for tok in mrz_tokens):
+        return FieldComparison(
+            field_name="name",
+            viz_value=viz_name,
+            mrz_value=mrz_name,
+            match=True,
+            status="match",
+            message="Holder name components align across VIZ and MRZ.",
+        )
+
     return FieldComparison(
         field_name="name",
         viz_value=viz_name,

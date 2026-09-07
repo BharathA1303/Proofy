@@ -155,6 +155,30 @@ export function VerificationProvider({ children }) {
       []
     ),
 
+    /** Navigate workflow stages (1: Intake, 2: Inspection, 3: Biometrics, 4: Clearance) */
+    setWorkflowStage: useCallback(
+      (stage) => dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: stage }),
+      []
+    ),
+
+    /** Mark session as a mock test vector (bypasses live camera in stage 3) */
+    setIsMockVector: useCallback(
+      (isMock) => dispatch({ type: ACTIONS.SET_IS_MOCK_VECTOR, payload: isMock }),
+      []
+    ),
+
+    /** Store captured live camera image data URI */
+    setCapturedLiveImage: useCallback(
+      (dataUrl) => dispatch({ type: ACTIONS.SET_CAPTURED_LIVE_IMAGE, payload: dataUrl }),
+      []
+    ),
+
+    /** Store cropped document face photo data URI */
+    setDocumentFaceImage: useCallback(
+      (dataUrl) => dispatch({ type: ACTIONS.SET_DOCUMENT_FACE_IMAGE, payload: dataUrl }),
+      []
+    ),
+
     /** Clear error state */
     clearError: useCallback(
       () => dispatch({ type: ACTIONS.CLEAR_ERROR }),

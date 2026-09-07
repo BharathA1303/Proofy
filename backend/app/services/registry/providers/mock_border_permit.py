@@ -37,6 +37,43 @@ logger = logging.getLogger(__name__)
 _MOCK_LATENCY_MS = 50.0
 
 _MOCK_BP_RECORDS: dict[str, dict] = {
+    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
+    "BP-2026-880011": {
+        "document_number": "BP-2026-880011",
+        "registry_document_status": "ACTIVE",
+        "name": "ELENA ROSTOVA",
+        "date_of_birth": "1991-10-12",
+        "expiry_date": "2026-12-31",
+        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
+        "passport_number": "Z1234567",
+    },
+    "BP2026880011": {
+        "document_number": "BP2026880011",
+        "registry_document_status": "ACTIVE",
+        "name": "ELENA ROSTOVA",
+        "date_of_birth": "1991-10-12",
+        "expiry_date": "2026-12-31",
+        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
+        "passport_number": "Z1234567",
+    },
+    "BP-2025-443322": {
+        "document_number": "BP-2025-443322",
+        "registry_document_status": "REVOKED",
+        "name": "MARCUS VANCE",
+        "date_of_birth": "1983-06-20",
+        "expiry_date": "2026-06-01",
+        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
+        "passport_number": "Z7654321",
+    },
+    "BP2025443322": {
+        "document_number": "BP2025443322",
+        "registry_document_status": "REVOKED",
+        "name": "MARCUS VANCE",
+        "date_of_birth": "1983-06-20",
+        "expiry_date": "2026-06-01",
+        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
+        "passport_number": "Z7654321",
+    },
     # Active valid Border Permit matching test sample
     "TESTBP001": {
         "document_number": "TESTBP001",

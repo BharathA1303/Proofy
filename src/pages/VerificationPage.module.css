@@ -40,21 +40,30 @@
 }
 
 .brandBadge {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: #FFFFFF;
-  border-radius: 9px;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
-  transition: transform 0.15s ease;
+  padding: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .brandBadge:hover {
   transform: scale(1.04);
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.15);
+}
+
+.brandLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .brandText {
@@ -70,10 +79,11 @@
 }
 
 .brandName {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.02em;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #0b192c;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   line-height: 1.15;
   margin: 0;
 }
@@ -105,48 +115,28 @@
   gap: var(--space-4);
 }
 
-.modeSwitcher {
-  display: flex;
-  background: #f1f5f9;
-  padding: 3px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.modeButton {
-  padding: 0.38rem 0.95rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.modeButton:hover {
-  color: #1e293b;
-}
-
-.modeButtonActive {
-  background: #ffffff;
-  color: #2563eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
 .systemIndicator {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #065f46;
-  background-color: #ecfdf5;
-  border: 1px solid #a7f3d0;
   padding: 4px 10px;
   border-radius: 9999px;
   letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+}
+
+.indicatorOnline {
+  color: #065f46;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.indicatorOffline {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
 }
 
 .statusDot {
@@ -157,6 +147,12 @@
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
   flex-shrink: 0;
   animation: pulseEmerald 2s infinite;
+}
+
+.statusDotOffline {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  animation: none;
 }
 
 @keyframes pulseEmerald {

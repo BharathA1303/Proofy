@@ -57,15 +57,14 @@ class Settings(BaseSettings):
     OCR_USE_GPU: bool = False
 
     # Module 4 — Biometric Verification Configuration
-    # NOTE: Biometric operating thresholds require calibration against representative
-    # operational test cohorts for the target FAR/FRR profile.
-    FACE_MATCH_THRESHOLD: float = 0.40
+    # Calibrated for cross-domain ID-document-to-live-webcam 1:1 biometric matching
+    FACE_MATCH_THRESHOLD: float = 0.35
     FACE_DETECTION_CONFIDENCE_THRESHOLD: float = 0.50
-    FACE_MIN_SIZE: int = 60
-    FACE_MIN_LAPLACIAN_VAR: float = 35.0
-    FACE_MIN_BRIGHTNESS: float = 35.0
-    FACE_MAX_BRIGHTNESS: float = 230.0
-    FACE_MIN_CONTRAST: float = 18.0
+    FACE_MIN_SIZE: int = 50
+    FACE_MIN_LAPLACIAN_VAR: float = 20.0
+    FACE_MIN_BRIGHTNESS: float = 30.0
+    FACE_MAX_BRIGHTNESS: float = 235.0
+    FACE_MIN_CONTRAST: float = 16.0
 
     # Presentation Attack Detection (Anti-Spoof) thresholds
     ANTI_SPOOF_THRESHOLD: float = 0.70

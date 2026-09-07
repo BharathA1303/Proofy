@@ -1374,5 +1374,4145 @@
       "case_id": "CASE-20260906-0D7131",
       "timestamp_iso": "2026-09-06T14:48:12Z"
     }
+  },
+  {
+    "block_index": 83,
+    "previous_hash": "f5e78ea221d4086f60ad825852035fc95841e442073bc88b1847952c2eaca12a",
+    "block_hash": "6458019117ace1b10b68af7ae2095167fd17a78f481e30d3c93da31d2f88932d",
+    "timestamp": 1788707745.6241927,
+    "target_id": "CASE-20260906-E12BEC",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-E12BEC",
+      "timestamp_iso": "2026-09-06T15:15:45Z"
+    }
+  },
+  {
+    "block_index": 84,
+    "previous_hash": "6458019117ace1b10b68af7ae2095167fd17a78f481e30d3c93da31d2f88932d",
+    "block_hash": "dfb89445428b7aa2f4459c9fdb0c4de07b10baaccd0d100efd00bb5654a41fbc",
+    "timestamp": 1788707745.6489925,
+    "target_id": "CASE-20260906-C54295",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-C54295",
+      "timestamp_iso": "2026-09-06T15:15:45Z"
+    }
+  },
+  {
+    "block_index": 85,
+    "previous_hash": "dfb89445428b7aa2f4459c9fdb0c4de07b10baaccd0d100efd00bb5654a41fbc",
+    "block_hash": "e1e7e756a3f1716d7b20b3da5d293aa6e553b247d1d875e19819849c05511131",
+    "timestamp": 1788708174.081683,
+    "target_id": "CASE-20260906-094897",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-094897",
+      "timestamp_iso": "2026-09-06T15:22:54Z"
+    }
+  },
+  {
+    "block_index": 86,
+    "previous_hash": "e1e7e756a3f1716d7b20b3da5d293aa6e553b247d1d875e19819849c05511131",
+    "block_hash": "ccb860ebf3eaa01bceb7cd03ea25fa8a9bfd63848a39a3cf87d5b04d0dce9bf1",
+    "timestamp": 1788708174.1048994,
+    "target_id": "CASE-20260906-CA5FCE",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260906-CA5FCE",
+      "timestamp_iso": "2026-09-06T15:22:54Z"
+    }
+  },
+  {
+    "block_index": 87,
+    "previous_hash": "ccb860ebf3eaa01bceb7cd03ea25fa8a9bfd63848a39a3cf87d5b04d0dce9bf1",
+    "block_hash": "cec4bcb62427b0c1b76f73acdc14080d9d51f9a24c518b53cf1aa52beddd79a1",
+    "timestamp": 1788756638.8716488,
+    "target_id": "CASE-20260907-1157C3",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-1157C3",
+      "timestamp_iso": "2026-09-07T04:50:38Z"
+    }
+  },
+  {
+    "block_index": 88,
+    "previous_hash": "cec4bcb62427b0c1b76f73acdc14080d9d51f9a24c518b53cf1aa52beddd79a1",
+    "block_hash": "8d4be9804af0a19b881349d5c692d2bf8b1773dc0020a57e1b2b91c31fe45131",
+    "timestamp": 1788756638.8815122,
+    "target_id": "CASE-20260907-BEC75A",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-BEC75A",
+      "timestamp_iso": "2026-09-07T04:50:38Z"
+    }
+  },
+  {
+    "block_index": 89,
+    "previous_hash": "8d4be9804af0a19b881349d5c692d2bf8b1773dc0020a57e1b2b91c31fe45131",
+    "block_hash": "54744eabdc165c25b9496f071e1c2a0a18e79bb7a518d522c60e66c1eba5facc",
+    "timestamp": 1788756701.4393632,
+    "target_id": "CASE-20260907-8DCA36",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-8DCA36",
+      "timestamp_iso": "2026-09-07T04:51:41Z"
+    }
+  },
+  {
+    "block_index": 90,
+    "previous_hash": "54744eabdc165c25b9496f071e1c2a0a18e79bb7a518d522c60e66c1eba5facc",
+    "block_hash": "6dfcab3741b0f2d68f42a3650a4f1eab70dd29a5a6fe4f8e1c6c0410bb7fc1d1",
+    "timestamp": 1788756701.4472268,
+    "target_id": "CASE-20260907-C4284E",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-C4284E",
+      "timestamp_iso": "2026-09-07T04:51:41Z"
+    }
+  },
+  {
+    "block_index": 91,
+    "previous_hash": "6dfcab3741b0f2d68f42a3650a4f1eab70dd29a5a6fe4f8e1c6c0410bb7fc1d1",
+    "block_hash": "73eac7319eca81639f7adc131bbebbc5bde5bf42b0e6368e1517ebed766921fd",
+    "timestamp": 1788758055.579139,
+    "target_id": "CASE-API-TEST",
+    "event_type": "OFFICER_REVIEWED",
+    "evidence_hash": "e498d89f815462883fb4d3a87f3f27b9270aa1f948fe8efad381483bda6b7f31",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "officer_id": "OFFICER-BORDER-99",
+      "decision": "CLEAR_ADMIT",
+      "reason": "All documents verified and biometric match confirmed",
+      "notes": "Standard clearance granted",
+      "action": "OFFICER_DETERMINATION",
+      "timestamp_iso": "2026-09-07T05:14:15Z"
+    }
+  },
+  {
+    "block_index": 92,
+    "previous_hash": "73eac7319eca81639f7adc131bbebbc5bde5bf42b0e6368e1517ebed766921fd",
+    "block_hash": "fab7486b72c4a0eaa3367e81c153eac2b7c52cd2c8b5aea3e6f111dae8874a0d",
+    "timestamp": 1788758055.612411,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-5DOC-TEST",
+      "timestamp_iso": "2026-09-07T05:14:15Z"
+    }
+  },
+  {
+    "block_index": 93,
+    "previous_hash": "fab7486b72c4a0eaa3367e81c153eac2b7c52cd2c8b5aea3e6f111dae8874a0d",
+    "block_hash": "eda5e322b7cd879a9a59cd45d094c339206bfd4bc42c8543e8a6ae5af8749ea5",
+    "timestamp": 1788758055.9129024,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "435994e0b71ea1d114f232624d910cd4638b07bdcb601817cd2a9996decd041a",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:15Z"
+    }
+  },
+  {
+    "block_index": 94,
+    "previous_hash": "eda5e322b7cd879a9a59cd45d094c339206bfd4bc42c8543e8a6ae5af8749ea5",
+    "block_hash": "f184b391cc15ba350f79a985d9b3fc2681e74564263e54f505fab919a17fef2c",
+    "timestamp": 1788758056.0131617,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "dbfae9576a0d64f206f588af2ee06005b2e91e2d6d7fd6cc6fbe2c3cf47c0176",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 95,
+    "previous_hash": "f184b391cc15ba350f79a985d9b3fc2681e74564263e54f505fab919a17fef2c",
+    "block_hash": "b6cb102f1f000ec33606a657d97954f1eacc920bfca32e3dad7cbec8a3c9e89d",
+    "timestamp": 1788758056.1012573,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "85c2871c461df4e4479c4f99b0954c045ecdf22bf9d10291e582b57e8cf9845f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 96,
+    "previous_hash": "b6cb102f1f000ec33606a657d97954f1eacc920bfca32e3dad7cbec8a3c9e89d",
+    "block_hash": "255c178cb754cc958ab7ffd7c2c0b7efc825eb2ef5e107489b156ba577127b70",
+    "timestamp": 1788758056.1850076,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "936eecf649ca83606316423c3e4dda599702bc377abd358a69d8e36d30572051",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 97,
+    "previous_hash": "255c178cb754cc958ab7ffd7c2c0b7efc825eb2ef5e107489b156ba577127b70",
+    "block_hash": "d60904fadc937942d703e0d89cf46d4dc0b2dab632645f1251e7d800536e6439",
+    "timestamp": 1788758056.272651,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "48b7ff714b5203bf6b0f6c77caa388d98a2a9f4d7f89f2138270840ad81f29d5",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-005",
+      "document_type": "border_permit",
+      "filename": "bp.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 98,
+    "previous_hash": "d60904fadc937942d703e0d89cf46d4dc0b2dab632645f1251e7d800536e6439",
+    "block_hash": "aa4e2ba4057cf819b97201eb06e7d7570b3e6376d3d413ef9b17095d9abd1cdd",
+    "timestamp": 1788758056.7715662,
+    "target_id": "CASE-20260907-70997F",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Border test case",
+      "case_id": "CASE-20260907-70997F",
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 99,
+    "previous_hash": "aa4e2ba4057cf819b97201eb06e7d7570b3e6376d3d413ef9b17095d9abd1cdd",
+    "block_hash": "f6e1a1510d8c4ebe76369692fd04a9f459a453f3cbf5ba3d466d32da4a592a2e",
+    "timestamp": 1788758056.799886,
+    "target_id": "CASE-20260907-8DEEF3",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-8DEEF3",
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 100,
+    "previous_hash": "f6e1a1510d8c4ebe76369692fd04a9f459a453f3cbf5ba3d466d32da4a592a2e",
+    "block_hash": "bff76f622baf5d47dd0e38bd1a000f367b3b8c1efc215a923fd9f8e55acb9914",
+    "timestamp": 1788758056.8808367,
+    "target_id": "CASE-20260907-8DEEF3",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "666b654b695230dd6ff49058233f8b2d049cd0194a3ea0ed1e0dfb4159f63c15",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 101,
+    "previous_hash": "bff76f622baf5d47dd0e38bd1a000f367b3b8c1efc215a923fd9f8e55acb9914",
+    "block_hash": "4b72d756e6e84da6b0c3b76f259aa8fe1e52e97375f8867a795eae0dacde275c",
+    "timestamp": 1788758056.9618368,
+    "target_id": "CASE-20260907-8DEEF3",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "526d8dca2ff12751be852564670d29a5dc5f051fb85b531331da4c445da07fdf",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 102,
+    "previous_hash": "4b72d756e6e84da6b0c3b76f259aa8fe1e52e97375f8867a795eae0dacde275c",
+    "block_hash": "0ea8a4f3d3a727074c903067984f1a2b2f7ce65cecee2025627c4608064067d8",
+    "timestamp": 1788758056.9875147,
+    "target_id": "CASE-20260907-8DEEF3",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "b7fb7665b0cb7e70b6608bdd65386015c809169336c7743f3775d787e22532ed",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T05:14:16Z"
+    }
+  },
+  {
+    "block_index": 103,
+    "previous_hash": "0ea8a4f3d3a727074c903067984f1a2b2f7ce65cecee2025627c4608064067d8",
+    "block_hash": "be0c55f90d19ae5e12f0e46c347800ea1ff0ef008e83d178cc4f90a25cf8ce10",
+    "timestamp": 1788758057.0021658,
+    "target_id": "CASE-01",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-01",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 104,
+    "previous_hash": "be0c55f90d19ae5e12f0e46c347800ea1ff0ef008e83d178cc4f90a25cf8ce10",
+    "block_hash": "ee367f1131bd3360e3ebed0210946eb3ee1bdfb0e46b150403c866f5f89ef3ff",
+    "timestamp": 1788758057.0123508,
+    "target_id": "CASE-02",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-02",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 105,
+    "previous_hash": "ee367f1131bd3360e3ebed0210946eb3ee1bdfb0e46b150403c866f5f89ef3ff",
+    "block_hash": "ab1c7ba4cea28638c57c46a45a855cacfc29cd416af4ecfc39eeede3e42f1bb7",
+    "timestamp": 1788758057.0188158,
+    "target_id": "CASE-03",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-03",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 106,
+    "previous_hash": "ab1c7ba4cea28638c57c46a45a855cacfc29cd416af4ecfc39eeede3e42f1bb7",
+    "block_hash": "3dca4a364f9a6c97a68f222a6b7bcc643df9b98af6de1274e584e3fcedd1581b",
+    "timestamp": 1788758057.0256212,
+    "target_id": "CASE-04",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-04",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 107,
+    "previous_hash": "3dca4a364f9a6c97a68f222a6b7bcc643df9b98af6de1274e584e3fcedd1581b",
+    "block_hash": "9f10815587903e8fe7bfa029df31ccee9438a236d1cd1091ac1a724c3b4ee106",
+    "timestamp": 1788758057.03366,
+    "target_id": "CASE-05",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-05",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 108,
+    "previous_hash": "9f10815587903e8fe7bfa029df31ccee9438a236d1cd1091ac1a724c3b4ee106",
+    "block_hash": "3c4bb2afbfd45403019e89af8c267e18067d047a0963b6b12a683bb182085d30",
+    "timestamp": 1788758057.0415757,
+    "target_id": "CASE-06",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-06",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 109,
+    "previous_hash": "3c4bb2afbfd45403019e89af8c267e18067d047a0963b6b12a683bb182085d30",
+    "block_hash": "b7273e22700c67390f9562ddd40fe23b78fc2fd93f62c1da826ddb6c59a7d5fd",
+    "timestamp": 1788758057.049242,
+    "target_id": "CASE-07",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-07",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 110,
+    "previous_hash": "b7273e22700c67390f9562ddd40fe23b78fc2fd93f62c1da826ddb6c59a7d5fd",
+    "block_hash": "481daf586b94b979164df934c3b30cfdc07f28d8015a66a19a5e65dd67476339",
+    "timestamp": 1788758057.054822,
+    "target_id": "CASE-08",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-08",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 111,
+    "previous_hash": "481daf586b94b979164df934c3b30cfdc07f28d8015a66a19a5e65dd67476339",
+    "block_hash": "dec27ddc7a3a2c279b90063a04cd4f81c2773b33b244d08963cf133b338cef9a",
+    "timestamp": 1788758057.0639136,
+    "target_id": "CASE-09A",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09A",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 112,
+    "previous_hash": "dec27ddc7a3a2c279b90063a04cd4f81c2773b33b244d08963cf133b338cef9a",
+    "block_hash": "4ba6746c06cfd447c808f84c33c03f21c7b5dfd3ca9c254ef6c4bc0327051fe0",
+    "timestamp": 1788758057.070743,
+    "target_id": "CASE-09B",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09B",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 113,
+    "previous_hash": "4ba6746c06cfd447c808f84c33c03f21c7b5dfd3ca9c254ef6c4bc0327051fe0",
+    "block_hash": "7e226295c66d13e75a2afffea0a25994b28bbfd4fdfd2af7c8c2d0dc3d0da012",
+    "timestamp": 1788758057.0798466,
+    "target_id": "CASE-10",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-10",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 114,
+    "previous_hash": "7e226295c66d13e75a2afffea0a25994b28bbfd4fdfd2af7c8c2d0dc3d0da012",
+    "block_hash": "d4b84026b15faa712db9c96c08e3487f59d63891a72880809ff847357c7601a1",
+    "timestamp": 1788758057.0882537,
+    "target_id": "CASE-11",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-11",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 115,
+    "previous_hash": "d4b84026b15faa712db9c96c08e3487f59d63891a72880809ff847357c7601a1",
+    "block_hash": "9e83bc9853c22008cdbe3893903480f457ec6734c75739e263b4cded5dbbe818",
+    "timestamp": 1788758057.0948906,
+    "target_id": "CASE-12",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-12",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 116,
+    "previous_hash": "9e83bc9853c22008cdbe3893903480f457ec6734c75739e263b4cded5dbbe818",
+    "block_hash": "0a639ca729d0044e22055b5867a227da1ec73f659346878eb2302ee89eb4dad9",
+    "timestamp": 1788758057.1035047,
+    "target_id": "CASE-13",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-13",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 117,
+    "previous_hash": "0a639ca729d0044e22055b5867a227da1ec73f659346878eb2302ee89eb4dad9",
+    "block_hash": "768a93eecd1286cf71c7bb5f721e5a4647cb111eb47be1e281950515cf8447ae",
+    "timestamp": 1788758057.1111631,
+    "target_id": "CASE-14",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-14",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 118,
+    "previous_hash": "768a93eecd1286cf71c7bb5f721e5a4647cb111eb47be1e281950515cf8447ae",
+    "block_hash": "581ed4cb4c552873f3af4103e72ed91499eb887c9bcaa53611d59c414ae629bf",
+    "timestamp": 1788758057.1192448,
+    "target_id": "CASE-15",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-15",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 119,
+    "previous_hash": "581ed4cb4c552873f3af4103e72ed91499eb887c9bcaa53611d59c414ae629bf",
+    "block_hash": "fc48e03c0de33c258b099739a270cf92ca9cda52ffeb3a9be68eb63161cb0bc7",
+    "timestamp": 1788758057.1260417,
+    "target_id": "CASE-15",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "8446bd4046e33d9b1983a344a4dcaf8d64db67f3328b974c3a3a0d876d7398f9",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 120,
+    "previous_hash": "fc48e03c0de33c258b099739a270cf92ca9cda52ffeb3a9be68eb63161cb0bc7",
+    "block_hash": "e49be1d12e956616e23c42457384f87c8f0b209a44f2c4236638d7cbb6fdbb6c",
+    "timestamp": 1788758057.1335018,
+    "target_id": "CASE-16",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-16",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 121,
+    "previous_hash": "e49be1d12e956616e23c42457384f87c8f0b209a44f2c4236638d7cbb6fdbb6c",
+    "block_hash": "f5ca25aa9c8738d9eaf874c69d5dd7644aae6f7ef44a4f0d69c7d511c76c9187",
+    "timestamp": 1788758057.1427932,
+    "target_id": "CASE-17",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-17",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 122,
+    "previous_hash": "f5ca25aa9c8738d9eaf874c69d5dd7644aae6f7ef44a4f0d69c7d511c76c9187",
+    "block_hash": "2b59a584b58f5120464c05886c40cd4c3b5f1127fac783fab69c9a7517a02125",
+    "timestamp": 1788758057.152176,
+    "target_id": "CASE-18",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-18",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 123,
+    "previous_hash": "2b59a584b58f5120464c05886c40cd4c3b5f1127fac783fab69c9a7517a02125",
+    "block_hash": "dd54b9cb8854801782a0be4c39e83cd6b2cc0faf2027dae1963d024c3b54cc1f",
+    "timestamp": 1788758057.1713023,
+    "target_id": "CASE-20260907-1F17CB",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-1F17CB",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 124,
+    "previous_hash": "dd54b9cb8854801782a0be4c39e83cd6b2cc0faf2027dae1963d024c3b54cc1f",
+    "block_hash": "bb0eba5e102c0ba17a9e35f29448074e02d9c7fa22295cffa52b4383557797b5",
+    "timestamp": 1788758057.2505586,
+    "target_id": "CASE-20260907-1F17CB",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "c75868cacba35a37d35833f828cc4ea4a09d51cb401fe2a0686bf1f15ef4dde2",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 125,
+    "previous_hash": "bb0eba5e102c0ba17a9e35f29448074e02d9c7fa22295cffa52b4383557797b5",
+    "block_hash": "ffc3b44b9d8252813295ec400a0f16a1ab194fb8bfaaceae05a198711edf6765",
+    "timestamp": 1788758057.2633774,
+    "target_id": "CASE-20260907-55FC16",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-55FC16",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 126,
+    "previous_hash": "ffc3b44b9d8252813295ec400a0f16a1ab194fb8bfaaceae05a198711edf6765",
+    "block_hash": "58d8e6569905b42f6b16764a49620cce3540c5d7e59f8258b53951d24eafeb53",
+    "timestamp": 1788758057.3507676,
+    "target_id": "CASE-20260907-55FC16",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "909c6e2623c044640f47dc49cac20ce9d94d97cdcd3781dfc8050b1fa3c6c61f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 127,
+    "previous_hash": "58d8e6569905b42f6b16764a49620cce3540c5d7e59f8258b53951d24eafeb53",
+    "block_hash": "133a07b68ac3c8ec898f136e566455f143192efda2534c9c91acb2a7d38e8847",
+    "timestamp": 1788758057.426051,
+    "target_id": "CASE-20260907-55FC16",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6b770849132adfa26616cac7d5b33a3a3efd8bdd56b7347feed96a7b16863c22",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 128,
+    "previous_hash": "133a07b68ac3c8ec898f136e566455f143192efda2534c9c91acb2a7d38e8847",
+    "block_hash": "5f189aff2984245ea043a6d3f144307f4ba174918db862b54ad5b57c60508ebc",
+    "timestamp": 1788758057.4386542,
+    "target_id": "CASE-20260907-9B37B7",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-9B37B7",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 129,
+    "previous_hash": "5f189aff2984245ea043a6d3f144307f4ba174918db862b54ad5b57c60508ebc",
+    "block_hash": "2ba04438d65b118104471464cd4a644ddd0d2026aa0e3637fcafd8b53d235d68",
+    "timestamp": 1788758057.5232244,
+    "target_id": "CASE-20260907-9B37B7",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d0e4a8932bfde6dec0c39963548909e3f3b2beeff7f18754e563271e39cf058b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 130,
+    "previous_hash": "2ba04438d65b118104471464cd4a644ddd0d2026aa0e3637fcafd8b53d235d68",
+    "block_hash": "dd6794632b92bc7be9168ef651af50075f851a00d3e1bd60ecc13de7ca2b6e03",
+    "timestamp": 1788758057.613429,
+    "target_id": "CASE-20260907-9B37B7",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "3cff4b2c374205bc28e054689c876feb3287c09e8d031b7df3de0912b87f5412",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 131,
+    "previous_hash": "dd6794632b92bc7be9168ef651af50075f851a00d3e1bd60ecc13de7ca2b6e03",
+    "block_hash": "e10fe10816514ce1f8828645567888c0330efe905d1f8472a40466237694d701",
+    "timestamp": 1788758057.687681,
+    "target_id": "CASE-20260907-9B37B7",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "82de6547575fafd891b3f92d8eba9a2c418991eb0f1fa13c4ea2ffeb085bb60a",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 132,
+    "previous_hash": "e10fe10816514ce1f8828645567888c0330efe905d1f8472a40466237694d701",
+    "block_hash": "14a9a70cfd3717f01978e63babdcb390782a3606437220ff7f2edd81753d2307",
+    "timestamp": 1788758057.6997967,
+    "target_id": "CASE-20260907-1E2E98",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-1E2E98",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 133,
+    "previous_hash": "14a9a70cfd3717f01978e63babdcb390782a3606437220ff7f2edd81753d2307",
+    "block_hash": "c3daa05c74d283de2d82e146a901fed8ff63750466807438a6126645b4f5462e",
+    "timestamp": 1788758057.7725937,
+    "target_id": "CASE-20260907-1E2E98",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "a451a546c55da5fae83c956a3e8785bf71ab2834c5e74c1e215d2c7f06c03f5b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 134,
+    "previous_hash": "c3daa05c74d283de2d82e146a901fed8ff63750466807438a6126645b4f5462e",
+    "block_hash": "a638263a506ce3955d564104bddb1d0bfdc557bd12319f1c1a09914cb3ad83da",
+    "timestamp": 1788758057.7855747,
+    "target_id": "CASE-20260907-B66986",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-B66986",
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 135,
+    "previous_hash": "a638263a506ce3955d564104bddb1d0bfdc557bd12319f1c1a09914cb3ad83da",
+    "block_hash": "4879e8c20d72660293c0f6e8922d142507c75c1c1824aaabbe4aadb314fd8f0f",
+    "timestamp": 1788758057.8728442,
+    "target_id": "CASE-20260907-B66986",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "aebf3d3f1bb3c0fd050e15474416fb6be2940120b7236ab609527ac258040879",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 136,
+    "previous_hash": "4879e8c20d72660293c0f6e8922d142507c75c1c1824aaabbe4aadb314fd8f0f",
+    "block_hash": "3a0204d8348ea8e88bd0054809b422cf8042f02e59abc514e9dc30f75f91efe1",
+    "timestamp": 1788758057.949989,
+    "target_id": "CASE-20260907-B66986",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "b91788abf253c8623adc9e72f5410dd4969e19ed4d122005817f9defd3ef2740",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:17Z"
+    }
+  },
+  {
+    "block_index": 137,
+    "previous_hash": "3a0204d8348ea8e88bd0054809b422cf8042f02e59abc514e9dc30f75f91efe1",
+    "block_hash": "a58a77160f0592b6f2f5aba3d9a7d988ef628282af11aa2508ae9c4305ba1b2b",
+    "timestamp": 1788758058.027531,
+    "target_id": "CASE-20260907-B66986",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "b38c99ea26f280cf0f5c70ad925e0aae40705c5d0d724dfa256c0731b0b05fd0",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl2.jpg",
+      "revision": 2,
+      "timestamp_iso": "2026-09-07T05:14:18Z"
+    }
+  },
+  {
+    "block_index": 138,
+    "previous_hash": "a58a77160f0592b6f2f5aba3d9a7d988ef628282af11aa2508ae9c4305ba1b2b",
+    "block_hash": "3d93f91af8c0d9682e5ed470b8de2e916ef1843600e6a4dcc47f5da0ab41d71e",
+    "timestamp": 1788758070.4619932,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-4DOC-TEST",
+      "timestamp_iso": "2026-09-07T05:14:30Z"
+    }
+  },
+  {
+    "block_index": 139,
+    "previous_hash": "3d93f91af8c0d9682e5ed470b8de2e916ef1843600e6a4dcc47f5da0ab41d71e",
+    "block_hash": "8cfe10217c34014d07887e974c2deaf02a47a99af680bd49098810a32fc123fb",
+    "timestamp": 1788758070.5540578,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d954108b5b5c8c58427047e63fc18cd174ea6fc7995d6da8a52d5eef47a4c93d",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:30Z"
+    }
+  },
+  {
+    "block_index": 140,
+    "previous_hash": "8cfe10217c34014d07887e974c2deaf02a47a99af680bd49098810a32fc123fb",
+    "block_hash": "972b736f7c729ca4b5d501d0254c8f2ef0baf41ab32703f7edd607991555e4ae",
+    "timestamp": 1788758070.6548867,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "cf4d73c7b0013c2ba269e9ef91e150a02aede85f2b5b23f373d8d89052f0bb8a",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:30Z"
+    }
+  },
+  {
+    "block_index": 141,
+    "previous_hash": "972b736f7c729ca4b5d501d0254c8f2ef0baf41ab32703f7edd607991555e4ae",
+    "block_hash": "789f537f537af957a66c901d4f3ff2d96a951188e124a4a4fe63dff7be669844",
+    "timestamp": 1788758070.7327294,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "2c558c54b2ee8e9f9ca5b2610751e28279c35c4e413ff2f22aae28ce409a48b3",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:30Z"
+    }
+  },
+  {
+    "block_index": 142,
+    "previous_hash": "789f537f537af957a66c901d4f3ff2d96a951188e124a4a4fe63dff7be669844",
+    "block_hash": "b92937f5e45199efc6a213c9536f4335461499e86f608f6f896ba1c06c6305a4",
+    "timestamp": 1788758070.8419404,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "c3df6298862e0b32b3a520ca496c789e4d6989ad17b51614f7d893dca3e8aa19",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T05:14:30Z"
+    }
+  },
+  {
+    "block_index": 143,
+    "previous_hash": "b92937f5e45199efc6a213c9536f4335461499e86f608f6f896ba1c06c6305a4",
+    "block_hash": "2ccd77a3d1fc53c3557f71afded3b9d0f6ee8398aebbdb89383b5264f2f0699f",
+    "timestamp": 1788758074.0792015,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T05:14:34Z"
+    }
+  },
+  {
+    "block_index": 144,
+    "previous_hash": "2ccd77a3d1fc53c3557f71afded3b9d0f6ee8398aebbdb89383b5264f2f0699f",
+    "block_hash": "f205f08a600948b257843a8a1851144fede01779d7589ee5eb070ef4f205b07d",
+    "timestamp": 1788758074.0998619,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T05:14:34Z"
+    }
+  },
+  {
+    "block_index": 145,
+    "previous_hash": "f205f08a600948b257843a8a1851144fede01779d7589ee5eb070ef4f205b07d",
+    "block_hash": "8a417dbdb54fb2b76dfcd3f9453a2a7e4c97a4768674c5f1a7eeab935da3d868",
+    "timestamp": 1788758074.1207745,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T05:14:34Z"
+    }
+  },
+  {
+    "block_index": 146,
+    "previous_hash": "8a417dbdb54fb2b76dfcd3f9453a2a7e4c97a4768674c5f1a7eeab935da3d868",
+    "block_hash": "619bac79c8fd134310143ae93144b5bd9a329ac4e15d0ca91107ca52fa929919",
+    "timestamp": 1788758074.137609,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T05:14:34Z"
+    }
+  },
+  {
+    "block_index": 147,
+    "previous_hash": "619bac79c8fd134310143ae93144b5bd9a329ac4e15d0ca91107ca52fa929919",
+    "block_hash": "ed6697dfa657008e8d43a28faa0b29d7f5d94c4a914511fd3c61a81b4fe6a6c9",
+    "timestamp": 1788761418.2420468,
+    "target_id": "CASE-API-TEST",
+    "event_type": "OFFICER_REVIEWED",
+    "evidence_hash": "e498d89f815462883fb4d3a87f3f27b9270aa1f948fe8efad381483bda6b7f31",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "officer_id": "OFFICER-BORDER-99",
+      "decision": "CLEAR_ADMIT",
+      "reason": "All documents verified and biometric match confirmed",
+      "notes": "Standard clearance granted",
+      "action": "OFFICER_DETERMINATION",
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 148,
+    "previous_hash": "ed6697dfa657008e8d43a28faa0b29d7f5d94c4a914511fd3c61a81b4fe6a6c9",
+    "block_hash": "54bbc4c01af9fc0e31eae4f1e12c8833c00516226b3f6a52bf69889c682425ae",
+    "timestamp": 1788761418.277543,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-5DOC-TEST",
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 149,
+    "previous_hash": "54bbc4c01af9fc0e31eae4f1e12c8833c00516226b3f6a52bf69889c682425ae",
+    "block_hash": "b0f2b436def0d3b10702fe08b0343e8346bf5fb045f0a46f2e3967575593ffb2",
+    "timestamp": 1788761418.488503,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "34bdc4df6a16fe73bb9142010339b4120bf4156d03f641ad9a6f7867612093a7",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 150,
+    "previous_hash": "b0f2b436def0d3b10702fe08b0343e8346bf5fb045f0a46f2e3967575593ffb2",
+    "block_hash": "30f5cc17f4c29fccd5b3b0a1573e6d9be743ce11e7fb9b7aa9b7527a7a1d3a32",
+    "timestamp": 1788761418.5890427,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "09e57f0fda0cd5eb5484b550649e7000d39c43e24bceec145b4055e0e426659f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 151,
+    "previous_hash": "30f5cc17f4c29fccd5b3b0a1573e6d9be743ce11e7fb9b7aa9b7527a7a1d3a32",
+    "block_hash": "1f355beb6ff30d40508fced8cd3e5cd74e79a40cea4ae7a122b48065a8aa0f9f",
+    "timestamp": 1788761418.6755803,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6e6bcd8f2c4c8d5f3c71182c58ecb783121a24531fb4bae99d57f52c52bcc09f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 152,
+    "previous_hash": "1f355beb6ff30d40508fced8cd3e5cd74e79a40cea4ae7a122b48065a8aa0f9f",
+    "block_hash": "374d70595576313a4458bca908cfb2e05a2a29db272f52809bf78ec1970212a4",
+    "timestamp": 1788761418.7590804,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d5f73913544142bcf18e86a871f2af864a12703b179980064f33a739eee1a38f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 153,
+    "previous_hash": "374d70595576313a4458bca908cfb2e05a2a29db272f52809bf78ec1970212a4",
+    "block_hash": "a9b3b4da8514e7732a8269cecd06ca07035fecb3bf8c27c47beab241ed8e92c4",
+    "timestamp": 1788761418.8433805,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6375ca60d429de439371c0ecec0d2ef99970b0241aef6d71a03808f97326962d",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-005",
+      "document_type": "border_permit",
+      "filename": "bp.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:18Z"
+    }
+  },
+  {
+    "block_index": 154,
+    "previous_hash": "a9b3b4da8514e7732a8269cecd06ca07035fecb3bf8c27c47beab241ed8e92c4",
+    "block_hash": "1785ab2d6b5fb81e8264e9dee262c3ad5e62f71a4217b2aad4b4e9c3c446532a",
+    "timestamp": 1788761419.3362925,
+    "target_id": "CASE-20260907-2A11CB",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Border test case",
+      "case_id": "CASE-20260907-2A11CB",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 155,
+    "previous_hash": "1785ab2d6b5fb81e8264e9dee262c3ad5e62f71a4217b2aad4b4e9c3c446532a",
+    "block_hash": "366469c9ffe5a9288f2560c4fb681eb1b789ddd18e472a25ab636c8da9761a13",
+    "timestamp": 1788761419.3727436,
+    "target_id": "CASE-20260907-259C6E",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-259C6E",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 156,
+    "previous_hash": "366469c9ffe5a9288f2560c4fb681eb1b789ddd18e472a25ab636c8da9761a13",
+    "block_hash": "175a85ec48020a05c24d82ccc903c067a7733efce80cd0b8f3268c16e304654e",
+    "timestamp": 1788761419.4546025,
+    "target_id": "CASE-20260907-259C6E",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "7ab852ce61c48398e23890f37a3923421318e9ef9b7e1b14ea7653286388881a",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 157,
+    "previous_hash": "175a85ec48020a05c24d82ccc903c067a7733efce80cd0b8f3268c16e304654e",
+    "block_hash": "c221a4e2f785c538cd6602733957be87deb18962892d58fb3fe34278c3959894",
+    "timestamp": 1788761419.5447567,
+    "target_id": "CASE-20260907-259C6E",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "68a72a5fcf6f0dd9719ecc65a0bcbb477ae28a6521d850e5be51f3b428998f11",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 158,
+    "previous_hash": "c221a4e2f785c538cd6602733957be87deb18962892d58fb3fe34278c3959894",
+    "block_hash": "7bd85ec563eea711e4432ad33e481e81564b9bd590c3775486af5f493ca0c487",
+    "timestamp": 1788761419.578258,
+    "target_id": "CASE-20260907-259C6E",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "b3b493198fe3c350c17ca10ff724fc358114b091209fbfc32fc2be33a6814e32",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 159,
+    "previous_hash": "7bd85ec563eea711e4432ad33e481e81564b9bd590c3775486af5f493ca0c487",
+    "block_hash": "81b0bdfec3f6739fe1d26a6d1bb7048f212afc40b05f60fc47d0ca12dc55fef1",
+    "timestamp": 1788761419.5949888,
+    "target_id": "CASE-01",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-01",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 160,
+    "previous_hash": "81b0bdfec3f6739fe1d26a6d1bb7048f212afc40b05f60fc47d0ca12dc55fef1",
+    "block_hash": "b5ed10976a0481f1e2d884bcc3bec8f65d5bc13e99d63b967c42f2aa9124a07e",
+    "timestamp": 1788761419.6055138,
+    "target_id": "CASE-02",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-02",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 161,
+    "previous_hash": "b5ed10976a0481f1e2d884bcc3bec8f65d5bc13e99d63b967c42f2aa9124a07e",
+    "block_hash": "459d17de78d17442e88da7080e0c91d48b083f7a6c72856a96c5ff36ebf0383b",
+    "timestamp": 1788761419.6129687,
+    "target_id": "CASE-03",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-03",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 162,
+    "previous_hash": "459d17de78d17442e88da7080e0c91d48b083f7a6c72856a96c5ff36ebf0383b",
+    "block_hash": "2b8b6e0551dc0d08ef159bb9176334a7aeea6a285c316524bdf4c77a81293a33",
+    "timestamp": 1788761419.6272736,
+    "target_id": "CASE-04",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-04",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 163,
+    "previous_hash": "2b8b6e0551dc0d08ef159bb9176334a7aeea6a285c316524bdf4c77a81293a33",
+    "block_hash": "49e7ab00d32d3ca14b21419746e1235e4b18586f7a8bcc7446a205e64b979506",
+    "timestamp": 1788761419.6356444,
+    "target_id": "CASE-05",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-05",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 164,
+    "previous_hash": "49e7ab00d32d3ca14b21419746e1235e4b18586f7a8bcc7446a205e64b979506",
+    "block_hash": "9805c762f54b9c8ddde260a769cd8fa4669cd66c677ad4716db552a3e113d132",
+    "timestamp": 1788761419.6382368,
+    "target_id": "CASE-06",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-06",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 165,
+    "previous_hash": "9805c762f54b9c8ddde260a769cd8fa4669cd66c677ad4716db552a3e113d132",
+    "block_hash": "94861d33746256fcb0b7996c65f98d25738867fae06b1631ab6f9cc6f9774cf5",
+    "timestamp": 1788761419.6531243,
+    "target_id": "CASE-07",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-07",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 166,
+    "previous_hash": "94861d33746256fcb0b7996c65f98d25738867fae06b1631ab6f9cc6f9774cf5",
+    "block_hash": "c15c94173d6835f9c5e462681895fbeecf8ca0e73ede5d14384b71cda53b2c93",
+    "timestamp": 1788761419.6622534,
+    "target_id": "CASE-08",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-08",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 167,
+    "previous_hash": "c15c94173d6835f9c5e462681895fbeecf8ca0e73ede5d14384b71cda53b2c93",
+    "block_hash": "9d2c7bed51cf9c39f3645c776d775e4c5b7a56e608291ba18d47b48de9b47e9b",
+    "timestamp": 1788761419.6716456,
+    "target_id": "CASE-09A",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09A",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 168,
+    "previous_hash": "9d2c7bed51cf9c39f3645c776d775e4c5b7a56e608291ba18d47b48de9b47e9b",
+    "block_hash": "dafc3bef108fa3ee76d986d255c2f774fc431036512a3fab4eca1f8a1cb80128",
+    "timestamp": 1788761419.6807785,
+    "target_id": "CASE-09B",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09B",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 169,
+    "previous_hash": "dafc3bef108fa3ee76d986d255c2f774fc431036512a3fab4eca1f8a1cb80128",
+    "block_hash": "49b8f638b2167913e71d50528a838e76c3dc403df5ef24b7e82122e2179e6d7e",
+    "timestamp": 1788761419.689732,
+    "target_id": "CASE-10",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-10",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 170,
+    "previous_hash": "49b8f638b2167913e71d50528a838e76c3dc403df5ef24b7e82122e2179e6d7e",
+    "block_hash": "233e2de202619cccb09abe226b90d4d2a73e96850f7d44028865e09f67d7cc86",
+    "timestamp": 1788761419.7000175,
+    "target_id": "CASE-11",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-11",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 171,
+    "previous_hash": "233e2de202619cccb09abe226b90d4d2a73e96850f7d44028865e09f67d7cc86",
+    "block_hash": "693089bce22dbf760ea2656b1d8439c3639804d834ff415a4fc5952e84c5783b",
+    "timestamp": 1788761419.71037,
+    "target_id": "CASE-12",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-12",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 172,
+    "previous_hash": "693089bce22dbf760ea2656b1d8439c3639804d834ff415a4fc5952e84c5783b",
+    "block_hash": "ad4883eb7a41a9e8d925f62f63fc6524ad81a1cc159c574fe0909f3a6efe1cfe",
+    "timestamp": 1788761419.7208872,
+    "target_id": "CASE-13",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-13",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 173,
+    "previous_hash": "ad4883eb7a41a9e8d925f62f63fc6524ad81a1cc159c574fe0909f3a6efe1cfe",
+    "block_hash": "77b9a785f553d35ad454e12e40b4c468bfc4399f24f73af8bef05133e5c7ba3d",
+    "timestamp": 1788761419.7283554,
+    "target_id": "CASE-14",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-14",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 174,
+    "previous_hash": "77b9a785f553d35ad454e12e40b4c468bfc4399f24f73af8bef05133e5c7ba3d",
+    "block_hash": "1c72c2b70406fadf3f19fd8a9620c7e56d0109c63e2997ce2828310753ba6063",
+    "timestamp": 1788761419.7399511,
+    "target_id": "CASE-15",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-15",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 175,
+    "previous_hash": "1c72c2b70406fadf3f19fd8a9620c7e56d0109c63e2997ce2828310753ba6063",
+    "block_hash": "91f2cc33fe9966a2bc3e931f906c6e89cb81cffebe72f98f9aef59c93f263810",
+    "timestamp": 1788761419.7474895,
+    "target_id": "CASE-15",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "ef05106818dd064546a69597e8ba6be2c55ff4b8787b1d59b57584fd4050e4db",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 176,
+    "previous_hash": "91f2cc33fe9966a2bc3e931f906c6e89cb81cffebe72f98f9aef59c93f263810",
+    "block_hash": "c4fe3959bad12c28613ff72098f967832f7cc5712cc8a7806b0bebaa715fed69",
+    "timestamp": 1788761419.7566607,
+    "target_id": "CASE-16",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-16",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 177,
+    "previous_hash": "c4fe3959bad12c28613ff72098f967832f7cc5712cc8a7806b0bebaa715fed69",
+    "block_hash": "2f7de87ef52957e02c2c00f82f3c51cb6819d219a7d1cbe2e56acfc21ceef254",
+    "timestamp": 1788761419.7685795,
+    "target_id": "CASE-17",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-17",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 178,
+    "previous_hash": "2f7de87ef52957e02c2c00f82f3c51cb6819d219a7d1cbe2e56acfc21ceef254",
+    "block_hash": "60305eb343298526956b0e7cefa1c0bc9c3bae79b4e6de7a91897f8abc642b8e",
+    "timestamp": 1788761419.7772086,
+    "target_id": "CASE-18",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-18",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 179,
+    "previous_hash": "60305eb343298526956b0e7cefa1c0bc9c3bae79b4e6de7a91897f8abc642b8e",
+    "block_hash": "b106a74784b56996e66f4983b77d94b77e52afb7287a75d4c13885ef029c1737",
+    "timestamp": 1788761419.8002574,
+    "target_id": "CASE-20260907-843D31",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-843D31",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 180,
+    "previous_hash": "b106a74784b56996e66f4983b77d94b77e52afb7287a75d4c13885ef029c1737",
+    "block_hash": "015d967ca73fe0465c98d1e6b399bd623c22fc95e04de1ff8b4abcd4dfd2c129",
+    "timestamp": 1788761419.8798442,
+    "target_id": "CASE-20260907-843D31",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "e1cab8e11f4a4d898245a4be12e44bfdf8281079251d6f9804a7d7e03a3b5605",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 181,
+    "previous_hash": "015d967ca73fe0465c98d1e6b399bd623c22fc95e04de1ff8b4abcd4dfd2c129",
+    "block_hash": "41c31e50a53dd460635ed2a57b092990ce9b152aa72e48404669ad060d896202",
+    "timestamp": 1788761419.8927703,
+    "target_id": "CASE-20260907-7378E3",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-7378E3",
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 182,
+    "previous_hash": "41c31e50a53dd460635ed2a57b092990ce9b152aa72e48404669ad060d896202",
+    "block_hash": "3a17ffc0b76c5d0344d1401dc809891b9beb5bb63521d235e9630d82d8e2d574",
+    "timestamp": 1788761419.987305,
+    "target_id": "CASE-20260907-7378E3",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "8179f4b6fa2a0d4381a37a34c13e6136543655b52e03cea3abd8874cf4c59a09",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:19Z"
+    }
+  },
+  {
+    "block_index": 183,
+    "previous_hash": "3a17ffc0b76c5d0344d1401dc809891b9beb5bb63521d235e9630d82d8e2d574",
+    "block_hash": "1def4c5e9f8825c6dc701b6081f85de29dbac9a6d0f8a1071f9408c8e1d0db0a",
+    "timestamp": 1788761420.0688453,
+    "target_id": "CASE-20260907-7378E3",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "aa6ad1315ce41ba809f5c52001a12c154012bce69c15a49ed098ce4529826114",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 184,
+    "previous_hash": "1def4c5e9f8825c6dc701b6081f85de29dbac9a6d0f8a1071f9408c8e1d0db0a",
+    "block_hash": "84aa892861bea8281528c3ffbf710e11638899f4cdc531f6767c4cf6a2a7c772",
+    "timestamp": 1788761420.0826237,
+    "target_id": "CASE-20260907-7E9C5D",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-7E9C5D",
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 185,
+    "previous_hash": "84aa892861bea8281528c3ffbf710e11638899f4cdc531f6767c4cf6a2a7c772",
+    "block_hash": "dc4a8291d0e53d34b2a9319a8b21cc422c78a6274a26cb3b0d96809a8ef9b5cc",
+    "timestamp": 1788761420.183571,
+    "target_id": "CASE-20260907-7E9C5D",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "fae7e5c3dac1b4cb0a221cfbb2e7a275e5a669d4d243e13a615aee6834735795",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 186,
+    "previous_hash": "dc4a8291d0e53d34b2a9319a8b21cc422c78a6274a26cb3b0d96809a8ef9b5cc",
+    "block_hash": "027b305b84b8c68191f5c93784ed3d03f0cba465acbdf9deee9627dab9abaa3f",
+    "timestamp": 1788761420.2821038,
+    "target_id": "CASE-20260907-7E9C5D",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "4f9e307d062dbc45caef44cecaa07ef6b9ed2e30c44973d5347ff768701c0c4f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 187,
+    "previous_hash": "027b305b84b8c68191f5c93784ed3d03f0cba465acbdf9deee9627dab9abaa3f",
+    "block_hash": "46e4222bf2dcb8e6a6636e2ec68016279717ac2ba14deeae923e9cada57cffd5",
+    "timestamp": 1788761420.36287,
+    "target_id": "CASE-20260907-7E9C5D",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "eefeed4156aba411cbf7b97f565cf4188b4eadee6108ad50ad7c19aa8afbf402",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 188,
+    "previous_hash": "46e4222bf2dcb8e6a6636e2ec68016279717ac2ba14deeae923e9cada57cffd5",
+    "block_hash": "24294dba9cb816c5cc50574e88b68d85a985598e5cc0ca4d11b43bcf934ff7a7",
+    "timestamp": 1788761420.37829,
+    "target_id": "CASE-20260907-E0F5D5",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-E0F5D5",
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 189,
+    "previous_hash": "24294dba9cb816c5cc50574e88b68d85a985598e5cc0ca4d11b43bcf934ff7a7",
+    "block_hash": "c83a7a1f888d36503c2c336d881acb8877703c4dbe14056455eaba48912b97fa",
+    "timestamp": 1788761420.4573941,
+    "target_id": "CASE-20260907-E0F5D5",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d3656ac6287b590371b2dcb33be51eb5e227da4854865dbcffa76a7726f6e509",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 190,
+    "previous_hash": "c83a7a1f888d36503c2c336d881acb8877703c4dbe14056455eaba48912b97fa",
+    "block_hash": "ec112dd0059a236088a2fe622de86b8231b294b047736297c30a2588da1b6764",
+    "timestamp": 1788761420.4715667,
+    "target_id": "CASE-20260907-773FCE",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-773FCE",
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 191,
+    "previous_hash": "ec112dd0059a236088a2fe622de86b8231b294b047736297c30a2588da1b6764",
+    "block_hash": "473d67c9681a4190652253da82fa2f728336d923f0b76e37db384fba3be4ea39",
+    "timestamp": 1788761420.5702415,
+    "target_id": "CASE-20260907-773FCE",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "29058d8bd9804167ae9d79f564d4b065c4c502db87daa6ca415e90f932a42320",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 192,
+    "previous_hash": "473d67c9681a4190652253da82fa2f728336d923f0b76e37db384fba3be4ea39",
+    "block_hash": "96eaec23d0d1192feab00715657210d65e79a9cae84ab7a9b6bc248fd8820125",
+    "timestamp": 1788761420.6505525,
+    "target_id": "CASE-20260907-773FCE",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "cc3e7e22fd261e43b27736232396c7c0020cac2565941d0415d4d9fb231f9d3f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 193,
+    "previous_hash": "96eaec23d0d1192feab00715657210d65e79a9cae84ab7a9b6bc248fd8820125",
+    "block_hash": "aac24102c008cc3d34f6c23cc61b1892031ecb33df0a7db1fc58a7c882868b31",
+    "timestamp": 1788761420.729553,
+    "target_id": "CASE-20260907-773FCE",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "80c7d5af0b843c047d9f6486f764a707565278da287ceed18715fcc416c77758",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl2.jpg",
+      "revision": 2,
+      "timestamp_iso": "2026-09-07T06:10:20Z"
+    }
+  },
+  {
+    "block_index": 194,
+    "previous_hash": "aac24102c008cc3d34f6c23cc61b1892031ecb33df0a7db1fc58a7c882868b31",
+    "block_hash": "6c882a1bb49d66621b06fb2b5ce4ba6d2f9199e094614ce538195167db8c4c46",
+    "timestamp": 1788761432.7146516,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-4DOC-TEST",
+      "timestamp_iso": "2026-09-07T06:10:32Z"
+    }
+  },
+  {
+    "block_index": 195,
+    "previous_hash": "6c882a1bb49d66621b06fb2b5ce4ba6d2f9199e094614ce538195167db8c4c46",
+    "block_hash": "2819a82953815ad6886ec5b38830f33a19c98d5592328a2134d43d62286640ce",
+    "timestamp": 1788761432.8305252,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "eedde1e11dabca4206b0edd3056a3d63a18b3b49feb9f08e230bdfdfcd611c0d",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:32Z"
+    }
+  },
+  {
+    "block_index": 196,
+    "previous_hash": "2819a82953815ad6886ec5b38830f33a19c98d5592328a2134d43d62286640ce",
+    "block_hash": "3deb2551ef84a1d99237ad2bf163fad6f58a769c0b354ac33bf4ba7a78bc651a",
+    "timestamp": 1788761432.935325,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "75b06eb0268abfc0a1afe975cfde9af801fc6c218fed547752811d115c6e94cc",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:32Z"
+    }
+  },
+  {
+    "block_index": 197,
+    "previous_hash": "3deb2551ef84a1d99237ad2bf163fad6f58a769c0b354ac33bf4ba7a78bc651a",
+    "block_hash": "498e66eb88890ff920d8755ddcb4edbf3bab9f4508b84087f39bd38655e36acd",
+    "timestamp": 1788761433.0207,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d7a3ff9223cf6da4ac088cf3a83315eb3f9db2f360732bed6fbaf362017b43c8",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:33Z"
+    }
+  },
+  {
+    "block_index": 198,
+    "previous_hash": "498e66eb88890ff920d8755ddcb4edbf3bab9f4508b84087f39bd38655e36acd",
+    "block_hash": "eaf7f573004ce92202cf97e095f52d69c6a0af42412b49fd57eca23184b1484e",
+    "timestamp": 1788761433.1094909,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "2bfbfc7ebf029879054f77b78db4efe82925ea1c1e090770451009d8fbf89a0f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:10:33Z"
+    }
+  },
+  {
+    "block_index": 199,
+    "previous_hash": "eaf7f573004ce92202cf97e095f52d69c6a0af42412b49fd57eca23184b1484e",
+    "block_hash": "ac81ed8f606e00b412d1459490bd344e62a00d63a6d756350a4ec1e1789bc90c",
+    "timestamp": 1788761436.698376,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T06:10:36Z"
+    }
+  },
+  {
+    "block_index": 200,
+    "previous_hash": "ac81ed8f606e00b412d1459490bd344e62a00d63a6d756350a4ec1e1789bc90c",
+    "block_hash": "6f67140b2a6d462be84e8f97fefed2e3bb34e6347508879caf3a09e38bc162c1",
+    "timestamp": 1788761436.7196832,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T06:10:36Z"
+    }
+  },
+  {
+    "block_index": 201,
+    "previous_hash": "6f67140b2a6d462be84e8f97fefed2e3bb34e6347508879caf3a09e38bc162c1",
+    "block_hash": "ca8e55defb4b967b4ea9e3fd5fdedc0a6ee2d8d574af51dbf8c1b657773436a8",
+    "timestamp": 1788761436.737842,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T06:10:36Z"
+    }
+  },
+  {
+    "block_index": 202,
+    "previous_hash": "ca8e55defb4b967b4ea9e3fd5fdedc0a6ee2d8d574af51dbf8c1b657773436a8",
+    "block_hash": "2b1a442954128e62141878b83f0d9cfd83fc9abdd316652a8b6ff96e2d56e1f4",
+    "timestamp": 1788761436.7560415,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T06:10:36Z"
+    }
+  },
+  {
+    "block_index": 203,
+    "previous_hash": "2b1a442954128e62141878b83f0d9cfd83fc9abdd316652a8b6ff96e2d56e1f4",
+    "block_hash": "18cf797ffd6d2d5cd0fc87de472efcd6683f116f6764b460d78ea597849c548c",
+    "timestamp": 1788761830.2455978,
+    "target_id": "CASE-API-TEST",
+    "event_type": "OFFICER_REVIEWED",
+    "evidence_hash": "e498d89f815462883fb4d3a87f3f27b9270aa1f948fe8efad381483bda6b7f31",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "officer_id": "OFFICER-BORDER-99",
+      "decision": "CLEAR_ADMIT",
+      "reason": "All documents verified and biometric match confirmed",
+      "notes": "Standard clearance granted",
+      "action": "OFFICER_DETERMINATION",
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 204,
+    "previous_hash": "18cf797ffd6d2d5cd0fc87de472efcd6683f116f6764b460d78ea597849c548c",
+    "block_hash": "162be926dcdc665fc5a0b91454bf38fe44c9bddd991c2cac88c13d2c825a61dd",
+    "timestamp": 1788761830.289808,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-5DOC-TEST",
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 205,
+    "previous_hash": "162be926dcdc665fc5a0b91454bf38fe44c9bddd991c2cac88c13d2c825a61dd",
+    "block_hash": "dc7a1e38378188f06b0a1af46664ff8dfc59168e3ab41535036396a9928d26ce",
+    "timestamp": 1788761830.5256054,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "fb9b5d3a3feccfe6007beac39e615a74d214b97711dfcb3e9fe696ab23e75546",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 206,
+    "previous_hash": "dc7a1e38378188f06b0a1af46664ff8dfc59168e3ab41535036396a9928d26ce",
+    "block_hash": "a55c63370d18981898d23cfd32dadc2248779610abf734f134e9eca98d5cc8d3",
+    "timestamp": 1788761830.6346047,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "4df26c96dcd511d0a6d9270ffa17794998fa4d16669fc50b92ff20a57821246c",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 207,
+    "previous_hash": "a55c63370d18981898d23cfd32dadc2248779610abf734f134e9eca98d5cc8d3",
+    "block_hash": "75a7ebce7f9fef7174588bca1a79c200872f24f92ad9ae5c18594720cbcf6ea8",
+    "timestamp": 1788761830.7223036,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "646cacef666109f2d08fcff80fe22e2139f2a3823670867705de77199ccb4b09",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 208,
+    "previous_hash": "75a7ebce7f9fef7174588bca1a79c200872f24f92ad9ae5c18594720cbcf6ea8",
+    "block_hash": "83eb5d0ab32d2e7e6f33b82c5590b49598ff86dfc293032b4e5c56a3e39829c6",
+    "timestamp": 1788761830.8089418,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "9ca37f0d9d1b30a4356e118205e5ffe54ffa50c95b9aabbf1a9a2b8d876d6af1",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 209,
+    "previous_hash": "83eb5d0ab32d2e7e6f33b82c5590b49598ff86dfc293032b4e5c56a3e39829c6",
+    "block_hash": "5fc4c796128e471a3d9dc97e57973e6337bbb0d89cdfa93f84abff7fd0bebe09",
+    "timestamp": 1788761830.8943267,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "458f0ed7a55c823f219c440783bedc82cc223637d325a22fbce4775c4d3821ec",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-005",
+      "document_type": "border_permit",
+      "filename": "bp.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:10Z"
+    }
+  },
+  {
+    "block_index": 210,
+    "previous_hash": "5fc4c796128e471a3d9dc97e57973e6337bbb0d89cdfa93f84abff7fd0bebe09",
+    "block_hash": "9002015181a5052177bf81d8739769cd8749164a7d2a79c5b84fbb430547c04d",
+    "timestamp": 1788761831.3964686,
+    "target_id": "CASE-20260907-54AA4E",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Border test case",
+      "case_id": "CASE-20260907-54AA4E",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 211,
+    "previous_hash": "9002015181a5052177bf81d8739769cd8749164a7d2a79c5b84fbb430547c04d",
+    "block_hash": "11478501927c46d39c5c540475d8495286d28dfc324df143366ffba946343740",
+    "timestamp": 1788761831.435515,
+    "target_id": "CASE-20260907-2EB129",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-2EB129",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 212,
+    "previous_hash": "11478501927c46d39c5c540475d8495286d28dfc324df143366ffba946343740",
+    "block_hash": "e4ae400050b595ddb34a007fbaa1802972a0ed5f9785f1d4175c48d5a39900aa",
+    "timestamp": 1788761831.5172322,
+    "target_id": "CASE-20260907-2EB129",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "e083e0a71a868f51b4cd4748bfb7aad74874648a7d7138bff376644aeca32ac3",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 213,
+    "previous_hash": "e4ae400050b595ddb34a007fbaa1802972a0ed5f9785f1d4175c48d5a39900aa",
+    "block_hash": "0b267c4739c5ea93c96f9b5ceaf8cee655e8a6ef4d593d3bf2219c37747fb482",
+    "timestamp": 1788761831.6097002,
+    "target_id": "CASE-20260907-2EB129",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "1bd8bd150a5c5f3661bbcab59fccb76645d8dfc81489679ff235cc2df49fa5a8",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 214,
+    "previous_hash": "0b267c4739c5ea93c96f9b5ceaf8cee655e8a6ef4d593d3bf2219c37747fb482",
+    "block_hash": "97e16f74160f327cf3a0e52af86f0b40012d04681fd6a3625a1a6af0eecefa7a",
+    "timestamp": 1788761831.6447234,
+    "target_id": "CASE-20260907-2EB129",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "74a02e3d0b7fd7edaa5a076ef381299f516e540d6cb72028789903aee2ce442e",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 215,
+    "previous_hash": "97e16f74160f327cf3a0e52af86f0b40012d04681fd6a3625a1a6af0eecefa7a",
+    "block_hash": "e21b0af447346408ec43f93fe6ece768069d90e935a8080ab6b5bd09e4f73768",
+    "timestamp": 1788761831.6624022,
+    "target_id": "CASE-01",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-01",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 216,
+    "previous_hash": "e21b0af447346408ec43f93fe6ece768069d90e935a8080ab6b5bd09e4f73768",
+    "block_hash": "204af27710ba753e488a37b165ce3aaaacb1ffbc33b7f0d840ac100e7a8b3ebf",
+    "timestamp": 1788761831.6748981,
+    "target_id": "CASE-02",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-02",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 217,
+    "previous_hash": "204af27710ba753e488a37b165ce3aaaacb1ffbc33b7f0d840ac100e7a8b3ebf",
+    "block_hash": "c96bb5679685f606b37ff0b0b7eabf8e08cb7cb68b44956ae41135551a8fb755",
+    "timestamp": 1788761831.6829386,
+    "target_id": "CASE-03",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-03",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 218,
+    "previous_hash": "c96bb5679685f606b37ff0b0b7eabf8e08cb7cb68b44956ae41135551a8fb755",
+    "block_hash": "9951674913a31fa8453272289023890966ea32b92a6522996d6cb14dee5442f4",
+    "timestamp": 1788761831.698293,
+    "target_id": "CASE-04",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-04",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 219,
+    "previous_hash": "9951674913a31fa8453272289023890966ea32b92a6522996d6cb14dee5442f4",
+    "block_hash": "7cf1a578ecdfef3246294f7cbc4b3aeeb10697d843eb2937bdff2693dd4a3858",
+    "timestamp": 1788761831.708608,
+    "target_id": "CASE-05",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-05",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 220,
+    "previous_hash": "7cf1a578ecdfef3246294f7cbc4b3aeeb10697d843eb2937bdff2693dd4a3858",
+    "block_hash": "01eacf22629380d0e1a8ae17853cb9d3de6e3292cca7bfdf669ac18055ae059c",
+    "timestamp": 1788761831.7196636,
+    "target_id": "CASE-06",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-06",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 221,
+    "previous_hash": "01eacf22629380d0e1a8ae17853cb9d3de6e3292cca7bfdf669ac18055ae059c",
+    "block_hash": "0e4ab87e96c26a38d17adc5bf3ddacf10d4ae4a33fee84c026c8de52bf729ab2",
+    "timestamp": 1788761831.7285292,
+    "target_id": "CASE-07",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-07",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 222,
+    "previous_hash": "0e4ab87e96c26a38d17adc5bf3ddacf10d4ae4a33fee84c026c8de52bf729ab2",
+    "block_hash": "1abca22afd4326b43c51dfc1f86b6ea8ef83dbaada89282354636d7578c536af",
+    "timestamp": 1788761831.7392423,
+    "target_id": "CASE-08",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-08",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 223,
+    "previous_hash": "1abca22afd4326b43c51dfc1f86b6ea8ef83dbaada89282354636d7578c536af",
+    "block_hash": "8d494d6db08da335fb4ea0e213d71818ba0ce73a2e5e32617a318b27644f3d1d",
+    "timestamp": 1788761831.7521713,
+    "target_id": "CASE-09A",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09A",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 224,
+    "previous_hash": "8d494d6db08da335fb4ea0e213d71818ba0ce73a2e5e32617a318b27644f3d1d",
+    "block_hash": "ef43f90f39a16ab492933711b8caa4423843d7857b17164e3ada467d5e2d7384",
+    "timestamp": 1788761831.7626185,
+    "target_id": "CASE-09B",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09B",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 225,
+    "previous_hash": "ef43f90f39a16ab492933711b8caa4423843d7857b17164e3ada467d5e2d7384",
+    "block_hash": "336b16a0126c7000278a158e2d8cc121db121b7cf826e4028cf979f9ba2a5f26",
+    "timestamp": 1788761831.7698495,
+    "target_id": "CASE-10",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-10",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 226,
+    "previous_hash": "336b16a0126c7000278a158e2d8cc121db121b7cf826e4028cf979f9ba2a5f26",
+    "block_hash": "5baaaea25fbd08fd5f8d5408a1cfe6ba2e773ff8e5e22ed7562acbe89f678e75",
+    "timestamp": 1788761831.7881913,
+    "target_id": "CASE-11",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-11",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 227,
+    "previous_hash": "5baaaea25fbd08fd5f8d5408a1cfe6ba2e773ff8e5e22ed7562acbe89f678e75",
+    "block_hash": "66827e7db98c0b93874ae692bc3343704cdd00882bee193e8cc60967b860c838",
+    "timestamp": 1788761831.803443,
+    "target_id": "CASE-12",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-12",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 228,
+    "previous_hash": "66827e7db98c0b93874ae692bc3343704cdd00882bee193e8cc60967b860c838",
+    "block_hash": "a652a5333f4673c0919efa4b1d721a7b7951097ee20a0bf5074ceebf9027e2be",
+    "timestamp": 1788761831.8146863,
+    "target_id": "CASE-13",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-13",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 229,
+    "previous_hash": "a652a5333f4673c0919efa4b1d721a7b7951097ee20a0bf5074ceebf9027e2be",
+    "block_hash": "141f14762ec9bb7b010cbdd7c1cc45d6a4ae7855043c037a0a60853ec1e77d96",
+    "timestamp": 1788761831.825727,
+    "target_id": "CASE-14",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-14",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 230,
+    "previous_hash": "141f14762ec9bb7b010cbdd7c1cc45d6a4ae7855043c037a0a60853ec1e77d96",
+    "block_hash": "ac2bd15d104040d327742712b2836171780b1a4532b16cdeffcba8958560cc5e",
+    "timestamp": 1788761831.842149,
+    "target_id": "CASE-15",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-15",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 231,
+    "previous_hash": "ac2bd15d104040d327742712b2836171780b1a4532b16cdeffcba8958560cc5e",
+    "block_hash": "30cb745cac1d572095cc049852bc3dc3419913612c345846ec8da2014447922a",
+    "timestamp": 1788761831.8516355,
+    "target_id": "CASE-15",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "877f7a97145cb5d9d240fce6c8a734f45b0e4c36bf2c1ec915504dca161bee7f",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 232,
+    "previous_hash": "30cb745cac1d572095cc049852bc3dc3419913612c345846ec8da2014447922a",
+    "block_hash": "dfc51e6999f6d9b56bb5b26f3a23bef30b35280638d90c5e0dc7e74dc383a401",
+    "timestamp": 1788761831.861646,
+    "target_id": "CASE-16",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-16",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 233,
+    "previous_hash": "dfc51e6999f6d9b56bb5b26f3a23bef30b35280638d90c5e0dc7e74dc383a401",
+    "block_hash": "b19066dc2dc7f81d6566888272c3e1a25bcca98cccc2bdaa01dbdf4b1bb0d198",
+    "timestamp": 1788761831.8785086,
+    "target_id": "CASE-17",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-17",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 234,
+    "previous_hash": "b19066dc2dc7f81d6566888272c3e1a25bcca98cccc2bdaa01dbdf4b1bb0d198",
+    "block_hash": "9b3bcdeeca9f0b26b27707c230ba7f6a2ef258064e8916a18806e8bc444a3455",
+    "timestamp": 1788761831.8903155,
+    "target_id": "CASE-18",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-18",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 235,
+    "previous_hash": "9b3bcdeeca9f0b26b27707c230ba7f6a2ef258064e8916a18806e8bc444a3455",
+    "block_hash": "cfbd0ba00460ed189c1e9bf4420493d391d172fde5595ff6562c60225ebe3cfd",
+    "timestamp": 1788761831.9195387,
+    "target_id": "CASE-20260907-24C1A4",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-24C1A4",
+      "timestamp_iso": "2026-09-07T06:17:11Z"
+    }
+  },
+  {
+    "block_index": 236,
+    "previous_hash": "cfbd0ba00460ed189c1e9bf4420493d391d172fde5595ff6562c60225ebe3cfd",
+    "block_hash": "5089278b149fc5b85d78569718037adc7471b7bdd355585f9b82501c59a953c8",
+    "timestamp": 1788761832.009399,
+    "target_id": "CASE-20260907-24C1A4",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d8f6aa98d48d703bbe99097890ca3b160bb7ebe73bbc530c2682a0c01d2c8b31",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 237,
+    "previous_hash": "5089278b149fc5b85d78569718037adc7471b7bdd355585f9b82501c59a953c8",
+    "block_hash": "60dca8125214619eaa319da1f2be5a1c87ca688cafdd888f8700ff00d542a926",
+    "timestamp": 1788761832.0237708,
+    "target_id": "CASE-20260907-693E78",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-693E78",
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 238,
+    "previous_hash": "60dca8125214619eaa319da1f2be5a1c87ca688cafdd888f8700ff00d542a926",
+    "block_hash": "7e4e55b27c66860c85c291cc86cc0dadf51b31e2669580e6afd0ded9b7ea6127",
+    "timestamp": 1788761832.1485248,
+    "target_id": "CASE-20260907-693E78",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "e66a0daa1202d231910b07e93d9b3e365131fe74274c7a7af886bb78dcc9b470",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 239,
+    "previous_hash": "7e4e55b27c66860c85c291cc86cc0dadf51b31e2669580e6afd0ded9b7ea6127",
+    "block_hash": "8f96ec802080c5fb7e1c924d8b46c2a3da570b98ca9a5465f234ee9fafc5da7d",
+    "timestamp": 1788761832.2470434,
+    "target_id": "CASE-20260907-693E78",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "3392b23d79ee9d038986bf5326af4e9697a441579e6995a90408471cc8250120",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 240,
+    "previous_hash": "8f96ec802080c5fb7e1c924d8b46c2a3da570b98ca9a5465f234ee9fafc5da7d",
+    "block_hash": "0521ec5e9f41e778317497cf8b371b0a9a298e4737deba4ab2bc84aeb318259c",
+    "timestamp": 1788761832.2680774,
+    "target_id": "CASE-20260907-97AC5F",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-97AC5F",
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 241,
+    "previous_hash": "0521ec5e9f41e778317497cf8b371b0a9a298e4737deba4ab2bc84aeb318259c",
+    "block_hash": "7b5bcb03d5de033f86ca6515cc97a1746af2c3da54a57e1fc7c7388ad3ab126d",
+    "timestamp": 1788761832.3949668,
+    "target_id": "CASE-20260907-97AC5F",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "b5ae6b1e8b224503ff3c6118539402620c0f1e8ead799837b1f9b261e796fc03",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 242,
+    "previous_hash": "7b5bcb03d5de033f86ca6515cc97a1746af2c3da54a57e1fc7c7388ad3ab126d",
+    "block_hash": "f876242f3164be753982b57d261935cfc3966d0adcc74a50577ed0d34a49a20e",
+    "timestamp": 1788761832.507402,
+    "target_id": "CASE-20260907-97AC5F",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d8eb67020dafce7667ce11b036447fe499b568c21660f4ba4e6b442bd40ba2e4",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 243,
+    "previous_hash": "f876242f3164be753982b57d261935cfc3966d0adcc74a50577ed0d34a49a20e",
+    "block_hash": "28bc0b074ac3d14a9ffc391a53a90eaf25947a62af6006f018e70b0c96688ffa",
+    "timestamp": 1788761832.5960586,
+    "target_id": "CASE-20260907-97AC5F",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "3745626d44dae8fd0f2a158912561db52dd402e3740a149185941ca69c797276",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 244,
+    "previous_hash": "28bc0b074ac3d14a9ffc391a53a90eaf25947a62af6006f018e70b0c96688ffa",
+    "block_hash": "3de5bd73637a839eee779aa944194d2143188673b48522321f6f78d6168af4f7",
+    "timestamp": 1788761832.6171548,
+    "target_id": "CASE-20260907-415C13",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-415C13",
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 245,
+    "previous_hash": "3de5bd73637a839eee779aa944194d2143188673b48522321f6f78d6168af4f7",
+    "block_hash": "cf01f021fbe1593b6d4554551f7399bff5da9700bf36b4a599de2f52b8e04406",
+    "timestamp": 1788761832.7058704,
+    "target_id": "CASE-20260907-415C13",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "14cec2f1c2acb394140225bb2db2461e22142dc13d660e6979098b1070413f96",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 246,
+    "previous_hash": "cf01f021fbe1593b6d4554551f7399bff5da9700bf36b4a599de2f52b8e04406",
+    "block_hash": "351dc3d135d4eb7e5c362321e22b91566749cb561de94c06d5db25adea31b5b5",
+    "timestamp": 1788761832.7292325,
+    "target_id": "CASE-20260907-7F0A88",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-7F0A88",
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 247,
+    "previous_hash": "351dc3d135d4eb7e5c362321e22b91566749cb561de94c06d5db25adea31b5b5",
+    "block_hash": "8d03f1cef538830ea225bf84b2cd77b0bc8e051b43403c377d146505f0a785ab",
+    "timestamp": 1788761832.8591986,
+    "target_id": "CASE-20260907-7F0A88",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6db0cb2dbf6411067412681b988ad165422d045c74333503932644a2e8976b2a",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 248,
+    "previous_hash": "8d03f1cef538830ea225bf84b2cd77b0bc8e051b43403c377d146505f0a785ab",
+    "block_hash": "17fec4cbe274b465bf26abdf6171ba7b3ea1ca50783a752958d59ce8ac360b3b",
+    "timestamp": 1788761832.9490616,
+    "target_id": "CASE-20260907-7F0A88",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "72db521e4f61a4b2629766fc88eb350d8595db532153e148892eb6182f2ed01b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:12Z"
+    }
+  },
+  {
+    "block_index": 249,
+    "previous_hash": "17fec4cbe274b465bf26abdf6171ba7b3ea1ca50783a752958d59ce8ac360b3b",
+    "block_hash": "18443933111e763baa6f6383ae22c55c79f308d0540f642dfcbfa270973ff930",
+    "timestamp": 1788761833.0352342,
+    "target_id": "CASE-20260907-7F0A88",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6d0c117aacd24adec3dae97e4d79ae7877565004138961e090e64ed8764fd702",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl2.jpg",
+      "revision": 2,
+      "timestamp_iso": "2026-09-07T06:17:13Z"
+    }
+  },
+  {
+    "block_index": 250,
+    "previous_hash": "18443933111e763baa6f6383ae22c55c79f308d0540f642dfcbfa270973ff930",
+    "block_hash": "b616a51724eb624dc991af86fe3d979ea33ad74fd2ac2d18c837c200bac15cf4",
+    "timestamp": 1788761848.4061022,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-4DOC-TEST",
+      "timestamp_iso": "2026-09-07T06:17:28Z"
+    }
+  },
+  {
+    "block_index": 251,
+    "previous_hash": "b616a51724eb624dc991af86fe3d979ea33ad74fd2ac2d18c837c200bac15cf4",
+    "block_hash": "2edd7aae94b8809e977ddd6ce3fd744ba666ed0446061fa6165fc8b149e96419",
+    "timestamp": 1788761848.5267816,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "d5a20e750a239bbd9464d0a8f3c9ae740fbc374a7550a3b68022a9d5a1580108",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:28Z"
+    }
+  },
+  {
+    "block_index": 252,
+    "previous_hash": "2edd7aae94b8809e977ddd6ce3fd744ba666ed0446061fa6165fc8b149e96419",
+    "block_hash": "22cc5dd00743a5ae18243705a0a78305bc7ff347549b86504aec23db8dd96d6d",
+    "timestamp": 1788761848.6408012,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "767b0430c21b849734fd8d1c79f87ee7c13bab24a8b0562adbecd960aa028ccf",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:28Z"
+    }
+  },
+  {
+    "block_index": 253,
+    "previous_hash": "22cc5dd00743a5ae18243705a0a78305bc7ff347549b86504aec23db8dd96d6d",
+    "block_hash": "c6e30584839e72d4ac53876bad4939436026f9afa5efeb0ceb8a1b6c1e387970",
+    "timestamp": 1788761848.73161,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "19d833c905caa876374e41d6cd41bb6c58f522fe48c3e5526c5b8ab9a3e6f865",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:28Z"
+    }
+  },
+  {
+    "block_index": 254,
+    "previous_hash": "c6e30584839e72d4ac53876bad4939436026f9afa5efeb0ceb8a1b6c1e387970",
+    "block_hash": "dd488cf52079da5caff14e580d368db0dd9cea09ee8a3ac75d54c795a7c8f9f3",
+    "timestamp": 1788761848.826329,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "95a6dd45dddcd2dbeec0c5d5a2fea561c0cd0183b31ddcde70604bc22d113b93",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T06:17:28Z"
+    }
+  },
+  {
+    "block_index": 255,
+    "previous_hash": "dd488cf52079da5caff14e580d368db0dd9cea09ee8a3ac75d54c795a7c8f9f3",
+    "block_hash": "dcc509f1426392cd4203cdb3f7d38e322d7a8af08214f80ffc20d3b8076d6f6a",
+    "timestamp": 1788761852.442415,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T06:17:32Z"
+    }
+  },
+  {
+    "block_index": 256,
+    "previous_hash": "dcc509f1426392cd4203cdb3f7d38e322d7a8af08214f80ffc20d3b8076d6f6a",
+    "block_hash": "39fe17302faa2406af698480c81642120110bb352cc847cc01cd97437ec83f15",
+    "timestamp": 1788761852.475443,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T06:17:32Z"
+    }
+  },
+  {
+    "block_index": 257,
+    "previous_hash": "39fe17302faa2406af698480c81642120110bb352cc847cc01cd97437ec83f15",
+    "block_hash": "0f9d46f2560de643c1f00c2802468d21e34bd07d0ec9bbc6a6e5c2c0962a513a",
+    "timestamp": 1788761852.4981976,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T06:17:32Z"
+    }
+  },
+  {
+    "block_index": 258,
+    "previous_hash": "0f9d46f2560de643c1f00c2802468d21e34bd07d0ec9bbc6a6e5c2c0962a513a",
+    "block_hash": "f37bdf3180db5c0a15ff0db7009a70c7afd763164611da51dbfc3406f3f9e26a",
+    "timestamp": 1788761852.5228796,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T06:17:32Z"
+    }
+  },
+  {
+    "block_index": 259,
+    "previous_hash": "f37bdf3180db5c0a15ff0db7009a70c7afd763164611da51dbfc3406f3f9e26a",
+    "block_hash": "71a6bd47c0b92ef8441a8748c39cc5d081a32f62285c88729d04636308d2a82f",
+    "timestamp": 1788764809.9932687,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T07:06:49Z"
+    }
+  },
+  {
+    "block_index": 260,
+    "previous_hash": "71a6bd47c0b92ef8441a8748c39cc5d081a32f62285c88729d04636308d2a82f",
+    "block_hash": "deafbf79f066013b6aebda895f8c81800001bf01d06ce4a60976c7ffd04627f5",
+    "timestamp": 1788764810.0215645,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T07:06:50Z"
+    }
+  },
+  {
+    "block_index": 261,
+    "previous_hash": "deafbf79f066013b6aebda895f8c81800001bf01d06ce4a60976c7ffd04627f5",
+    "block_hash": "9e0bbf95ff1679b4ca318ebd2a8023c90f1ad2ccd40f4d365b30af9f001e0d9a",
+    "timestamp": 1788764810.0436695,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T07:06:50Z"
+    }
+  },
+  {
+    "block_index": 262,
+    "previous_hash": "9e0bbf95ff1679b4ca318ebd2a8023c90f1ad2ccd40f4d365b30af9f001e0d9a",
+    "block_hash": "c1aa950b13ef7ffe7447b6d9be859e9df16ad8c91038c3c19fd46e20f7f36cb4",
+    "timestamp": 1788764810.0634334,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T07:06:50Z"
+    }
+  },
+  {
+    "block_index": 263,
+    "previous_hash": "c1aa950b13ef7ffe7447b6d9be859e9df16ad8c91038c3c19fd46e20f7f36cb4",
+    "block_hash": "32025ece0536a97d116de9af363129c6e2001f868bca1dec5bdea203532c59df",
+    "timestamp": 1788766907.9794314,
+    "target_id": "CASE-API-TEST",
+    "event_type": "OFFICER_REVIEWED",
+    "evidence_hash": "e498d89f815462883fb4d3a87f3f27b9270aa1f948fe8efad381483bda6b7f31",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "officer_id": "OFFICER-BORDER-99",
+      "decision": "CLEAR_ADMIT",
+      "reason": "All documents verified and biometric match confirmed",
+      "notes": "Standard clearance granted",
+      "action": "OFFICER_DETERMINATION",
+      "timestamp_iso": "2026-09-07T07:41:47Z"
+    }
+  },
+  {
+    "block_index": 264,
+    "previous_hash": "32025ece0536a97d116de9af363129c6e2001f868bca1dec5bdea203532c59df",
+    "block_hash": "5fab0166abc4e81a2fa1c5b1fb3e73e8c4e76584d3f93d8de93b0fda6831aca1",
+    "timestamp": 1788766908.0040343,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-5DOC-TEST",
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 265,
+    "previous_hash": "5fab0166abc4e81a2fa1c5b1fb3e73e8c4e76584d3f93d8de93b0fda6831aca1",
+    "block_hash": "90564f2439d52f85308240a0e07cb215ac9d9ea05502df12a3e842532d4b1c98",
+    "timestamp": 1788766908.1945536,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "6fef21a9f36a8064c516d168c75aca7756c345de1ef3499131904b299a1b4d3b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 266,
+    "previous_hash": "90564f2439d52f85308240a0e07cb215ac9d9ea05502df12a3e842532d4b1c98",
+    "block_hash": "b8236035c16e999d0b0913a23b7a0ab55a444ff18780609358228b42e2766222",
+    "timestamp": 1788766908.3033202,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "673a9c2eb2417e9dac4bd34f4a357dfc88ccec8e09c4ee98eb3aa5b0af2c9525",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 267,
+    "previous_hash": "b8236035c16e999d0b0913a23b7a0ab55a444ff18780609358228b42e2766222",
+    "block_hash": "8dd75a3c55e60b3c56d4da9535244cf77f0cb34f3cd24ae4b9d4e3b274106ad0",
+    "timestamp": 1788766908.395359,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "8fbdfb8044c64cf7416b613c36d991925a8d041d68e6cb5ba87f35396ffd7d30",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 268,
+    "previous_hash": "8dd75a3c55e60b3c56d4da9535244cf77f0cb34f3cd24ae4b9d4e3b274106ad0",
+    "block_hash": "0855ac9b88793f270467f518cb0a359e9817b79bbda1f8600f6251c28edc5144",
+    "timestamp": 1788766908.4923723,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "3718c2448ac1d03de69be91b16a55dee3df76cb30b71217cf1568a38fd3cb7a8",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 269,
+    "previous_hash": "0855ac9b88793f270467f518cb0a359e9817b79bbda1f8600f6251c28edc5144",
+    "block_hash": "5d934b324500a345e25caace4432e845055d6b61def0ce70826abafcdfbf686f",
+    "timestamp": 1788766908.5805151,
+    "target_id": "CASE-5DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "af7b4c035599b46c9752d4d42e4fbb147044dab34c5daeb175842fdf5a8bbddd",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-005",
+      "document_type": "border_permit",
+      "filename": "bp.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:48Z"
+    }
+  },
+  {
+    "block_index": 270,
+    "previous_hash": "5d934b324500a345e25caace4432e845055d6b61def0ce70826abafcdfbf686f",
+    "block_hash": "11ddf452563d41d5b869a5ac75416b5b262e16f46d55073e76d6826fd9078056",
+    "timestamp": 1788766909.1266427,
+    "target_id": "CASE-20260907-8E8816",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Border test case",
+      "case_id": "CASE-20260907-8E8816",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 271,
+    "previous_hash": "11ddf452563d41d5b869a5ac75416b5b262e16f46d55073e76d6826fd9078056",
+    "block_hash": "328c706f2915c7ff3b9d93638302fb80d4c24d2c853ff7737e5fea8d568e49da",
+    "timestamp": 1788766909.172305,
+    "target_id": "CASE-20260907-2EDD5C",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-2EDD5C",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 272,
+    "previous_hash": "328c706f2915c7ff3b9d93638302fb80d4c24d2c853ff7737e5fea8d568e49da",
+    "block_hash": "011b2058b0654957e4fb7616b7e87175a967886ad97a0fad63c8e32d5db6594a",
+    "timestamp": 1788766909.253488,
+    "target_id": "CASE-20260907-2EDD5C",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "beecd2a4eff28710c68a0ce27c6ae24ad58ab77524a6db3fc99b4db4396ddcb3",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 273,
+    "previous_hash": "011b2058b0654957e4fb7616b7e87175a967886ad97a0fad63c8e32d5db6594a",
+    "block_hash": "7f8f582d669df88480fe2d11b85534b41a87d2624357d5f54c6afec45f83e9d8",
+    "timestamp": 1788766909.3391912,
+    "target_id": "CASE-20260907-2EDD5C",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "35743e2f89504275a62993efcca785ad4f07a32a4132ff170da0a74d68230721",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 274,
+    "previous_hash": "7f8f582d669df88480fe2d11b85534b41a87d2624357d5f54c6afec45f83e9d8",
+    "block_hash": "d226092847565cb66fa216f6bbbd013f7d64059a4e4cf8ef641434af1f6d2c56",
+    "timestamp": 1788766909.369227,
+    "target_id": "CASE-20260907-2EDD5C",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "9d1fc918ab9fc6a0999908ce6d409e881abe406139e02f8cea88551c3b5b694c",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 275,
+    "previous_hash": "d226092847565cb66fa216f6bbbd013f7d64059a4e4cf8ef641434af1f6d2c56",
+    "block_hash": "ac39db5b8fa51dc376d6711fb35a6c69dacbd7520cddc70dfe839131d27e0350",
+    "timestamp": 1788766909.3897994,
+    "target_id": "CASE-01",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-01",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 276,
+    "previous_hash": "ac39db5b8fa51dc376d6711fb35a6c69dacbd7520cddc70dfe839131d27e0350",
+    "block_hash": "83f70e2c208e145be40883545523d100e84fa8ea41235f700e17ae29a9000fba",
+    "timestamp": 1788766909.3994696,
+    "target_id": "CASE-02",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-02",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 277,
+    "previous_hash": "83f70e2c208e145be40883545523d100e84fa8ea41235f700e17ae29a9000fba",
+    "block_hash": "f374110226b8a40f44f406cf018d38518cac2a56a1e52564757e5a333cfeb90c",
+    "timestamp": 1788766909.411339,
+    "target_id": "CASE-03",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-03",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 278,
+    "previous_hash": "f374110226b8a40f44f406cf018d38518cac2a56a1e52564757e5a333cfeb90c",
+    "block_hash": "ece512fc7e92b1f1fe299e5e119156922dda95e131cc2741213c20c08f112ac8",
+    "timestamp": 1788766909.4210243,
+    "target_id": "CASE-04",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-04",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 279,
+    "previous_hash": "ece512fc7e92b1f1fe299e5e119156922dda95e131cc2741213c20c08f112ac8",
+    "block_hash": "fc610bbdba8b65a5d5bfd20095ea3a524d56e941ebddb58fc5a6a04d75bf6dfd",
+    "timestamp": 1788766909.4320762,
+    "target_id": "CASE-05",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-05",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 280,
+    "previous_hash": "fc610bbdba8b65a5d5bfd20095ea3a524d56e941ebddb58fc5a6a04d75bf6dfd",
+    "block_hash": "1600556fedc1d48cb2b24e8dfd00d65feddf0aaca618b492ff52abf6cf5ec48f",
+    "timestamp": 1788766909.4436438,
+    "target_id": "CASE-06",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-06",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 281,
+    "previous_hash": "1600556fedc1d48cb2b24e8dfd00d65feddf0aaca618b492ff52abf6cf5ec48f",
+    "block_hash": "c0db97bd2e69d5baffae2236735ffbf063b061a205ccf782419d6b05c3d9ec89",
+    "timestamp": 1788766909.455883,
+    "target_id": "CASE-07",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-07",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 282,
+    "previous_hash": "c0db97bd2e69d5baffae2236735ffbf063b061a205ccf782419d6b05c3d9ec89",
+    "block_hash": "97d5ea771bdcdb39eb7244b1044add897574229d8b50c864a351cfc9ab96aaf0",
+    "timestamp": 1788766909.4655766,
+    "target_id": "CASE-08",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-08",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 283,
+    "previous_hash": "97d5ea771bdcdb39eb7244b1044add897574229d8b50c864a351cfc9ab96aaf0",
+    "block_hash": "5eb28cbde0e861b207b86dee791f1a677141bf66394d8c0d269332a376bbbd39",
+    "timestamp": 1788766909.477245,
+    "target_id": "CASE-09A",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09A",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 284,
+    "previous_hash": "5eb28cbde0e861b207b86dee791f1a677141bf66394d8c0d269332a376bbbd39",
+    "block_hash": "e724c2dfe3b439959c57e52e4994cb868edc4c00aba3ce9d4086d99983b33f78",
+    "timestamp": 1788766909.4866416,
+    "target_id": "CASE-09B",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-09B",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 285,
+    "previous_hash": "e724c2dfe3b439959c57e52e4994cb868edc4c00aba3ce9d4086d99983b33f78",
+    "block_hash": "1b769e68f28c095a016985130dc5470859ce143cd206d4844ab99b169b4f61d0",
+    "timestamp": 1788766909.5001383,
+    "target_id": "CASE-10",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-10",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 286,
+    "previous_hash": "1b769e68f28c095a016985130dc5470859ce143cd206d4844ab99b169b4f61d0",
+    "block_hash": "1138e52a3c23baa6d9741bdd0607368c9ec761d850cffd64772298d28354bf23",
+    "timestamp": 1788766909.5094604,
+    "target_id": "CASE-11",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-11",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 287,
+    "previous_hash": "1138e52a3c23baa6d9741bdd0607368c9ec761d850cffd64772298d28354bf23",
+    "block_hash": "e80b35c0aff882d7af3eaae72f834f8bec8f51659512b059d348ea80923d6709",
+    "timestamp": 1788766909.5199823,
+    "target_id": "CASE-12",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-12",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 288,
+    "previous_hash": "e80b35c0aff882d7af3eaae72f834f8bec8f51659512b059d348ea80923d6709",
+    "block_hash": "7dec4489bb75e1940525fb665740434ce3282e5197e2cd26d5d31c0a44313332",
+    "timestamp": 1788766909.532305,
+    "target_id": "CASE-13",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-13",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 289,
+    "previous_hash": "7dec4489bb75e1940525fb665740434ce3282e5197e2cd26d5d31c0a44313332",
+    "block_hash": "4f58a0eeceddd2e68bbe8e1b9287101429e6843eb959193c9135a6c944c6497a",
+    "timestamp": 1788766909.542421,
+    "target_id": "CASE-14",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-14",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 290,
+    "previous_hash": "4f58a0eeceddd2e68bbe8e1b9287101429e6843eb959193c9135a6c944c6497a",
+    "block_hash": "3d02ba1fe04b93856c3aa1eda8c1304b1ce36dadfa7bb694edf3a658844bda1a",
+    "timestamp": 1788766909.5559547,
+    "target_id": "CASE-15",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-15",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 291,
+    "previous_hash": "3d02ba1fe04b93856c3aa1eda8c1304b1ce36dadfa7bb694edf3a658844bda1a",
+    "block_hash": "d9c0e0774c118bc2cc78ce0e6a8db8f145692fd586274a2cf6408e1c8bb91c55",
+    "timestamp": 1788766909.5651827,
+    "target_id": "CASE-15",
+    "event_type": "DOCUMENT_REMOVED",
+    "evidence_hash": "fe51ed00e58a3f2efbb9ab0a09a0498c24700013a71cda4c96bc7dc1dcb54a08",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 292,
+    "previous_hash": "d9c0e0774c118bc2cc78ce0e6a8db8f145692fd586274a2cf6408e1c8bb91c55",
+    "block_hash": "310cfef713fc31f6c1c0f006b492aa84880feca821547902ba3c96f93307026e",
+    "timestamp": 1788766909.5743978,
+    "target_id": "CASE-16",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-16",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 293,
+    "previous_hash": "310cfef713fc31f6c1c0f006b492aa84880feca821547902ba3c96f93307026e",
+    "block_hash": "12f2c544e1ed796e7a0542611e8c4fcc48d4486e2b3f9a6ea06e4d529235227f",
+    "timestamp": 1788766909.5873644,
+    "target_id": "CASE-17",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-17",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 294,
+    "previous_hash": "12f2c544e1ed796e7a0542611e8c4fcc48d4486e2b3f9a6ea06e4d529235227f",
+    "block_hash": "0d696e0319e56769711940a2f7a4bb09b43c87a00cb9ecd800a3f651af4f11e2",
+    "timestamp": 1788766909.5972188,
+    "target_id": "CASE-18",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-18",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 295,
+    "previous_hash": "0d696e0319e56769711940a2f7a4bb09b43c87a00cb9ecd800a3f651af4f11e2",
+    "block_hash": "e29ae33458fbefb5183596347f41505cec0c9b4027bce18502dc456012ea81c5",
+    "timestamp": 1788766909.6176617,
+    "target_id": "CASE-20260907-F0A154",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-F0A154",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 296,
+    "previous_hash": "e29ae33458fbefb5183596347f41505cec0c9b4027bce18502dc456012ea81c5",
+    "block_hash": "913fb94e1382e4fcfeb75beb3fb5d64f1c7edd0a22678526dd653d61dab1667e",
+    "timestamp": 1788766909.694115,
+    "target_id": "CASE-20260907-F0A154",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "ff40ac4b7f73f0912482d45cc5e001a1c17c2cddf5b02e8f47b1e9b43edc1ff0",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 297,
+    "previous_hash": "913fb94e1382e4fcfeb75beb3fb5d64f1c7edd0a22678526dd653d61dab1667e",
+    "block_hash": "c57588e10add57cac0896ddef9215f649dd9295eaff7005c31fb4057bc1cd7d3",
+    "timestamp": 1788766909.7102878,
+    "target_id": "CASE-20260907-4CD91E",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-4CD91E",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 298,
+    "previous_hash": "c57588e10add57cac0896ddef9215f649dd9295eaff7005c31fb4057bc1cd7d3",
+    "block_hash": "d08e408a9f0e600707f0d043a25dad20afb9e678c5c104a468912549aa208653",
+    "timestamp": 1788766909.7985513,
+    "target_id": "CASE-20260907-4CD91E",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "9d6c1396c08bf9787861f7b797626bd53a1ed69c98b97790d7d733cf2d502468",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 299,
+    "previous_hash": "d08e408a9f0e600707f0d043a25dad20afb9e678c5c104a468912549aa208653",
+    "block_hash": "e8224486cd7c96fc43525dd66cdc823b3007b3b676064d639fe085c69a139f2c",
+    "timestamp": 1788766909.8763144,
+    "target_id": "CASE-20260907-4CD91E",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "a7903b01c90d251ec9f672df3330dd0e47622a24fb08495f6dbaccbc9a003a04",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 300,
+    "previous_hash": "e8224486cd7c96fc43525dd66cdc823b3007b3b676064d639fe085c69a139f2c",
+    "block_hash": "dab68f7e8ad31e78b0c745af5d4e11dd3f9182610f03be7d4c061a4e7caefd4c",
+    "timestamp": 1788766909.8928878,
+    "target_id": "CASE-20260907-EBF897",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-EBF897",
+      "timestamp_iso": "2026-09-07T07:41:49Z"
+    }
+  },
+  {
+    "block_index": 301,
+    "previous_hash": "dab68f7e8ad31e78b0c745af5d4e11dd3f9182610f03be7d4c061a4e7caefd4c",
+    "block_hash": "4302fab5932964d2ed9caf876d3ae2458ccb5e3ef8254f8b828b6210f2cb4b76",
+    "timestamp": 1788766910.0070393,
+    "target_id": "CASE-20260907-EBF897",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "e1105d873383fae6645e07487288dd1442b90f2e86ad2c777a1c44631d421542",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 302,
+    "previous_hash": "4302fab5932964d2ed9caf876d3ae2458ccb5e3ef8254f8b828b6210f2cb4b76",
+    "block_hash": "e218301fab8bb55bdb9710d9ea7228074e15cd3e027cc0d86107e5b521bd8927",
+    "timestamp": 1788766910.1150856,
+    "target_id": "CASE-20260907-EBF897",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "198b5611ade841395431b8057434cd94edef5403b5bcfb86a3b729ce0a4b750d",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 303,
+    "previous_hash": "e218301fab8bb55bdb9710d9ea7228074e15cd3e027cc0d86107e5b521bd8927",
+    "block_hash": "8468a82e0de6240adf7c21060d4b0ffcb48b75bfe10bcf11953f472dfc8796ab",
+    "timestamp": 1788766910.19505,
+    "target_id": "CASE-20260907-EBF897",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "74e0daa1d8dbd7513d2aff72ebf16cecfb997c8b7c69d5dd63671553022559bd",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 304,
+    "previous_hash": "8468a82e0de6240adf7c21060d4b0ffcb48b75bfe10bcf11953f472dfc8796ab",
+    "block_hash": "b5d184eb2f984a5334e26f743b193f216ef301d9bfdbd80e49a1b1cf267f5d1f",
+    "timestamp": 1788766910.2131386,
+    "target_id": "CASE-20260907-023CAF",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-023CAF",
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 305,
+    "previous_hash": "b5d184eb2f984a5334e26f743b193f216ef301d9bfdbd80e49a1b1cf267f5d1f",
+    "block_hash": "87ba727b4f69124a5a6a3992df4ca8d15956f0e5ebbbf7a158829449b77c360f",
+    "timestamp": 1788766910.2903311,
+    "target_id": "CASE-20260907-023CAF",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "dc1c794912907bd3de4777318996ee70f9627448759d07e174bd227d5c5b8bcf",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 306,
+    "previous_hash": "87ba727b4f69124a5a6a3992df4ca8d15956f0e5ebbbf7a158829449b77c360f",
+    "block_hash": "6af1823c66180408a33bfab249693caa8139a53721769df63b7c229ab520fcec",
+    "timestamp": 1788766910.3049364,
+    "target_id": "CASE-20260907-46FC2B",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-20260907-46FC2B",
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 307,
+    "previous_hash": "6af1823c66180408a33bfab249693caa8139a53721769df63b7c229ab520fcec",
+    "block_hash": "3c7eb5fa402cddf1633c3200233af47fc8da2cb5cb41af838714bb8c01fed8e5",
+    "timestamp": 1788766910.3876522,
+    "target_id": "CASE-20260907-46FC2B",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "e00c2857c5f21a6a53751de61908b208bfe0108ba2b3437fcdd3ece25eb0d0a4",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 308,
+    "previous_hash": "3c7eb5fa402cddf1633c3200233af47fc8da2cb5cb41af838714bb8c01fed8e5",
+    "block_hash": "8fe6d3b26c5c07dfe2b5c1e272235c43c247d809a12acc6af1e534e3b6293256",
+    "timestamp": 1788766910.4617152,
+    "target_id": "CASE-20260907-46FC2B",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "99659f11515e9ab80035ecdb4b461fc50d43c425047cbd0647412ff257514a5b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "driving_license",
+      "filename": "dl1.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 309,
+    "previous_hash": "8fe6d3b26c5c07dfe2b5c1e272235c43c247d809a12acc6af1e534e3b6293256",
+    "block_hash": "e7805340c672c5434cf7fb9d75b005833db162880d98d5be37a1a86118a1325f",
+    "timestamp": 1788766910.5404477,
+    "target_id": "CASE-20260907-46FC2B",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "25c1dcce76fcac63077a187773d23f36f427b1edcc5f20aadf500ab06be4a7f5",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl2.jpg",
+      "revision": 2,
+      "timestamp_iso": "2026-09-07T07:41:50Z"
+    }
+  },
+  {
+    "block_index": 310,
+    "previous_hash": "e7805340c672c5434cf7fb9d75b005833db162880d98d5be37a1a86118a1325f",
+    "block_hash": "fbae7ecda6d8d6ad0b69743bc0e2c779f91e5e397a49189976444ca1e16db551",
+    "timestamp": 1788766922.702544,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": null,
+      "case_id": "CASE-4DOC-TEST",
+      "timestamp_iso": "2026-09-07T07:42:02Z"
+    }
+  },
+  {
+    "block_index": 311,
+    "previous_hash": "fbae7ecda6d8d6ad0b69743bc0e2c779f91e5e397a49189976444ca1e16db551",
+    "block_hash": "ef527e0283791e0e89024ebcfff6876c1d01108e4b856ba2a491ca2c92dc1528",
+    "timestamp": 1788766922.800197,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "7ba4b60f794cced89553a89a8c9b5d1302238dc155d061a14f9a06faf11726a7",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-001",
+      "document_type": "passport",
+      "filename": "passport.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:42:02Z"
+    }
+  },
+  {
+    "block_index": 312,
+    "previous_hash": "ef527e0283791e0e89024ebcfff6876c1d01108e4b856ba2a491ca2c92dc1528",
+    "block_hash": "f98136df4b839e4c8fbf4f0ec17afe6f2e008dd2de1a0114e8883d51b911e114",
+    "timestamp": 1788766922.891374,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "26c8ca0b9b50062f069dea832e00fa88ba7be0d6bd43d520e9f436d3618cf3e5",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-002",
+      "document_type": "visa",
+      "filename": "visa.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:42:02Z"
+    }
+  },
+  {
+    "block_index": 313,
+    "previous_hash": "f98136df4b839e4c8fbf4f0ec17afe6f2e008dd2de1a0114e8883d51b911e114",
+    "block_hash": "9857b2ff8fb76d300040c6050dcfb6d3b3dc9c2d9025bec6d5e4c4bf8ff89673",
+    "timestamp": 1788766922.974243,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "fff547a3f20b2a0bd94bb0dbf6d4480fe6c691519db6f45643df120692760c41",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-003",
+      "document_type": "driving_license",
+      "filename": "dl.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:42:02Z"
+    }
+  },
+  {
+    "block_index": 314,
+    "previous_hash": "9857b2ff8fb76d300040c6050dcfb6d3b3dc9c2d9025bec6d5e4c4bf8ff89673",
+    "block_hash": "ff9b303cd1c7e2ab37d9170034ad2300c808086ac8085fc2170215b8762f7886",
+    "timestamp": 1788766923.054688,
+    "target_id": "CASE-4DOC-TEST",
+    "event_type": "DOCUMENT_UPLOADED",
+    "evidence_hash": "3e758e707560734fa38dd06e915dfb89af43e9664b30cc7831c36b463b39987b",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "document_id": "DOC-004",
+      "document_type": "national_id",
+      "filename": "nid.jpg",
+      "revision": 1,
+      "timestamp_iso": "2026-09-07T07:42:03Z"
+    }
+  },
+  {
+    "block_index": 315,
+    "previous_hash": "ff9b303cd1c7e2ab37d9170034ad2300c808086ac8085fc2170215b8762f7886",
+    "block_hash": "8d3c51c38d74769bc64fb55afd00554e73f95906d5718af4feeb62ffaaba3a71",
+    "timestamp": 1788766926.0735025,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T07:42:06Z"
+    }
+  },
+  {
+    "block_index": 316,
+    "previous_hash": "8d3c51c38d74769bc64fb55afd00554e73f95906d5718af4feeb62ffaaba3a71",
+    "block_hash": "5fc5179f17f441f759e9fe3f47323bde64e770433cd710655726fc3194827564",
+    "timestamp": 1788766926.0929575,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T07:42:06Z"
+    }
+  },
+  {
+    "block_index": 317,
+    "previous_hash": "5fc5179f17f441f759e9fe3f47323bde64e770433cd710655726fc3194827564",
+    "block_hash": "dc42342a2991ad5fae2ecb8a15a00b81d23ae3190bfd1412cc77ba91f36ca607",
+    "timestamp": 1788766926.112391,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T07:42:06Z"
+    }
+  },
+  {
+    "block_index": 318,
+    "previous_hash": "dc42342a2991ad5fae2ecb8a15a00b81d23ae3190bfd1412cc77ba91f36ca607",
+    "block_hash": "882a1896b20e5782903825a71a9874893b56db44735779c22fbc7548b95bc085",
+    "timestamp": 1788766926.1269662,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T07:42:06Z"
+    }
+  },
+  {
+    "block_index": 319,
+    "previous_hash": "882a1896b20e5782903825a71a9874893b56db44735779c22fbc7548b95bc085",
+    "block_hash": "d79461e8123ad1b002839c4d83dd6bebe7d4baaf2182651b7d2d3f281721590a",
+    "timestamp": 1788767093.0986867,
+    "target_id": "CASE-SIH-001",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario A - Clean",
+      "case_id": "CASE-SIH-001",
+      "timestamp_iso": "2026-09-07T07:44:53Z"
+    }
+  },
+  {
+    "block_index": 320,
+    "previous_hash": "d79461e8123ad1b002839c4d83dd6bebe7d4baaf2182651b7d2d3f281721590a",
+    "block_hash": "27c17b996995a9972e1379329dafbf2d56d85527cfa90bddf06ec69aee5af8ad",
+    "timestamp": 1788767093.1171227,
+    "target_id": "CASE-SIH-002",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario B - Tampered",
+      "case_id": "CASE-SIH-002",
+      "timestamp_iso": "2026-09-07T07:44:53Z"
+    }
+  },
+  {
+    "block_index": 321,
+    "previous_hash": "27c17b996995a9972e1379329dafbf2d56d85527cfa90bddf06ec69aee5af8ad",
+    "block_hash": "0ea1af4f24fe6b96beabf472a1ceeaf6ea22393c081c91520e83993bd8e1269e",
+    "timestamp": 1788767093.134798,
+    "target_id": "CASE-SIH-003",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario C - Mismatch",
+      "case_id": "CASE-SIH-003",
+      "timestamp_iso": "2026-09-07T07:44:53Z"
+    }
+  },
+  {
+    "block_index": 322,
+    "previous_hash": "0ea1af4f24fe6b96beabf472a1ceeaf6ea22393c081c91520e83993bd8e1269e",
+    "block_hash": "985799e6b587ddd776546dd38846b40df3189c6c8438d112285130838af1d1cb",
+    "timestamp": 1788767093.1487825,
+    "target_id": "CASE-SIH-004",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "SIH Demo Scenario D - Registry Down",
+      "case_id": "CASE-SIH-004",
+      "timestamp_iso": "2026-09-07T07:44:53Z"
+    }
+  },
+  {
+    "block_index": 323,
+    "previous_hash": "985799e6b587ddd776546dd38846b40df3189c6c8438d112285130838af1d1cb",
+    "block_hash": "2fc2ef9d9161ca1a06ce9ec8badf562cdbd4c7ea601a4b990b55ad6d8c72d2d2",
+    "timestamp": 1788780640.3701346,
+    "target_id": "CASE-20260907-9902DA",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-9902DA",
+      "timestamp_iso": "2026-09-07T11:30:40Z"
+    }
+  },
+  {
+    "block_index": 324,
+    "previous_hash": "2fc2ef9d9161ca1a06ce9ec8badf562cdbd4c7ea601a4b990b55ad6d8c72d2d2",
+    "block_hash": "4d93544d5d3a7f9cd838c55eac4333bd692c9941f8d6eb4ab0e17ff63fcabbd9",
+    "timestamp": 1788780640.388323,
+    "target_id": "CASE-20260907-995AA1",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-995AA1",
+      "timestamp_iso": "2026-09-07T11:30:40Z"
+    }
+  },
+  {
+    "block_index": 325,
+    "previous_hash": "4d93544d5d3a7f9cd838c55eac4333bd692c9941f8d6eb4ab0e17ff63fcabbd9",
+    "block_hash": "96e24d0d9938d462ec556bc0f5511861276761b3e82e749873f88797e2070ad1",
+    "timestamp": 1788781551.4360712,
+    "target_id": "CASE-20260907-FEC377",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-FEC377",
+      "timestamp_iso": "2026-09-07T11:45:51Z"
+    }
+  },
+  {
+    "block_index": 326,
+    "previous_hash": "96e24d0d9938d462ec556bc0f5511861276761b3e82e749873f88797e2070ad1",
+    "block_hash": "c8a84e3bd232768aa180f0ddadf14d4d2edf492e92ac643b55387835671ca89f",
+    "timestamp": 1788781551.5048664,
+    "target_id": "CASE-20260907-E33894",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-E33894",
+      "timestamp_iso": "2026-09-07T11:45:51Z"
+    }
+  },
+  {
+    "block_index": 327,
+    "previous_hash": "c8a84e3bd232768aa180f0ddadf14d4d2edf492e92ac643b55387835671ca89f",
+    "block_hash": "3e059c13590c7be4e70757ade2e61dc050300a54cb76007c6c2513af1a05391f",
+    "timestamp": 1788782606.1544466,
+    "target_id": "CASE-20260907-DAAB38",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-DAAB38",
+      "timestamp_iso": "2026-09-07T12:03:26Z"
+    }
+  },
+  {
+    "block_index": 328,
+    "previous_hash": "3e059c13590c7be4e70757ade2e61dc050300a54cb76007c6c2513af1a05391f",
+    "block_hash": "4fadbc7d898e3c0e639fdfb6758d1380e03cb165c75bf4092767bb47e2e329d4",
+    "timestamp": 1788782606.1964204,
+    "target_id": "CASE-20260907-38AA52",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-38AA52",
+      "timestamp_iso": "2026-09-07T12:03:26Z"
+    }
+  },
+  {
+    "block_index": 329,
+    "previous_hash": "4fadbc7d898e3c0e639fdfb6758d1380e03cb165c75bf4092767bb47e2e329d4",
+    "block_hash": "3cc164296a8f4a614ce7ae0b030f8d5114c7aeb1e933bf4e5a97203a64081491",
+    "timestamp": 1788793931.3365188,
+    "target_id": "CASE-20260907-195CB1",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-195CB1",
+      "timestamp_iso": "2026-09-07T15:12:11Z"
+    }
+  },
+  {
+    "block_index": 330,
+    "previous_hash": "3cc164296a8f4a614ce7ae0b030f8d5114c7aeb1e933bf4e5a97203a64081491",
+    "block_hash": "3a88e1a51e7d600bedb41c3111db40074c5d8d04841746563c02b4143f8ed3ac",
+    "timestamp": 1788793931.3535907,
+    "target_id": "CASE-20260907-43A250",
+    "event_type": "CASE_CREATED",
+    "evidence_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_version": "1.0.0",
+    "system_version": "1.0.0-phase12",
+    "metadata": {
+      "notes": "Standard Border Control Multi-Document Case",
+      "case_id": "CASE-20260907-43A250",
+      "timestamp_iso": "2026-09-07T15:12:11Z"
+    }
   }
 ]

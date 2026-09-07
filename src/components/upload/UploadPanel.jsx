@@ -4,22 +4,19 @@
  * Manages document ingestion including:
  *   - DropZone (drag & drop / Choose File)
  *   - Executive selected file preview card
- *   - Quick Sample document trigger (explicit user action)
- *   - Commanding "Run Verification" action button
+ *   - Backend-served sample document selector (fetches real sample image files from the backend)
+ *   - Commanding "Run Verification Pipeline" action button
  *
- * Adheres strictly to decoupled state architecture: triggers action via
- * useVerification actions without direct mutation.
- *
- * Phase 1: Passport OCR is wired via useOCRSubmit.
- * For other document types, a clear "not yet implemented" message is shown.
+ * NOTE: Strictly adheres to zero-frontend-mock architecture. All test sample images
+ * and verification data are fetched from and evaluated by the backend API.
  */
+import { useEffect, useState } from 'react';
 import { useVerification } from '../../state/verification/useVerification.js';
 import { getProfile } from '../../config/documentProfiles.js';
-import { DOCUMENT_TYPES } from '../../config/documentProfiles.js';
+import { DEFAULT_SAMPLE_OPTIONS } from '../../config/mockSampleOptions.js';
 import { SESSION_STATUS } from '../../state/verification/initialState.js';
 import { useOCRSubmit } from '../../services/useOCRSubmit.js';
 import DropZone from './DropZone.jsx';
-import SectionHeader from '../common/SectionHeader.jsx';
 import styles from './UploadPanel.module.css';
 
 export default function UploadPanel() {
@@ -27,12 +24,33 @@ export default function UploadPanel() {
   const { submitOCR, isSubmitting } = useOCRSubmit();
   const profile = getProfile(session.documentType);
 
+  const [sampleOptions, setSampleOptions] = useState(DEFAULT_SAMPLE_OPTIONS);
+  const [loadingSampleId, setLoadingSampleId] = useState(null);
+
   const isFileSelected  = session.status === SESSION_STATUS.DOCUMENT_SELECTED;
   const isSampleSelected= session.status === SESSION_STATUS.SAMPLE_SELECTED;
   const isProcessing    = [
     SESSION_STATUS.UPLOADING,
     SESSION_STATUS.PROCESSING,
   ].includes(session.status) || isSubmitting;
+
+  // Query available sample documents from backend on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadSampleOptions() {
+      try {
+        const res = await fetch('/api/v1/verification/sample/options');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) setSampleOptions(prev => ({ ...prev, ...data }));
+        }
+      } catch (err) {
+        console.debug('Failed to fetch sample options from backend:', err);
+      }
+    }
+    loadSampleOptions();
+    return () => { isMounted = false; };
+  }, []);
 
   /* ---------- Handlers ---------- */
 
@@ -50,102 +68,51 @@ export default function UploadPanel() {
   }
 
   /**
-   * Sample Format — loads the synthetic sample asset as a real File object.
-   * For Passport: fetches the synthetic test image from the backend tests directory
-   * (served via the Vite dev proxy or a static file server).
-   * For other document types: sets a sample_selected state (no real OCR).
+   * Fetch sample document image with static fallback if backend is offline.
    */
-  async function handleLoadSample() {
+  async function handleFetchSample(sample) {
+    const { url: sampleUrl, filename: fileName, id: sampleId, fallbackUrl } = sample;
     actions.clearError();
+    setLoadingSampleId(sampleId);
 
-    if (session.documentType === DOCUMENT_TYPES.PASSPORT) {
-      // Fetch the synthetic test passport image as a real File so it can go
-      // through the full OCR pipeline when "Verify Document" is clicked.
+    try {
+      let response = null;
       try {
-        const sampleUrl = '/api/v1/verification/sample/passport';
-        const response = await fetch(sampleUrl);
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const syntheticFile = new File([blob], 'Sample_Passport.jpg', { type: 'image/jpeg' });
-          actions.selectFile(syntheticFile);
-          return;
-        }
+        const res = await fetch(sampleUrl);
+        if (res.ok) response = res;
       } catch {
-        // Fall through to basic selectSample if the sample endpoint isn't available
+        // network issue
       }
-    } else if (session.documentType === DOCUMENT_TYPES.VISA) {
-      // Fetch the synthetic test visa image as a real File
-      try {
-        const sampleUrl = '/api/v1/verification/sample/visa';
-        const response = await fetch(sampleUrl);
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const syntheticFile = new File([blob], 'Sample_Visa.jpg', { type: 'image/jpeg' });
-          actions.selectFile(syntheticFile);
-          return;
+      if ((!response || !response.ok) && fallbackUrl) {
+        try {
+          const fbRes = await fetch(fallbackUrl);
+          if (fbRes.ok) response = fbRes;
+        } catch {
+          // ignore
         }
-      } catch {
-        // Fall through to basic selectSample if the sample endpoint isn't available
       }
-    } else if (session.documentType === DOCUMENT_TYPES.DRIVING_LICENSE) {
-      // Fetch the synthetic test driving license image as a real File
-      try {
-        const sampleUrl = '/api/v1/verification/sample/driving_license';
-        const response = await fetch(sampleUrl);
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const syntheticFile = new File([blob], 'Sample_Driving_License.jpg', { type: 'image/jpeg' });
-          actions.selectFile(syntheticFile);
-          return;
-        }
-      } catch {
-        // Fall through to basic selectSample if the sample endpoint isn't available
+      if (!response || !response.ok) {
+        throw new Error(`Unable to fetch sample image. Check backend status.`);
       }
-    } else if (session.documentType === DOCUMENT_TYPES.NATIONAL_ID) {
-      // Fetch the synthetic test national id image as a real File
-      try {
-        const sampleUrl = '/api/v1/verification/sample/national_id';
-        const response = await fetch(sampleUrl);
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const syntheticFile = new File([blob], 'Sample_National_ID.jpg', { type: 'image/jpeg' });
-          actions.selectFile(syntheticFile);
-          return;
-        }
-      } catch {
-        // Fall through to basic selectSample if the sample endpoint isn't available
-      }
-    } else if (session.documentType === DOCUMENT_TYPES.BORDER_PERMIT) {
-      // Fetch the synthetic test border permit image as a real File
-      try {
-        const sampleUrl = '/api/v1/verification/sample/border_permit';
-        const response = await fetch(sampleUrl);
+      const blob = await response.blob();
+      const fileObj = new File([blob], fileName || `sample_${session.documentType}.jpg`, {
+        type: blob.type || 'image/jpeg',
+      });
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const syntheticFile = new File([blob], 'Sample_Border_Permit.jpg', { type: 'image/jpeg' });
-          actions.selectFile(syntheticFile);
-          return;
-        }
-      } catch {
-        // Fall through to basic selectSample if the sample endpoint isn't available
-      }
+      actions.selectFile(fileObj);
+    } catch (err) {
+      console.error('Failed to load sample from server:', err);
+      actions.setError(`Unable to load sample document: ${err.message}`);
+    } finally {
+      setLoadingSampleId(null);
     }
-
-    // Default: mark as sample_selected (no OCR will run until real file submitted)
-    actions.selectSample(
-      `Sample_${profile.label.replace(/\s+/g, '_')}.jpg`,
-      `sample_${session.documentType}`,
-    );
   }
 
   /**
-   * Verify — Phase 1: submits the selected file to the OCR backend.
-   * Transitions: UPLOADING → PROCESSING → COMPLETED / ERROR
+   * Verify — submits the selected file to the backend verification pipeline.
    */
   async function handleVerify() {
     await submitOCR(session.file, session.documentType);
@@ -161,17 +128,30 @@ export default function UploadPanel() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
 
-  /**
-   * Determine the processing status label for the spinner indicator.
-   */
   function getProcessingLabel() {
     if (session.status === SESSION_STATUS.UPLOADING) {
       return { title: 'TRANSMITTING DOCUMENT...', sub: 'Sending to OCR pipeline' };
     }
-    return { title: 'ANALYZING CREDENTIAL...', sub: 'Executing optical text recognition' };
+    return { title: 'ANALYZING CREDENTIAL...', sub: 'Executing optical recognition & forensic analysis' };
   }
 
   const processingLabel = getProcessingLabel();
+
+  const docType = session.documentType;
+  const canonicalDocType = (
+    docType === 'drivingLicense' ? 'driving_license' :
+    docType === 'nationalId' ? 'national_id' :
+    docType === 'borderPermit' ? 'border_permit' : docType
+  );
+
+  // Current doc type samples from backend options (or default catalog fallback)
+  const currentSamples = (
+    (Array.isArray(sampleOptions[docType]) && sampleOptions[docType].length > 0 ? sampleOptions[docType] : null) ||
+    (Array.isArray(sampleOptions[canonicalDocType]) && sampleOptions[canonicalDocType].length > 0 ? sampleOptions[canonicalDocType] : null) ||
+    DEFAULT_SAMPLE_OPTIONS[docType] ||
+    DEFAULT_SAMPLE_OPTIONS[canonicalDocType] ||
+    []
+  );
 
   return (
     <div className={styles.section} aria-label="Document ingestion">
@@ -231,7 +211,7 @@ export default function UploadPanel() {
               <p className={styles.fileName} title={session.fileName}>{session.fileName}</p>
               <div className={styles.fileTags}>
                 <span className={styles.fileBadge}>
-                  {isSampleSelected ? 'SAMPLE ARTIFACT' : `${profile.label.toUpperCase()}`}
+                  {isSampleSelected ? 'SAMPLE CREDENTIAL' : `${profile.label.toUpperCase()}`}
                 </span>
                 {session.file?.size && (
                   <span className={styles.fileSize}>
@@ -268,24 +248,47 @@ export default function UploadPanel() {
         </div>
       )}
 
-      {/* Sample Format trigger — visible when in standby */}
-      {!hasFile && !isProcessing && (
-        <div className={styles.sampleRow}>
-          <span className={styles.sampleLabel}>Automated test vectors:</span>
-          <button
-            className={styles.sampleBtn}
-            onClick={handleLoadSample}
-            type="button"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Load Sample {profile.label}</span>
-          </button>
+      {/* ── Sample Documents Selector (Loaded from Backend) ── */}
+      {!hasFile && !isProcessing && currentSamples.length > 0 && (
+        <div className={styles.mockSection}>
+          <div className={styles.mockHeader}>
+            <span className={styles.mockTitle}>Sample Test Documents (Backend)</span>
+            <span className={styles.mockSubtitle}>Select a test document to fetch from backend and run verification:</span>
+          </div>
+
+          <div className={styles.mockGrid}>
+            {currentSamples.map((sample) => {
+              const isFraud = sample.id?.includes('fake') || sample.badge?.includes('TAMPERED');
+              const isLoadingThis = loadingSampleId === sample.id;
+
+              return (
+                <button
+                  key={sample.id}
+                  type="button"
+                  className={`${styles.mockCard} ${isFraud ? styles.mockCardFraud : styles.mockCardGenuine}`}
+                  onClick={() => handleFetchSample(sample)}
+                  disabled={Boolean(loadingSampleId)}
+                  title={`Load ${sample.label} from backend`}
+                >
+                  <div className={styles.mockCardTop}>
+                    <span className={styles.mockCardLabel}>
+                      {isLoadingThis ? 'Downloading from backend...' : sample.label}
+                    </span>
+                    <span className={`${styles.mockBadge} ${isFraud ? styles.badgeFraud : styles.badgeGenuine}`}>
+                      {sample.badge}
+                    </span>
+                  </div>
+                  {sample.description && (
+                    <p className={styles.mockCardDesc}>{sample.description}</p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Verify button — shown when file or sample is selected */}
+      {/* Verify button — shown when file is selected */}
       {hasFile && !isProcessing && (
         <button
           className={styles.verifyBtn}
@@ -303,5 +306,3 @@ export default function UploadPanel() {
     </div>
   );
 }
-
-

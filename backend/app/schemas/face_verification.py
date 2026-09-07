@@ -212,6 +212,14 @@ class FaceVerificationResponse(BaseModel):
     anti_spoof: AntiSpoofResult = Field(..., description="Primary deep PAD evaluation (MiniFASNet)")
     secondary_pad: SecondaryPADSchema = Field(..., description="Secondary defensive optical telemetry")
     face_match: FaceMatchResult = Field(..., description="Facial vector comparison evaluation (ArcFace)")
+    document_face_image: Optional[str] = Field(
+        default=None,
+        description="Base64-encoded JPEG crop of the detected document face photo",
+    )
+    live_face_image: Optional[str] = Field(
+        default=None,
+        description="Base64-encoded JPEG crop of the live camera face",
+    )
     summary: str = Field(
         ...,
         description="Officer-facing summary statement explaining the biometric result",

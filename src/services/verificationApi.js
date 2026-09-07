@@ -28,7 +28,7 @@ import { API_BASE_URL } from '../config/appConfig.js';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30_000,
+  timeout: 120_000,
   headers: {
     Accept: 'application/json',
   },
@@ -54,6 +54,10 @@ function formatError(err, fallbackMessage = 'An unexpected error occurred. Pleas
   if (axios.isAxiosError(err)) {
     if (!err.response) {
       return 'Verification service unavailable. Please check your connection and try again.';
+    }
+    const backendDetail = err.response.data?.detail;
+    if (typeof backendDetail === 'string' && backendDetail.trim()) {
+      return backendDetail.trim();
     }
     switch (err.response.status) {
       case 400: return 'Invalid document submission. Please check your file and try again.';

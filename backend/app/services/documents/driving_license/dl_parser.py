@@ -136,11 +136,17 @@ def parse_driving_license(
                 result.dob = DLField(value=norm_dob, confidence=conf, bbox=bbox, raw=m_dob.group(1))
                 break
 
-        if clean_upper in ("DOB", "D.O.B", "DOB:", "DATE OF BIRTH") and idx + 1 < len(lines):
-            next_text = lines[idx + 1][0]
-            norm_dob = normalize_dl_date(next_text)
-            if norm_dob:
-                result.dob = DLField(value=norm_dob, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=next_text)
+        if any(kw in clean_upper for kw in ("DOB", "D.O.B", "DATE OF BIRTH", "DATE OFBIRTH", "BIRTH DATE")):
+            # Check up to 3 lines forward for date
+            for look_ahead in range(1, min(4, len(lines) - idx)):
+                candidate_text = lines[idx + look_ahead][0]
+                m_dt = re.search(r"(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})", candidate_text)
+                if m_dt:
+                    norm_dob = normalize_dl_date(m_dt.group(1))
+                    if norm_dob:
+                        result.dob = DLField(value=norm_dob, confidence=lines[idx + look_ahead][1], bbox=lines[idx + look_ahead][2], raw=candidate_text)
+                        break
+            if result.dob.value:
                 break
 
     # ── Field 3: Name ────────────────────────────────────────────────────────
@@ -148,22 +154,22 @@ def parse_driving_license(
         clean_upper = text.upper()
         # Labeled Name
         m_name = re.search(
-            r"(?:NAME|HOLDER(?:'S)?\s*NAME|BEARER)\s*[:.\-]?\s*([A-Z\s]{3,40})",
+            r"(?:NAME|HOLDER(?:'S)?\s*NAME|BEARER)\s*[:.\-]?\s*([A-Z\s]{2,40})",
             clean_upper,
         )
         if m_name and not result.name.value:
             candidate = m_name.group(1).strip()
             # Avoid picking up labels
-            if candidate and not any(kw in candidate for kw in ("DATE", "DOB", "VALID", "FATHER", "S/O", "ADDRESS")):
+            if candidate and not any(kw in candidate for kw in ("DATE", "DOB", "VALID", "FATHER", "S/O", "ADDRESS", "INDIAN")):
                 norm_name = normalize_dl_text(candidate)
-                if norm_name and len(norm_name) >= 3:
+                if norm_name and len(norm_name) >= 2:
                     result.name = DLField(value=norm_name, confidence=conf, bbox=bbox, raw=candidate)
                     break
 
-        if clean_upper in ("NAME", "NAME:", "HOLDER NAME", "HOLDER'S NAME:") and idx + 1 < len(lines):
+        if any(clean_upper == kw for kw in ("NAME", "NAME:", "HOLDER NAME", "HOLDER NAME:", "HOLDER'S NAME:", "BEARER NAME:")) and idx + 1 < len(lines):
             next_text = lines[idx + 1][0]
             norm_name = normalize_dl_text(next_text)
-            if norm_name and len(norm_name) >= 3 and not any(kw in norm_name for kw in ("DOB", "VALID", "FATHER", "ADDRESS")):
+            if norm_name and len(norm_name) >= 2 and not any(kw in norm_name for kw in ("DOB", "VALID", "FATHER", "ADDRESS", "INDIAN")):
                 result.name = DLField(value=norm_name, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=next_text)
                 break
 
@@ -171,12 +177,11 @@ def parse_driving_license(
     if not result.name.value:
         for idx, (text, conf, bbox) in enumerate(lines):
             clean_upper = text.upper()
-            if "S/O" in clean_upper or "D/O" in clean_upper or "W/O" in clean_upper:
-                # Name might be on the previous line
+            if "S/O" in clean_upper or "D/O" in clean_upper or "W/O" in clean_upper or "SON/DAUGHTER" in clean_upper:
                 if idx > 0:
                     prev_text = lines[idx - 1][0]
                     norm_prev = normalize_dl_text(prev_text)
-                    if norm_prev and not any(kw in norm_prev for kw in ("LICENCE", "UNION", "INDIA", "TRANSPORT", "DL")):
+                    if norm_prev and not any(kw in norm_prev for kw in ("LICENCE", "UNION", "INDIA", "TRANSPORT", "DL", "DATE")):
                         result.name = DLField(value=norm_prev, confidence=lines[idx - 1][1], bbox=lines[idx - 1][2], raw=prev_text)
                         break
 
@@ -184,9 +189,9 @@ def parse_driving_license(
     for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper()
 
-        # Expiry / Valid Till
+        # Expiry / Valid Till / Validity (NT)
         m_expiry = re.search(
-            r"(?:VALID\s*(?:TILL|UPTO|UNTIL|TO)|EXPIRY(?:\s*DATE)?)\s*[:.\-]?\s*([0-9A-Za-z\/\.\-]+)",
+            r"(?:VALID\s*(?:TILL|UPTO|UNTIL|TO)|VALIDITY\s*(?:\(NT\)|\(TR\))?|EXPIRY(?:\s*DATE)?)\s*[:.\-]?\s*([0-9A-Za-z\/\.\-]+)",
             clean_upper,
         )
         if m_expiry and not result.valid_to.value:
@@ -195,9 +200,21 @@ def parse_driving_license(
                 result.valid_to = DLField(value=norm_exp, confidence=conf, bbox=bbox, raw=m_expiry.group(1))
                 result.expiry = result.valid_to
 
+        if any(kw in clean_upper for kw in ("VALID TILL", "VALIDITY (NT)", "VALIDITY(NT)", "VALID UPTO", "VALID UNTIL", "EXPIRY")) and not result.valid_to.value:
+            # Check up to 4 lines forward for date
+            for look_ahead in range(1, min(5, len(lines) - idx)):
+                candidate_text = lines[idx + look_ahead][0]
+                m_dt = re.search(r"(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})", candidate_text)
+                if m_dt:
+                    norm_exp = normalize_dl_date(m_dt.group(1))
+                    if norm_exp:
+                        result.valid_to = DLField(value=norm_exp, confidence=lines[idx + look_ahead][1], bbox=lines[idx + look_ahead][2], raw=candidate_text)
+                        result.expiry = result.valid_to
+                        break
+
         # Valid From / Date of Issue
         m_doi = re.search(
-            r"(?:VALID\s*FROM|ISSUE\s*DATE|DATE\s*OF\s*ISSUE|DOI)\s*[:.\-]?\s*([0-9A-Za-z\/\.\-]+)",
+            r"(?:VALID\s*FROM|ISSUE\s*DATE|DATE\s*OF\s*(?:FIRST\s*)?ISSUE|DOI)\s*[:.\-]?\s*([0-9A-Za-z\/\.\-]+)",
             clean_upper,
         )
         if m_doi and not result.valid_from.value:
@@ -206,11 +223,36 @@ def parse_driving_license(
                 result.valid_from = DLField(value=norm_doi, confidence=conf, bbox=bbox, raw=m_doi.group(1))
                 result.issuedDate = result.valid_from
 
+        if any(kw in clean_upper for kw in ("ISSUE DATE", "ISSUEDATE", "DATE OF ISSUE", "DATE OF FIRST ISSUE", "VALID FROM")) and not result.valid_from.value:
+            for look_ahead in range(1, min(5, len(lines) - idx)):
+                candidate_text = lines[idx + look_ahead][0]
+                m_dt = re.search(r"(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})", candidate_text)
+                if m_dt:
+                    norm_doi = normalize_dl_date(m_dt.group(1))
+                    if norm_doi:
+                        result.valid_from = DLField(value=norm_doi, confidence=lines[idx + look_ahead][1], bbox=lines[idx + look_ahead][2], raw=candidate_text)
+                        result.issuedDate = result.valid_from
+                        break
+
+    # Date Chronology Resolution: If valid_to is <= valid_from or equal, find the future date
+    if result.valid_from.value and (not result.valid_to.value or result.valid_to.value <= result.valid_from.value):
+        found_dates = []
+        for text, conf, bbox in lines:
+            for m in re.finditer(r"\b(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b", text):
+                nd = normalize_dl_date(m.group(1))
+                if nd and nd > result.valid_from.value:
+                    found_dates.append((nd, conf, bbox, m.group(1)))
+        if found_dates:
+            # Pick latest future date as valid_to
+            found_dates.sort(key=lambda x: x[0], reverse=True)
+            result.valid_to = DLField(value=found_dates[0][0], confidence=found_dates[0][1], bbox=found_dates[0][2], raw=found_dates[0][3])
+            result.expiry = result.valid_to
+
     # ── Field 5: Blood Group ─────────────────────────────────────────────────
     for text, conf, bbox in lines:
         clean_upper = text.upper()
         m_bg = re.search(
-            r"(?:BLOOD\s*(?:GRP|GROUP)?|BG)\s*[:.\-]?\s*([ABO][+-]|AB[+-]|O\s*\+VE|B\s*\+VE|A\s*\+VE)",
+            r"(?:BLOOD\s*(?:GRP|GROUP)?|BG)\s*[:.\-]?\s*([A-Z0-9\+\-]+)",
             clean_upper,
         )
         if m_bg and not result.blood_group.value:

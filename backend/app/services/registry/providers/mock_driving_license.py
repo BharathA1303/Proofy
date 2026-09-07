@@ -45,6 +45,68 @@ _MOCK_DL_RECORDS: dict[str, dict] = {
         "blood_group": "O+",
         "vehicle_classes": "LMV, MCWG",
     },
+    # Genuine User Driving License: BHARATH A (Government of Tamil Nadu)
+    "TN0520250014128": {
+        "document_number": "TN0520250014128",
+        "registry_document_status": "ACTIVE",
+        "name": "BHARATH A",
+        "date_of_birth": "2007-03-13",
+        "expiry_date": "2047-03-12",
+        "issuing_authority": "GOVERNMENT OF TAMIL NADU",
+        "blood_group": "A1B+",
+        "vehicle_classes": "LMV, MCWG",
+    },
+    "TN05 20250014128": {
+        "document_number": "TN05 20250014128",
+        "registry_document_status": "ACTIVE",
+        "name": "BHARATH A",
+        "date_of_birth": "2007-03-13",
+        "expiry_date": "2047-03-12",
+        "issuing_authority": "GOVERNMENT OF TAMIL NADU",
+        "blood_group": "A1B+",
+        "vehicle_classes": "LMV, MCWG",
+    },
+    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
+    "DL-0420230012345": {
+        "document_number": "DL-0420230012345",
+        "registry_document_status": "ACTIVE",
+        "name": "PRIYA SUNDAR",
+        "date_of_birth": "1994-03-22",
+        "expiry_date": "2034-03-21",
+        "issuing_authority": "RTO DELHI CENTRAL",
+        "blood_group": "B+",
+        "vehicle_classes": "MCWG, LMV",
+    },
+    "DL0420230012345": {
+        "document_number": "DL0420230012345",
+        "registry_document_status": "ACTIVE",
+        "name": "PRIYA SUNDAR",
+        "date_of_birth": "1994-03-22",
+        "expiry_date": "2034-03-21",
+        "issuing_authority": "RTO DELHI CENTRAL",
+        "blood_group": "B+",
+        "vehicle_classes": "MCWG, LMV",
+    },
+    "DL-0120180099887": {
+        "document_number": "DL-0120180099887",
+        "registry_document_status": "REVOKED",
+        "name": "KABIR MEHTA",
+        "date_of_birth": "1986-07-14",
+        "expiry_date": "2038-07-13",
+        "issuing_authority": "RTO MUMBAI WEST",
+        "blood_group": "O+",
+        "vehicle_classes": "MCWG, LMV",
+    },
+    "DL0120180099887": {
+        "document_number": "DL0120180099887",
+        "registry_document_status": "REVOKED",
+        "name": "KABIR MEHTA",
+        "date_of_birth": "1986-07-14",
+        "expiry_date": "2038-07-13",
+        "issuing_authority": "RTO MUMBAI WEST",
+        "blood_group": "O+",
+        "vehicle_classes": "MCWG, LMV",
+    },
     # Expired DL
     "TESTDLEXPIRED001": {
         "document_number": "TESTDLEXPIRED001",
@@ -131,6 +193,8 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
 
         doc_num_provenance = request.document_number
         doc_num = doc_num_provenance.value if doc_num_provenance else None
+        if not doc_num and request.traveler:
+            doc_num = getattr(request.traveler, "licenseNumber", None) or getattr(request.traveler, "docNumber", None)
         lookup_key = (doc_num or "").strip().upper()
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
@@ -145,7 +209,17 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
         if lookup_key == "TESTDLUNAVAIL001":
             raise RegistryProviderUnavailable(f"Mock driving license registry unavailable for {lookup_key}")
 
-        # NOT FOUND
+        # NOT FOUND check (support space/hyphen variation e.g. "TN05 2025..." vs "TN052025..." or "DL-04...")
+        if lookup_key not in _MOCK_DL_RECORDS:
+            compact = lookup_key.replace(" ", "").replace("-", "")
+            if compact in _MOCK_DL_RECORDS:
+                lookup_key = compact
+            else:
+                for k in _MOCK_DL_RECORDS:
+                    if k.replace(" ", "").replace("-", "") == compact:
+                        lookup_key = k
+                        break
+
         if not lookup_key or lookup_key not in _MOCK_DL_RECORDS:
             return self._build_response(
                 request=request,

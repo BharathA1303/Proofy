@@ -38,6 +38,61 @@ logger = logging.getLogger(__name__)
 _MOCK_LATENCY_MS = 50.0
 
 _MOCK_NID_RECORDS: dict[str, dict] = {
+    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
+    "847291038473": {
+        "document_number": "847291038473",
+        "registry_document_status": "ACTIVE",
+        "name": "SNEHA PATEL",
+        "date_of_birth": "1992-09-18",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "FEMALE",
+        "address": "42 BAKER STREET, NEW DELHI 110001",
+    },
+    "8472 9103 8473": {
+        "document_number": "847291038473",
+        "registry_document_status": "ACTIVE",
+        "name": "SNEHA PATEL",
+        "date_of_birth": "1992-09-18",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "FEMALE",
+        "address": "42 BAKER STREET, NEW DELHI 110001",
+    },
+    "XXXX XXXX 8473": {
+        "document_number": "847291038473",
+        "registry_document_status": "ACTIVE",
+        "name": "SNEHA PATEL",
+        "date_of_birth": "1992-09-18",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "FEMALE",
+        "address": "42 BAKER STREET, NEW DELHI 110001",
+    },
+    "654123987101": {
+        "document_number": "654123987101",
+        "registry_document_status": "REVOKED",
+        "name": "TARIQ AHMED",
+        "date_of_birth": "1980-04-05",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "MALE",
+        "address": "15 MARINE DRIVE, MUMBAI 400020",
+    },
+    "6541 2398 7101": {
+        "document_number": "654123987101",
+        "registry_document_status": "REVOKED",
+        "name": "TARIQ AHMED",
+        "date_of_birth": "1980-04-05",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "MALE",
+        "address": "15 MARINE DRIVE, MUMBAI 400020",
+    },
+    "XXXX XXXX 7101": {
+        "document_number": "654123987101",
+        "registry_document_status": "REVOKED",
+        "name": "TARIQ AHMED",
+        "date_of_birth": "1980-04-05",
+        "issuing_authority": "Unique Identification Authority of India",
+        "gender": "MALE",
+        "address": "15 MARINE DRIVE, MUMBAI 400020",
+    },
     # Active valid National ID matching standard test sample
     "TESTNID001": {
         "document_number": "TESTNID001",

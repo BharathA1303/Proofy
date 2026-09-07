@@ -67,6 +67,40 @@ _MOCK_LATENCY_MS = 8.0   # Fixed latency for test predictability
 
 _MOCK_RECORDS: dict[str, dict] = {
 
+    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
+    "Z1234567": {
+        "document_number": "Z1234567",
+        "registry_document_status": "ACTIVE",
+        "name": "AARAV SHARMA",
+        "date_of_birth": "1990-05-15",
+        "nationality": "IND",
+        "expiry_date": "2030-01-09",
+        "issuing_authority": "REGIONAL PASSPORT OFFICE DELHI",
+        "gender": "M",
+    },
+    "Z7654321": {
+        "document_number": "Z7654321",
+        "registry_document_status": "REVOKED",
+        "name": "VIKRAM MALHOTRA",
+        "date_of_birth": "1982-11-20",
+        "nationality": "IND",
+        "expiry_date": "2028-04-11",
+        "issuing_authority": "REGIONAL PASSPORT OFFICE MUMBAI",
+        "gender": "M",
+    },
+
+    # Synthetic Test Passport (matches create_synthetic_passport.py & sample_passport.jpg)
+    "T9876543": {
+        "document_number": "T9876543",
+        "registry_document_status": "ACTIVE",
+        "name": "TEST USER",
+        "date_of_birth": "1985-06-15",
+        "nationality": "IND",
+        "expiry_date": "2029-12-31",
+        "issuing_authority": "SYNTHETIC TEST AUTHORITY",
+        "gender": "M",
+    },
+
     # RECORD A: Active, all fields correctly populated
     "TESTPASS001": {
         "document_number": "TESTPASS001",

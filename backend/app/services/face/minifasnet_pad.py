@@ -188,22 +188,33 @@ class MiniFASNetPAD(PresentationAttackDetector):
 
             p_spoof, p_real, p_bg = self._predict_crop(patch)
 
-            # Calibrated liveness probability (class 1 is bona fide human)
-            score = round(float(p_real), 4)
+            # When evaluating a detected face region, normalize probability across bona fide vs presentation attack:
+            face_prob_sum = p_real + p_spoof
+            if face_prob_sum > 1e-6:
+                p_bona_fide = p_real / face_prob_sum
+                p_attack = p_spoof / face_prob_sum
+            else:
+                p_bona_fide = p_real
+                p_attack = p_spoof
+
+            # Calibrated liveness probability (bona fide human presence)
+            score = round(float(p_bona_fide), 4)
 
             details = {
-                "p_genuine": round(p_real, 4),
-                "p_spoof": round(p_spoof, 4),
+                "p_genuine": round(float(p_bona_fide), 4),
+                "p_spoof": round(float(p_attack), 4),
+                "raw_p_real": round(p_real, 4),
+                "raw_p_spoof": round(p_spoof, 4),
                 "p_background": round(p_bg, 4),
                 "threshold": settings.ANTI_SPOOF_THRESHOLD,
             }
 
-            if score >= settings.ANTI_SPOOF_THRESHOLD:
+            if score >= settings.ANTI_SPOOF_THRESHOLD and p_attack < 0.50:
                 status = "pass"
                 explanation = f"Bona fide human presence verified by MiniFASNet (liveness score: {score:.3f})"
-            elif score <= settings.ANTI_SPOOF_SUSPECT_THRESHOLD or p_spoof > 0.50:
+            elif score <= settings.ANTI_SPOOF_SUSPECT_THRESHOLD or p_attack >= 0.50:
                 status = "suspected_spoof"
-                explanation = f"Presentation attack detected by MiniFASNet (spoof probability: {p_spoof:.3f})"
+                explanation = f"Presentation attack detected by MiniFASNet (spoof probability: {p_attack:.3f})"
             else:
                 status = "inconclusive"
                 explanation = f"Presentation attack assessment inconclusive (liveness score: {score:.3f})"

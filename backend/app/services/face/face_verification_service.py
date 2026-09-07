@@ -23,12 +23,24 @@ Design:
 """
 from __future__ import annotations
 
+import base64
 import logging
 import time
 from typing import List, Optional
 
 import cv2
 import numpy as np
+
+def _crop_to_b64(crop_np: Optional[np.ndarray]) -> Optional[str]:
+    if crop_np is None or not isinstance(crop_np, np.ndarray) or crop_np.size == 0:
+        return None
+    try:
+        success, buf = cv2.imencode(".jpg", crop_np, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        if success:
+            return f"data:image/jpeg;base64,{base64.b64encode(buf.tobytes()).decode('ascii')}"
+    except Exception:
+        pass
+    return None
 
 from app.core.config import settings
 from app.schemas.face_verification import (
@@ -246,7 +258,9 @@ class FaceVerificationService:
             )
 
         try:
-            doc_embedding = self.embedding_model.get_embedding(doc_aligned)
+            # Enhance document facial contrast and suppress print/scanning noise for robust cross-domain matching
+            doc_aligned_enh = self.aligner.enhance_document_face(doc_aligned)
+            doc_embedding = self.embedding_model.get_embedding(doc_aligned_enh)
             live_embedding = self.embedding_model.get_embedding(live_aligned)
         except Exception as exc:
             logger.error("Embedding generation failed: %s", exc)
@@ -327,12 +341,14 @@ class FaceVerificationService:
             face_match=FaceMatchResult(
                 status=match_result.status,
                 similarity=match_result.similarity,
-                similarity_score=match_result.similarity,
+                similarity_score=match_result.confidence_score if match_result.confidence_score is not None else match_result.similarity,
                 threshold=match_result.threshold,
                 embedding_model=self.embedding_model.model_info().get("model_name", "ArcFace-w600k_r50"),
                 embedding_dimension=self.embedding_model.get_embedding_dimension(),
                 explanation=match_result.explanation,
             ),
+            document_face_image=_crop_to_b64(doc_crop),
+            live_face_image=_crop_to_b64(live_crop),
             summary=summary,
         )
 

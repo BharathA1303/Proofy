@@ -33,7 +33,31 @@ logger = logging.getLogger(__name__)
 _MOCK_LATENCY_MS = 50.0
 
 _MOCK_VISA_RECORDS: dict[str, dict] = {
-    # Active valid visa matching test sample
+    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
+    "V1002003": {
+        "document_number": "V1002003",
+        "registry_document_status": "ACTIVE",
+        "name": "AARAV SHARMA",
+        "date_of_birth": "1990-05-15",
+        "nationality": "IND",
+        "expiry_date": "2028-01-31",
+        "issuing_authority": "CONSULAR SECTION DELHI",
+        "gender": "M",
+        "passport_number": "Z1234567",
+        "visa_type": "BUSINESS",
+    },
+    "V7008009": {
+        "document_number": "V7008009",
+        "registry_document_status": "REVOKED",
+        "name": "VIKRAM MALHOTRA",
+        "date_of_birth": "1982-11-20",
+        "nationality": "IND",
+        "expiry_date": "2027-05-09",
+        "issuing_authority": "CONSULAR SECTION MUMBAI",
+        "gender": "M",
+        "passport_number": "Z7654321",
+        "visa_type": "TOURIST",
+    },
     "TESTVISA001": {
         "document_number": "TESTVISA001",
         "registry_document_status": "ACTIVE",

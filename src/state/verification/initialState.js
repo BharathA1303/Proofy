@@ -94,6 +94,13 @@ export function createInitialSession(documentType = DOCUMENT_TYPES.PASSPORT) {
 
     status: SESSION_STATUS.STANDBY,
 
+    /** Active workflow stage (1: Intake & Selection, 2: Officer Inspection, 3: Live Face Match, 4: Final Clearance) */
+    workflowStage: 1,
+    maxUnlockedStage: 1,
+    isMockVector: false,
+    capturedLiveImage: null,
+    documentFaceImage: null,
+
     /** Active pipeline milestone: 0 = standby, 1 = extraction, 2 = validation, 3 = forensics, 4 = biometrics, 5 = registryRisk */
     activeMilestone: 0,
     milestones: {

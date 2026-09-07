@@ -428,3 +428,33 @@ def test_risk_normalizer_all_modules_absent():
     assert all(a.status == "not_run" for a in availability)
     # All evidence items should be unavailable
     assert all(not e.available for e in evidence)
+
+
+def test_normalize_validation_with_field_consistency_item_objects():
+    """Verify that Pydantic FieldConsistencyItem instances inside fields don't raise AttributeError."""
+    from app.schemas.validation import FieldConsistencyItem
+
+    raw = {
+        "status": "warning",
+        "summary": "VIZ/MRZ mismatch detected.",
+        "checks": {
+            "viz_mrz_consistency": {
+                "status": "warning",
+                "fields": {
+                    "date_of_birth": FieldConsistencyItem(
+                        viz="1990-05-15",
+                        mrz="1990-05-16",
+                        match=False,
+                        status="mismatch",
+                        message="DOB mismatch between VIZ and MRZ",
+                    )
+                }
+            }
+        }
+    }
+    items = normalize_validation(raw)
+    dob_mismatches = [i for i in items if i.signal == "viz_mrz_dob_mismatch"]
+    assert len(dob_mismatches) == 1
+    assert dob_mismatches[0].status == EvidenceStatus.MISMATCH
+    assert "1990-05-15" in dob_mismatches[0].explanation
+
