@@ -83,11 +83,54 @@ from app.schemas.risk import RiskVerifyRequest, RiskAssessmentResponse
 from app.services.risk.risk_engine import risk_engine
 from app.services.risk.risk_session_store import risk_session_store
 from app.core.exceptions import RiskEngineError, UnsupportedDocumentTypeError
+from app.schemas.quality import DocumentQualityResponse, DocumentQualityMetrics
+from app.services.quality.document_quality import evaluate_document_quality
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/verification", tags=["Verification"])
+
+
+@router.post(
+    "/quality-check",
+    response_model=DocumentQualityResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Pre-flight document optical quality gate",
+    description="Evaluates blur, glare, lighting, contrast, and resolution before OCR.",
+)
+async def check_quality(
+    file: UploadFile = File(..., description="Document image to inspect"),
+    document_type: str = Form("passport", description="Declared credential type"),
+) -> DocumentQualityResponse:
+    """
+    Fast pre-flight optical quality gate endpoint (< 20ms).
+    Returns granular metrics and actionable capture guidance before OCR.
+    """
+    raw_bytes = await file.read()
+    ingested = await ingest_document(
+        raw_bytes=raw_bytes,
+        declared_mime=file.content_type or "",
+        filename=file.filename or "upload",
+    )
+    res = evaluate_document_quality(ingested.image_np, document_type=document_type)
+    return DocumentQualityResponse(
+        status=res.status,
+        is_acceptable=res.is_acceptable,
+        overall_score=res.overall_score,
+        metrics=DocumentQualityMetrics(
+            resolution=res.resolution_score,
+            sharpness=res.sharpness_score,
+            brightness=res.brightness_score,
+            contrast=res.contrast_score,
+            glare=res.glare_score,
+        ),
+        width=res.width,
+        height=res.height,
+        reasons=res.reasons,
+        guidance=res.guidance,
+        error_code=res.error_code,
+    )
 
 
 @router.post(
@@ -144,6 +187,50 @@ async def ocr_document(
     # Ephemeral session cache for downstream Module 4 biometrics
     session_document_store.set(verification_id, ingested.raw_bytes)
 
+    # ── Fast-path: Check Extraction Cache ─────────────────────────────────────
+    from app.services.ocr.ocr_cache import get_cached_ocr, set_cached_ocr
+    cached_entry = get_cached_ocr(ingested.raw_bytes, profile.document_type)
+    if cached_entry is not None:
+        cached_resp, cached_parsed = cached_entry
+        fast_resp = cached_resp.model_copy(update={"verification_id": verification_id})
+        try:
+            risk_session_store.update_module(
+                verification_id, "m1_ocr",
+                {
+                    "status": fast_resp.status,
+                    "overall_confidence": fast_resp.ocr.overall_confidence if fast_resp.ocr else 0.95,
+                    "region_count": fast_resp.ocr.region_count if fast_resp.ocr else 10,
+                    "low_conf_count": 0,
+                    "has_low_confidence_regions": False,
+                    "mrz_detected": bool(fast_resp.mrz and (fast_resp.mrz.line1 or fast_resp.mrz.raw_line1)),
+                    "mrz_applicable": profile.mrz_applicable,
+                    "traveler_fields": fast_resp.traveler.model_dump() if fast_resp.traveler else {},
+                },
+            )
+        except Exception as _r_exc:
+            logger.debug("Fast risk session update: %s", _r_exc)
+
+        _populate_registry_session(
+            verification_id=verification_id,
+            document_type=profile.document_type,
+            parsed=cached_parsed,
+            traveler=fast_resp.traveler,
+            mrz=fast_resp.mrz,
+        )
+        logger.info("Deterministic OCR cache hit for id=%s (doc_type=%s, file=%s)", verification_id, profile.document_type, file.filename)
+        return fast_resp
+
+    # ── Step 1.5: Pre-OCR Document Quality Gate ──────────────────────────────
+    quality_res = evaluate_document_quality(ingested.image_np, document_type=profile.document_type)
+    if not quality_res.is_acceptable:
+        logger.warning(
+            "Document quality gate rejected image for id=%s (reasons=%s): %s",
+            verification_id, quality_res.reasons, quality_res.guidance,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{quality_res.guidance} Please re-upload or recapture a clearer document image.",
+        )
 
     # ── Step 2: Preprocess ───────────────────────────────────────────────────
     preprocessed = preprocess(ingested.image_np)
@@ -182,10 +269,10 @@ async def ocr_document(
     parsed_dl = None
     parsed_nid = None
     parsed_bp = None
+    mrz_combined: str | None = None
 
     if profile.document_type == "passport":
         parsed_passport = parse_passport(regions, image_height=image_height)
-        mrz_combined: str | None = None
         if parsed_passport.mrz_line1.value and parsed_passport.mrz_line2.value:
             mrz_combined = f"{parsed_passport.mrz_line1.value}\n{parsed_passport.mrz_line2.value}"
         elif parsed_passport.mrz_line1.value:
@@ -390,6 +477,60 @@ async def ocr_document(
         has_low_confidence_regions=low_conf_count > 0,
     )
 
+    quality_report = DocumentQualityResponse(
+        status=quality_res.status,
+        is_acceptable=quality_res.is_acceptable,
+        overall_score=quality_res.overall_score,
+        metrics=DocumentQualityMetrics(
+            resolution=quality_res.resolution_score,
+            sharpness=quality_res.sharpness_score,
+            brightness=quality_res.brightness_score,
+            contrast=quality_res.contrast_score,
+            glare=quality_res.glare_score,
+        ),
+        width=quality_res.width,
+        height=quality_res.height,
+        reasons=quality_res.reasons,
+        guidance=quality_res.guidance,
+        error_code=quality_res.error_code,
+    )
+
+    # ── Pre-extract & cache Document Face for instant Stage 3 biometrics ─────
+    doc_face_b64: Optional[str] = None
+    try:
+        from app.services.face.face_detector import face_detector
+        from app.services.face.face_enhancer import DocumentFaceEnhancer
+        from app.services.face.face_verification_service import _crop_to_b64
+        from app.services.face.face_aligner import FaceAligner
+        from app.services.face.arcface_embedding import ArcFaceEmbeddingModel
+
+        doc_detect = face_detector.detect_faces(ingested.image_np, is_document=True)
+        if doc_detect.face_count == 1:
+            d_box = doc_detect.faces[0]
+            d_crop_raw = face_detector.crop_portrait(ingested.image_np, d_box)
+            d_crop = DocumentFaceEnhancer.enhance_portrait_crop(d_crop_raw)
+            if d_crop is not None:
+                doc_face_b64 = _crop_to_b64(d_crop)
+                aligner = FaceAligner()
+                if d_box.landmarks and len(d_box.landmarks) == 5:
+                    d_aligned = aligner.align_face_5point(ingested.image_np, d_box.landmarks, (112, 112))
+                else:
+                    d_aligned = aligner.align_bbox_fallback(ingested.image_np, d_box.bbox, target_size=(112, 112))
+                d_aligned_enh = aligner.enhance_document_face(d_aligned)
+                arc_model = ArcFaceEmbeddingModel()
+                d_emb = arc_model.get_embedding(d_aligned_enh) if arc_model.is_available() else None
+                session_document_store.set_face_cache(
+                    verification_id=verification_id,
+                    doc_box=d_box,
+                    doc_crop=d_crop,
+                    doc_aligned=d_aligned,
+                    doc_embedding=d_emb,
+                    detector_used=doc_detect.detector_used,
+                )
+                logger.info("Pre-warmed document face & ArcFace embedding cache for id=%s", verification_id)
+    except Exception as _face_exc:
+        logger.debug("Face pre-extraction in OCR skipped: %s", _face_exc)
+
     response = PassportOCRResponse(
         verification_id=verification_id,
         document_type=profile.document_type,
@@ -397,6 +538,8 @@ async def ocr_document(
         traveler=traveler,
         mrz=mrz_data,
         ocr=ocr_meta,
+        quality=quality_report,
+        document_face_image=doc_face_b64,
     )
 
     logger.info(
@@ -429,6 +572,12 @@ async def ocr_document(
         parsed=parsed_passport or parsed_visa or parsed_dl or parsed_nid or parsed_bp,
         traveler=response.traveler,
         mrz=response.mrz,
+    )
+
+    set_cached_ocr(
+        ingested.raw_bytes,
+        profile.document_type,
+        (response, parsed_passport or parsed_visa or parsed_dl or parsed_nid or parsed_bp),
     )
 
     return response

@@ -94,6 +94,14 @@ export function useOCRSubmit() {
         actions.setSessionId(ocrResult.verification_id);
       }
 
+      if (ocrResult.quality) {
+        actions.setDocumentQuality(ocrResult.quality);
+      }
+
+      if (ocrResult.document_face_image) {
+        actions.setDocumentFaceImage(ocrResult.document_face_image);
+      }
+
       // Map extracted traveler fields to state
       const travelerPayload = {};
       const backendTraveler = ocrResult.traveler ?? {};
@@ -124,8 +132,8 @@ export function useOCRSubmit() {
         desc: 'Credentials and optical fields extracted',
       });
 
-      // Brief cinematic delay for visual milestone progression
-      await new Promise((r) => setTimeout(r, 220));
+      // Fast cinematic delay for responsive visual milestone progression
+      await new Promise((r) => setTimeout(r, 40));
 
       // ══════════════════════════════════════════════════════════════════
       // MILESTONE 2: DOCUMENT VALIDATION (ICAO Check Digits, Chronology)
@@ -171,7 +179,7 @@ export function useOCRSubmit() {
         desc: `${validationStatus.toUpperCase()} — Algorithmic rules verified`,
       });
 
-      await new Promise((r) => setTimeout(r, 220));
+      await new Promise((r) => setTimeout(r, 40));
 
       // ══════════════════════════════════════════════════════════════════
       // MILESTONE 3: TAMPERING & FORENSIC ANALYSIS
@@ -222,7 +230,7 @@ export function useOCRSubmit() {
         desc: `${tamperingStatus.toUpperCase()} — Tampering scan completed`,
       });
 
-      await new Promise((r) => setTimeout(r, 220));
+      await new Promise((r) => setTimeout(r, 40));
 
       // ══════════════════════════════════════════════════════════════════
       // MILESTONE 4: BIOMETRIC TELEMETRY & PAD LIVENESS
@@ -250,7 +258,7 @@ export function useOCRSubmit() {
         desc: 'Document portrait localized · Ready for live camera scan',
       });
 
-      await new Promise((r) => setTimeout(r, 180));
+      await new Promise((r) => setTimeout(r, 40));
 
       // ══════════════════════════════════════════════════════════════════
       // MILESTONE 5: REGISTRY CROSS-CHECK & RISK ASSESSMENT

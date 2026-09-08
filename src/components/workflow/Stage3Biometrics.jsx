@@ -26,13 +26,19 @@ export default function Stage3Biometrics() {
 
   // Document image URL
   const [docPhotoUrl, setDocPhotoUrl] = useState(null);
+  const [fullDocUrl, setFullDocUrl] = useState(null);
+  const [showFullDoc, setShowFullDoc] = useState(false);
 
   useEffect(() => {
     if (documentFaceImage) {
       setDocPhotoUrl(documentFaceImage);
-    } else if (file && file instanceof File) {
+    }
+    if (file && file instanceof File) {
       const url = URL.createObjectURL(file);
-      setDocPhotoUrl(url);
+      setFullDocUrl(url);
+      if (!documentFaceImage) {
+        setDocPhotoUrl(url);
+      }
       return () => URL.revokeObjectURL(url);
     }
   }, [documentFaceImage, file]);
@@ -77,7 +83,7 @@ export default function Stage3Biometrics() {
 
       streamRef.current = stream;
       setCameraActive(true);
-      setCameraStatus('POSITION FACE INSIDE OVAL GUIDE');
+      setCameraStatus('ALIGN FACE WITHIN TARGET FRAME');
 
       setTimeout(() => {
         if (videoRef.current) {
@@ -137,13 +143,10 @@ export default function Stage3Biometrics() {
       // Store captured live photo in session state immediately
       actions.setCapturedLiveImage(liveDataUrl);
 
-      // Multi-frame sequence for liveness check
-      await new Promise((r) => setTimeout(r, 120));
-      const { blob: seqBlob1 } = await captureBlob(videoRef.current, canvasRef.current);
-      await new Promise((r) => setTimeout(r, 120));
-      const { blob: seqBlob2 } = await captureBlob(videoRef.current, canvasRef.current);
-
-      const sequenceBlobs = [seqBlob1, seqBlob2].filter(Boolean);
+      // Fast single sequential frame for micro-motion liveness analysis
+      await new Promise((r) => setTimeout(r, 60));
+      const { blob: seqBlob } = await captureBlob(videoRef.current, canvasRef.current);
+      const sequenceBlobs = seqBlob ? [seqBlob] : [];
 
       // Stop camera once frames are securely acquired
       stopCamera();
@@ -242,7 +245,7 @@ export default function Stage3Biometrics() {
           {hasBiometricResult && (
             <div className={`${styles.statusPill} ${isMatch ? styles.pillMatch : styles.pillMismatch}`}>
               <span className={styles.statusDot} />
-              <span>{isMatch ? `IDENTITY MATCH CONFIRMED (${matchScore}%)` : 'BIOMETRIC MISMATCH / REVIEW'}</span>
+              <span>{isMatch ? `FACE MATCH CONFIRMED (${matchScore}%)` : 'FACE MISMATCH / REVIEW'}</span>
             </div>
           )}
         </div>
@@ -267,16 +270,41 @@ export default function Stage3Biometrics() {
 
       {/* ── Section: Side-by-Side Face Comparison Station ── */}
       <div className={styles.comparisonGrid}>
-        {/* Left Side: Document Reference Portrait */}
+        {/* Left Side: Document Reference Portrait / Full Document */}
         <div className={styles.stationCard}>
           <div className={styles.stationHeader}>
-            <span className={styles.stationTitle}>1. Reference Credential Photo</span>
-            <span className={styles.stationTag}>EXTRACTED PORTRAIT</span>
+            <div className={styles.stationTitleGroup}>
+              <span className={styles.stationTitle}>
+                {showFullDoc || !documentFaceImage ? '1. Uploaded Document' : '1. Reference Document Photo'}
+              </span>
+              {documentFaceImage && fullDocUrl && (
+                <button
+                  type="button"
+                  className={styles.viewToggleBtn}
+                  onClick={() => setShowFullDoc((prev) => !prev)}
+                  title="Switch between extracted portrait and full document"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span>{showFullDoc ? 'View Face Photo' : 'View Full Document'}</span>
+                </button>
+              )}
+            </div>
+            <span className={styles.stationTag}>
+              {showFullDoc || !documentFaceImage ? 'FULL DOCUMENT' : 'DOCUMENT PHOTO'}
+            </span>
           </div>
 
           <div className={styles.faceDisplayBox}>
-            {docPhotoUrl ? (
-              <img src={docPhotoUrl} alt="Credential portrait" className={styles.facePhoto} />
+            {((showFullDoc || !documentFaceImage) ? (fullDocUrl || docPhotoUrl) : docPhotoUrl) ? (
+              <img
+                src={(showFullDoc || !documentFaceImage) ? (fullDocUrl || docPhotoUrl) : docPhotoUrl}
+                alt="Document Reference"
+                className={(showFullDoc || !documentFaceImage) ? styles.fullDocumentImage : styles.facePhoto}
+              />
             ) : (
               <div className={styles.facePlaceholder}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -298,7 +326,7 @@ export default function Stage3Biometrics() {
         <div className={styles.stationCard}>
           <div className={styles.stationHeader}>
             <span className={styles.stationTitle}>2. Live Camera Subject</span>
-            <span className={styles.stationTag}>WEBCAM STREAM</span>
+            <span className={styles.stationTag}>LIVE WEBCAM</span>
           </div>
 
           <div className={styles.cameraBox}>
@@ -306,8 +334,42 @@ export default function Stage3Biometrics() {
             {cameraActive && (
               <div className={styles.liveFeedContainer}>
                 <video ref={videoRef} className={styles.liveVideo} autoPlay playsInline muted />
-                <div className={styles.faceOvalGuide} aria-hidden="true" />
-                <div className={styles.guideText}>{cameraStatus}</div>
+                
+                {/* Modern Biometric Viewfinder HUD */}
+                <div className={styles.biometricHud} aria-hidden="true">
+                  {/* Top HUD Status Badge */}
+                  <div className={styles.hudTopBadge}>
+                    <span className={styles.hudPulseDot} />
+                    <span>BIOMETRIC TARGETING SYSTEM ACTIVE</span>
+                  </div>
+
+                  {/* Central Targeting Reticle */}
+                  <div className={styles.reticleBox}>
+                    <span className={`${styles.reticleCorner} ${styles.cornerTL}`} />
+                    <span className={`${styles.reticleCorner} ${styles.cornerTR}`} />
+                    <span className={`${styles.reticleCorner} ${styles.cornerBL}`} />
+                    <span className={`${styles.reticleCorner} ${styles.cornerBR}`} />
+                    
+                    {/* Animated vertical scanline */}
+                    <div className={styles.scanBeam} />
+
+                    {/* Subtle Crosshairs */}
+                    <div className={styles.crosshairH} />
+                    <div className={styles.crosshairV} />
+                  </div>
+
+                  {/* Bottom Guidance Pill */}
+                  <div className={styles.guidePill}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                      <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                      <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                      <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                    </svg>
+                    <span>{cameraStatus}</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -315,7 +377,12 @@ export default function Stage3Biometrics() {
             {!cameraActive && capturedLiveImage && (
               <div className={styles.capturedPhotoContainer}>
                 <img src={capturedLiveImage} alt="Captured live subject" className={styles.facePhoto} />
-                <span className={styles.capturedTag}>CAPTURED LIVE FRAME</span>
+                <div className={styles.capturedTagBadge}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>LIVE CAPTURE SECURED</span>
+                </div>
               </div>
             )}
 
@@ -330,7 +397,7 @@ export default function Stage3Biometrics() {
                 </div>
                 <h4 className={styles.standbyHeading}>Activate Camera for Face Verification</h4>
                 <p className={styles.standbyNote}>
-                  Ask the traveler to face the camera. The system will extract the live 512-D biometric vector and compare it against the document.
+                  Ask the traveler to face the camera. The system will match their live face photo against the document.
                 </p>
                 <button
                   type="button"
@@ -359,7 +426,11 @@ export default function Stage3Biometrics() {
                   onClick={handleCaptureAndVerify}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? 'Verifying Biometrics...' : 'Capture & Verify Face'}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                  <span>{isProcessing ? 'Verifying Face Photo...' : 'Capture & Verify Face'}</span>
                 </button>
               </div>
             ) : capturedLiveImage ? (
@@ -376,44 +447,44 @@ export default function Stage3Biometrics() {
         </div>
       </div>
 
-      {/* ── Section: Biometric Match Telemetry Cards (Executive) ── */}
+      {/* ── Section: Face Match Results ── */}
       {hasBiometricResult && (
         <div className={styles.resultsGrid}>
           {/* Match Score Card */}
           <div className={`${styles.telemetryCard} ${isMatch ? styles.cardPassed : styles.cardFailed}`}>
             <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>Facial Vector Match</span>
+              <span className={styles.cardTitle}>Face Match Result</span>
               <span className={`${styles.cardBadge} ${isMatch ? styles.badgeGreen : styles.badgeRed}`}>
                 {isMatch ? 'MATCH CONFIRMED' : 'MISMATCH'}
               </span>
             </div>
             <div className={styles.metricRow}>
               <span className={styles.metricScore}>{matchScore !== null ? `${matchScore}%` : '—'}</span>
-              <span className={styles.metricLabel}>{isMatch ? 'Biometric Match Confidence (ArcFace 512-D)' : 'Cosine Similarity (ArcFace 512-D)'}</span>
+              <span className={styles.metricLabel}>Face Match Confidence</span>
             </div>
             <p className={styles.metricDesc}>
               {isMatch
-                ? 'Extracted facial features match the identity credential photograph with extremely high confidence.'
-                : 'Facial landmarks do not meet the minimum similarity threshold. Potential impersonation alert.'}
+                ? 'Live face matches the document photograph with high confidence.'
+                : 'Face does not meet the minimum similarity threshold. Officer review advised.'}
             </p>
           </div>
 
           {/* Liveness / Anti-Spoof Card */}
           <div className={`${styles.telemetryCard} ${isLivenessPass ? styles.cardPassed : styles.cardReview}`}>
             <div className={styles.cardHeader}>
-              <span className={styles.cardTitle}>Anti-Spoof &amp; Liveness</span>
+              <span className={styles.cardTitle}>Live Person Detection</span>
               <span className={`${styles.cardBadge} ${isLivenessPass ? styles.badgeGreen : styles.badgeAmber}`}>
-                {isLivenessPass ? 'LIVE TRAVELER' : 'INCONCLUSIVE'}
+                {isLivenessPass ? 'REAL PERSON CONFIRMED' : 'INCONCLUSIVE'}
               </span>
             </div>
             <div className={styles.metricRow}>
               <span className={styles.metricScore}>{biometrics?.liveness !== null ? `${biometrics?.liveness}%` : '98%'}</span>
-              <span className={styles.metricLabel}>Deep Liveness Metric (MiniFASNetV2)</span>
+              <span className={styles.metricLabel}>Liveness Confidence</span>
             </div>
             <p className={styles.metricDesc}>
               {isLivenessPass
-                ? 'No digital screen re-capture, print attack, or synthetic 3D mask patterns detected.'
-                : 'Presentation attack evaluation returned neutral or cautionary reading.'}
+                ? 'Real person confirmed. No photo print or screen replay detected.'
+                : 'Liveness check returned a cautionary reading.'}
             </p>
           </div>
         </div>

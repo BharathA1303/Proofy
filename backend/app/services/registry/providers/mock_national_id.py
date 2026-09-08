@@ -32,119 +32,39 @@ from app.services.documents.national_id.national_id_identifier_validator import 
 )
 from app.services.registry.base import RegistryProvider
 from app.services.registry.comparator import compare_fields
+from app.services.registry.db.registry_db import government_registry_db
 
 logger = logging.getLogger(__name__)
 
 _MOCK_LATENCY_MS = 50.0
 
-_MOCK_NID_RECORDS: dict[str, dict] = {
-    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
-    "847291038473": {
-        "document_number": "847291038473",
-        "registry_document_status": "ACTIVE",
-        "name": "SNEHA PATEL",
-        "date_of_birth": "1992-09-18",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "FEMALE",
-        "address": "42 BAKER STREET, NEW DELHI 110001",
-    },
-    "8472 9103 8473": {
-        "document_number": "847291038473",
-        "registry_document_status": "ACTIVE",
-        "name": "SNEHA PATEL",
-        "date_of_birth": "1992-09-18",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "FEMALE",
-        "address": "42 BAKER STREET, NEW DELHI 110001",
-    },
-    "XXXX XXXX 8473": {
-        "document_number": "847291038473",
-        "registry_document_status": "ACTIVE",
-        "name": "SNEHA PATEL",
-        "date_of_birth": "1992-09-18",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "FEMALE",
-        "address": "42 BAKER STREET, NEW DELHI 110001",
-    },
-    "654123987101": {
-        "document_number": "654123987101",
-        "registry_document_status": "REVOKED",
-        "name": "TARIQ AHMED",
-        "date_of_birth": "1980-04-05",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-        "address": "15 MARINE DRIVE, MUMBAI 400020",
-    },
-    "6541 2398 7101": {
-        "document_number": "654123987101",
-        "registry_document_status": "REVOKED",
-        "name": "TARIQ AHMED",
-        "date_of_birth": "1980-04-05",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-        "address": "15 MARINE DRIVE, MUMBAI 400020",
-    },
-    "XXXX XXXX 7101": {
-        "document_number": "654123987101",
-        "registry_document_status": "REVOKED",
-        "name": "TARIQ AHMED",
-        "date_of_birth": "1980-04-05",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-        "address": "15 MARINE DRIVE, MUMBAI 400020",
-    },
-    # Active valid National ID matching standard test sample
-    "TESTNID001": {
-        "document_number": "TESTNID001",
-        "registry_document_status": "ACTIVE",
-        "name": "RAHUL SHARMA",
-        "date_of_birth": "1992-05-15",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-    },
-    # 12-digit numeric synthetic ID matching create_synthetic_national_id
-    "987654321098": {
-        "document_number": "987654321098",
-        "registry_document_status": "ACTIVE",
-        "name": "RAHUL SHARMA",
-        "date_of_birth": "1992-05-15",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-    },
-    # Expired status test record
-    "TESTNIDEXPIRED001": {
-        "document_number": "TESTNIDEXPIRED001",
-        "registry_document_status": "EXPIRED",
-        "name": "TEST EXPIRED",
-        "date_of_birth": "1980-01-01",
-        "issuing_authority": "Unique Identification Authority of India",
-    },
-    # Revoked status test record
-    "TESTNIDREVOKED001": {
-        "document_number": "TESTNIDREVOKED001",
-        "registry_document_status": "REVOKED",
-        "name": "TEST REVOKED",
-        "date_of_birth": "1975-06-15",
-        "issuing_authority": "Unique Identification Authority of India",
-    },
-    # Suspended status test record
-    "TESTNIDSUSPENDED001": {
-        "document_number": "TESTNIDSUSPENDED001",
-        "registry_document_status": "SUSPENDED",
-        "name": "TEST SUSPENDED",
-        "date_of_birth": "1988-10-20",
-        "issuing_authority": "Unique Identification Authority of India",
-    },
-    # Mismatch record (active record exists, but holder details differ)
-    "TESTNIDMISMATCH001": {
-        "document_number": "TESTNIDMISMATCH001",
-        "registry_document_status": "ACTIVE",
-        "name": "VIKRAM SINGH",
-        "date_of_birth": "1965-03-12",
-        "issuing_authority": "Unique Identification Authority of India",
-        "gender": "MALE",
-    },
-}
+class _NIDRecordProxy(dict):
+    """Proxy providing backward compatibility by decrypting SQLite records on demand."""
+    def __getitem__(self, key: str):
+        res = government_registry_db.lookup_document("national_id", key)
+        if not res:
+            raise KeyError(key)
+        return res
+
+    def __contains__(self, key: object):
+        if not isinstance(key, str):
+            return False
+        return government_registry_db.lookup_document("national_id", key) is not None
+
+    def get(self, key: str, default=None):
+        res = government_registry_db.lookup_document("national_id", key)
+        return res if res is not None else default
+
+    def keys(self):
+        return government_registry_db.get_all_records_for_type("national_id").keys()
+
+    def values(self):
+        return government_registry_db.get_all_records_for_type("national_id").values()
+
+    def items(self):
+        return government_registry_db.get_all_records_for_type("national_id").items()
+
+_MOCK_NID_RECORDS = _NIDRecordProxy()
 
 
 class MockNationalIdRegistryProvider(RegistryProvider):
@@ -240,7 +160,16 @@ class MockNationalIdRegistryProvider(RegistryProvider):
         )
 
         field_results, status = compare_fields(request, reg_record)
+        if raw_record.get("is_blacklisted") and reg_record.registry_document_status != "SUSPENDED":
+            status = RegistryStatus.REVOKED
+
         evidence = _build_evidence(status, field_results, masked_id)
+        if raw_record.get("is_blacklisted"):
+            evidence.insert(0, RegistryEvidence(
+                type="watchlist_hit",
+                severity="critical",
+                description=f"GOVERNMENT WATCHLIST ALERT: {raw_record.get('watchlist_reason', 'National ID suspended/revoked on security watchlist.')}",
+            ))
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 

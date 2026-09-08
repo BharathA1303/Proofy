@@ -30,6 +30,8 @@ class SessionDocumentStore:
         self._lock = threading.Lock()
         # map: verification_id -> (timestamp, raw_bytes)
         self._store: dict[str, tuple[float, bytes]] = {}
+        # map: verification_id -> (timestamp, face_result, face_crop)
+        self._face_cache: dict[str, tuple[float, Any, Any]] = {}
 
     def set(self, verification_id: str, raw_bytes: bytes) -> None:
         """Store document raw bytes for a verification session."""
@@ -59,6 +61,40 @@ class SessionDocumentStore:
                 del self._store[verification_id]
                 return None
             return raw_bytes
+
+    def set_face_cache(
+        self,
+        verification_id: str,
+        doc_box: Any,
+        doc_crop: Any,
+        doc_aligned: Any = None,
+        doc_embedding: Any = None,
+        detector_used: str = "InsightFace-SCRFD-10G",
+    ) -> None:
+        """Cache detected document face result and pre-enhanced crop for sub-second verification."""
+        with self._lock:
+            self._face_cache[verification_id] = (
+                time.time(),
+                {
+                    "doc_box": doc_box,
+                    "doc_crop": doc_crop,
+                    "doc_aligned": doc_aligned,
+                    "doc_embedding": doc_embedding,
+                    "detector_used": detector_used,
+                },
+            )
+
+    def get_face_cache(self, verification_id: str) -> Optional[dict[str, Any]]:
+        """Retrieve pre-detected document face result and crop if cached."""
+        with self._lock:
+            entry = self._face_cache.get(verification_id)
+            if entry is None:
+                return None
+            ts, data = entry
+            if (time.time() - ts) > self._ttl:
+                del self._face_cache[verification_id]
+                return None
+            return data
 
     def evict(self, verification_id: str) -> bool:
         """Explicitly remove document bytes for a session."""

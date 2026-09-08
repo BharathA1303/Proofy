@@ -48,8 +48,26 @@
 /* Category Grid */
 .categoryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--space-3);
+}
+
+@media (max-width: 1150px) {
+  .categoryGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .categoryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .categoryGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .categoryCard {
@@ -380,8 +398,14 @@
 
 .sampleGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-3);
+}
+
+@media (max-width: 960px) {
+  .sampleGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sampleCard {
@@ -529,18 +553,274 @@
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
+/* Catchy Inspection Timer & Gauge Animation */
+.timerCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  border: 1.5px solid #93c5fd;
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
+  margin-top: var(--space-4);
+  position: relative;
+  overflow: hidden;
+  animation: timerCardFadeIn 0.3s ease;
+}
+
+@keyframes timerCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timerVisualCol {
+  flex-shrink: 0;
+}
+
+.gaugeContainer {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gaugeSvg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.gaugeBgCircle {
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 7;
+}
+
+.gaugeBarCircle {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  transition: stroke-dashoffset 0.08s linear;
+  filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.4));
+}
+
+.gaugeCenter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.gaugeSeconds {
+  font-size: 1.45rem;
+  font-weight: 800;
+  font-family: var(--font-family-mono, monospace);
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.gaugeLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  margin-top: 3px;
+}
+
+.timerDetailsCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.timerStatusHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.timerLiveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.03em;
+}
+
+.pulsingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  animation: pulseTimerDot 1.2s infinite;
+}
+
+.dotCompleted {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: none;
+}
+
+@keyframes pulseTimerDot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.65;
+  }
+}
+
+.timerSecondsBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-family: var(--font-family-mono, monospace);
+}
+
+.timerMainHeading {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.timerSubText {
+  font-size: 12px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.4;
+  min-height: 18px;
+}
+
+.timerStepsRow {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.timerStep {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 3px 9px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.stepNum {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.stepActive {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #f8faff;
+}
+
+.stepActive .stepNum {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.stepDone {
+  color: #065f46;
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+
+.stepDone .stepNum {
+  background: #10b981;
+  color: #ffffff;
+}
+
 @media (max-width: 768px) {
+  .uploadSection {
+    padding: var(--space-4);
+  }
+  .timerCard {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+  .timerStatusHeader {
+    justify-content: center;
+  }
+  .timerStepsRow {
+    justify-content: center;
+  }
   .previewCard {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    text-align: center;
+    gap: var(--space-3);
+  }
+  .previewThumbBox {
+    margin: 0 auto;
+    width: 140px;
+    height: 100px;
+  }
+  .previewBadgeRow {
+    justify-content: center;
+  }
+  .removeBtn {
+    justify-content: center;
+    width: 100%;
   }
   .actionBar {
     flex-direction: column;
     gap: var(--space-3);
     align-items: stretch;
     text-align: center;
+    padding: var(--space-4);
   }
   .proceedBtn {
     justify-content: center;
+    width: 100%;
   }
 }

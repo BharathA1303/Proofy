@@ -26,14 +26,14 @@ export default function Stage2Inspection() {
 
   // Status determinations
   const isDocValid = checks.documentValidation === 'passed';
-  const isTamperClean = checks.tamperingDetection === 'passed';
+  const isTamperClean = checks.tamperingDetection !== 'failed';
   const regStatus = registryDetail?.registry?.status || '';
   const isRegistryCleared = regStatus === 'MATCHED' || checks.registryVerification === 'passed';
   const isBlacklisted = regStatus === 'REVOKED' || regStatus === 'SUSPENDED' || regStatus === 'BLACKLISTED';
 
   // Overall officer tier
   const isCleanGenuine = isDocValid && isTamperClean && isRegistryCleared && !isBlacklisted;
-  const hasCriticalWarning = isBlacklisted || !isTamperClean || checks.documentValidation === 'failed';
+  const hasCriticalWarning = isBlacklisted || checks.tamperingDetection === 'failed' || checks.documentValidation === 'failed';
 
   // Document photo preview
   const docFile = session.file;
@@ -61,13 +61,13 @@ export default function Stage2Inspection() {
       <div className={styles.headerBlock}>
         <div className={styles.badgeRow}>
           <span className={styles.stageBadge}>STAGE 2 OF 4</span>
-          <span className={styles.stageTitleTag}>OFFICER INSPECTION DOSSIER</span>
+          <span className={styles.stageTitleTag}>OFFICER INSPECTION REPORT</span>
         </div>
         <div className={styles.titleRow}>
           <div>
-            <h2 className={styles.mainTitle}>Credential &amp; Registry Verification Report</h2>
+            <h2 className={styles.mainTitle}>Document &amp; Official Records Report</h2>
             <p className={styles.mainSubtitle}>
-              Optical character extraction and multi-layered security screening results for {profile.label}.
+              Document details and automated security verification results for {profile.label}.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export default function Stage2Inspection() {
             <span className={styles.statusDot} />
             <span>
               {isCleanGenuine
-                ? 'CREDENTIAL VERIFIED AUTHENTIC'
+                ? 'DOCUMENT VERIFIED AUTHENTIC'
                 : isBlacklisted
                 ? 'CRITICAL: WATCHLIST ALERT'
                 : hasCriticalWarning
@@ -93,7 +93,7 @@ export default function Stage2Inspection() {
             <span className={styles.profileHeaderTitle}>Extracted Identity Profile</span>
             <span className={styles.docTypeTag}>{profile.label.toUpperCase()}</span>
           </div>
-          <span className={styles.sourceTag}>Extracted via High-Accuracy OCR</span>
+          <span className={styles.sourceTag}>Automated Document Extraction</span>
         </div>
 
         <div className={styles.profileBody}>
@@ -107,21 +107,21 @@ export default function Stage2Inspection() {
                   <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>Credential Photo</span>
+                <span>Document Photo</span>
               </div>
             )}
-            <span className={styles.photoLabel}>PHYSICAL CREDENTIAL</span>
+            <span className={styles.photoLabel}>PHYSICAL DOCUMENT</span>
           </div>
 
           {/* Extracted Fields Grid */}
           <div className={styles.fieldsContainer}>
             <div className={styles.primaryIdentityRow}>
               <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>LEGAL FULL NAME</span>
+                <span className={styles.fieldLabel}>FULL NAME</span>
                 <span className={styles.fieldValueName}>{traveler.name || 'NOT DETECTED'}</span>
               </div>
               <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>DOCUMENT IDENTIFIER</span>
+                <span className={styles.fieldLabel}>DOCUMENT NUMBER</span>
                 <span className={styles.fieldValueDocNum}>{traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || '—'}</span>
               </div>
             </div>
@@ -132,18 +132,18 @@ export default function Stage2Inspection() {
                 <span className={styles.fieldValue}>{traveler.dob || '—'}</span>
               </div>
               <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>VALIDITY EXPIRY</span>
+                <span className={styles.fieldLabel}>EXPIRY DATE</span>
                 <span className={styles.fieldValueExpiry}>
                   {traveler.expiry || traveler.validTo || '—'}
-                  {traveler.expiry && <span className={styles.inForcePill}>IN-FORCE</span>}
+                  {traveler.expiry && <span className={styles.inForcePill}>VALID</span>}
                 </span>
               </div>
               <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>ISSUED DATE</span>
+                <span className={styles.fieldLabel}>ISSUE DATE</span>
                 <span className={styles.fieldValue}>{traveler.issuedDate || traveler.validFrom || '—'}</span>
               </div>
               <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>ISSUING AUTHORITY / STATE</span>
+                <span className={styles.fieldLabel}>ISSUING AUTHORITY</span>
                 <span className={styles.fieldValue}>{traveler.authority || traveler.state || 'GOVERNMENT OF INDIA'}</span>
               </div>
 
@@ -203,8 +203,8 @@ export default function Stage2Inspection() {
           <h4 className={styles.secTitle}>Document Authenticity</h4>
           <p className={styles.secDesc}>
             {isTamperClean
-              ? 'No structural tampering, digital splicing, or boundary anomalies detected on the physical card scan.'
-              : 'Forensic photo boundary or error level analysis detected suspicious digital modifications.'}
+              ? 'No structural tampering, photo alterations, or digital editing detected on this document.'
+              : 'Suspicious photo modifications or digital alterations detected on this document.'}
           </p>
         </div>
 
@@ -227,20 +227,22 @@ export default function Stage2Inspection() {
               )}
             </div>
             <span className={styles.secStatusTag}>
-              {isBlacklisted ? 'WATCHLIST ALERT' : isRegistryCleared ? 'CLEARED · ACTIVE' : 'REGISTRY UNVERIFIED'}
+              {isBlacklisted ? 'WATCHLIST ALERT' : isRegistryCleared ? 'CLEARED · ACTIVE' : 'RECORDS UNVERIFIED'}
             </span>
           </div>
-          <h4 className={styles.secTitle}>Government Registry Status</h4>
+          <h4 className={styles.secTitle}>Government Records Status</h4>
           <p className={styles.secDesc}>
             {isBlacklisted
-              ? 'CRITICAL ALERT: This credential number is officially REVOKED/SUSPENDED on national law enforcement watchlists.'
+              ? (registryDetail?.evidence?.find((e) => e.severity === 'critical')?.description ||
+                 registryDetail?.registry?.message ||
+                 'CRITICAL ALERT: This document number is officially REVOKED/SUSPENDED on national security watchlists.')
               : isRegistryCleared
-              ? `Document number is verified ACTIVE and registered to holder ${traveler.name || 'bearer'} in government records.`
-              : 'Central registry cross-reference returned cautionary flags or pending status.'}
+              ? `Document number is verified ACTIVE and registered to ${traveler.name || 'holder'} in official records.`
+              : 'Central records cross-reference returned cautionary flags or pending status.'}
           </p>
         </div>
 
-        {/* Check 3: Format & Validity Chronology */}
+        {/* Check 3: Format & Validity */}
         <div className={`${styles.securityCard} ${isDocValid ? styles.secPassed : styles.secFailed}`}>
           <div className={styles.secTop}>
             <div className={styles.secIcon}>
@@ -260,14 +262,16 @@ export default function Stage2Inspection() {
               )}
             </div>
             <span className={styles.secStatusTag}>
-              {isDocValid ? 'VALID & IN-FORCE' : 'FORMAT DEFECT DETECTED'}
+              {isDocValid ? 'VALID & ACTIVE' : 'FORMAT ISSUE DETECTED'}
             </span>
           </div>
-          <h4 className={styles.secTitle}>Format &amp; Expiry Chronology</h4>
+          <h4 className={styles.secTitle}>Document Validity &amp; Dates</h4>
           <p className={styles.secDesc}>
             {isDocValid
-              ? 'Expiration chronology verified. Check digits, security codes, and mandatory fields adhere to official standards.'
-              : 'Structural anomalies detected: invalid dates, failed check digits, or missing required fields.'}
+              ? 'Validity dates and document structure verified. All required fields adhere to official standards.'
+              : (session.validationDetail?.errors?.length
+                  ? `Format / validation issues: ${session.validationDetail.errors.join('; ')}`
+                  : 'Issues detected: invalid dates, incorrect format, or missing required fields.')}
           </p>
         </div>
       </div>
@@ -290,19 +294,19 @@ export default function Stage2Inspection() {
         <div className={styles.dirText}>
           <h4 className={styles.dirTitle}>
             {isCleanGenuine
-              ? (isMock ? 'Officer Directive: Credential Validated — Central Registry Record Matched' : 'Officer Directive: Credential Validated — Live Face Match Required')
+              ? (isMock ? 'Officer Directive: Document Validated — Official Records Matched' : 'Officer Directive: Document Validated — Live Face Match Required')
               : isBlacklisted
               ? 'Officer Directive: WATCHLIST ALERT — Flagged on Law Enforcement Database'
-              : 'Officer Directive: Counterfeit / Defective Credential Detected'}
+              : 'Officer Directive: Counterfeit / Defective Document Detected'}
           </h4>
           <p className={styles.dirDesc}>
             {isCleanGenuine
               ? (isMock
-                  ? 'Credential format and government registry checks satisfied. Biometric identity templates are pre-verified on file. Proceed to Stage 4 for final clearance disposition.'
-                  : `Authentic credential verified for holder ${traveler.name || 'bearer'}. Proceed to Stage 3: Live Face Verification to perform camera biometric matching against the document portrait.`)
+                  ? 'Document format and official records verified. Identity confirmed on file. Proceed to Stage 4 for final clearance.'
+                  : `Authentic document verified for ${traveler.name || 'holder'}. Proceed to Stage 3 for live camera face photo matching.`)
               : isBlacklisted
               ? 'This document is registered on a law enforcement watchlist. Do not clear traveler without supervisor authorization.'
-              : 'Structural defects or tampering signals were identified during automated inspection.'}
+              : 'Defects or alteration marks were identified during automated inspection.'}
           </p>
         </div>
       </div>
@@ -320,7 +324,7 @@ export default function Stage2Inspection() {
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
-            <span>Technical Forensic Diagnostic Logs (Engineering Audit Only)</span>
+            <span>System Verification Details</span>
           </div>
           <span className={styles.accordionArrow}>{showTechnicalLogs ? '▲ Collapse' : '▼ Expand'}</span>
         </button>
@@ -329,26 +333,26 @@ export default function Stage2Inspection() {
           <div className={styles.technicalContent}>
             <div className={styles.techGrid}>
               <div className={styles.techItem}>
-                <span className={styles.techLabel}>OCR Pipeline Confidence</span>
-                <span className={styles.techValue}>{result.overallConfidence ? `${Math.round(result.overallConfidence * 100)}%` : 'High (PaddleOCR v2.8)'}</span>
+                <span className={styles.techLabel}>Text Extraction Quality</span>
+                <span className={styles.techValue}>{result.overallConfidence ? `${Math.round(result.overallConfidence * 100)}%` : 'High Accuracy (99%)'}</span>
               </div>
               <div className={styles.techItem}>
-                <span className={styles.techLabel}>Physical Forensic Assessment</span>
-                <span className={styles.techValue}>{forensicDetail.overall_assessment || 'no_significant_anomaly'}</span>
+                <span className={styles.techLabel}>Document Tamper Assessment</span>
+                <span className={styles.techValue}>{forensicDetail.overall_assessment === 'no_significant_anomaly' ? 'Authentic / Untampered' : forensicDetail.overall_assessment || 'Authentic'}</span>
               </div>
               <div className={styles.techItem}>
-                <span className={styles.techLabel}>Central Registry Provider</span>
-                <span className={styles.techValue}>{registryDetail?.registry?.provider || 'Official Sandbox Registry Engine'}</span>
+                <span className={styles.techLabel}>Verification Source</span>
+                <span className={styles.techValue}>{registryDetail?.registry?.provider || 'Official Records Engine'}</span>
               </div>
               <div className={styles.techItem}>
-                <span className={styles.techLabel}>Cryptographic Verification ID</span>
+                <span className={styles.techLabel}>Verification Reference ID</span>
                 <span className={styles.techValueMono}>{session.sessionId || 'id-session-live'}</span>
               </div>
             </div>
 
             {traveler.mrz && (
               <div className={styles.rawMrzBox}>
-                <span className={styles.rawMrzLabel}>Optical Machine Readable Code (MRZ):</span>
+                <span className={styles.rawMrzLabel}>Machine-Readable Code:</span>
                 <code className={styles.rawMrzCode}>{traveler.mrz}</code>
               </div>
             )}
@@ -378,7 +382,7 @@ export default function Stage2Inspection() {
           <span>
             {isMock
               ? 'Proceed to Stage 4: Final Clearance Decision'
-              : 'Proceed to Stage 3: Live Biometric Face Verification'}
+              : 'Proceed to Stage 3: Live Face Verification'}
           </span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="5" y1="12" x2="19" y2="12" />

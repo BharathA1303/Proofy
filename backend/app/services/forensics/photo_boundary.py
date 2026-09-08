@@ -50,6 +50,7 @@ MIN_RECTANGULARITY = 0.85
 BOUNDARY_MARGIN = 6
 EDGE_DENSITY_SUSPICIOUS = 0.55
 TEXTURE_RATIO_SUSPICIOUS = 3.0
+MIN_BACKGROUND_TEXTURE_VARIANCE = 5.0
 
 
 @dataclass
@@ -197,10 +198,14 @@ def analyze_photo_boundary(
     ring_edge_pixels = edges_outer[ring_mask]
     edge_density = float((ring_edge_pixels > 0).mean()) if ring_edge_pixels.size else 0.0
 
-    ring_pixels = outer[ring_mask]
-    ring_variance = float(ring_pixels.astype(np.float64).var()) if ring_pixels.size else 0.0
-    inner_variance = _local_texture_variance(inner)
-    texture_ratio = (max(inner_variance, ring_variance) + 1e-6) / (min(inner_variance, ring_variance) + 1e-6)
+    ring_lap = cv2.Laplacian(outer, cv2.CV_64F)[ring_mask]
+    ring_variance = float(ring_lap.var()) if ring_lap.size else 0.0
+    inner_variance = float(cv2.Laplacian(inner, cv2.CV_64F).var()) if inner.size else 0.0
+
+    if min(inner_variance, ring_variance) >= 50.0:
+        texture_ratio = (max(inner_variance, ring_variance) + 1e-6) / (min(inner_variance, ring_variance) + 1e-6)
+    else:
+        texture_ratio = 1.0
 
     indicators: list[BoundaryIndicator] = []
 
@@ -209,7 +214,8 @@ def analyze_photo_boundary(
             type="edge_discontinuity", severity="medium", region=region,
         ))
 
-    if texture_ratio >= TEXTURE_RATIO_SUSPICIOUS:
+    # Texture discontinuity: only meaningful when both regions contain texture, or if ring has severe alteration noise
+    if ring_variance >= 10000.0 or texture_ratio >= TEXTURE_RATIO_SUSPICIOUS:
         indicators.append(BoundaryIndicator(
             type="texture_discontinuity", severity="medium", region=region,
         ))

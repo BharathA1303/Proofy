@@ -28,122 +28,39 @@ from app.schemas.registry import (
 )
 from app.services.registry.base import RegistryProvider
 from app.services.registry.comparator import compare_fields
+from app.services.registry.db.registry_db import government_registry_db
 
 logger = logging.getLogger(__name__)
 
 _MOCK_LATENCY_MS = 50.0
 
-_MOCK_DL_RECORDS: dict[str, dict] = {
-    # Active valid DL matching standard test sample
-    "TESTDL001": {
-        "document_number": "TESTDL001",
-        "registry_document_status": "ACTIVE",
-        "name": "RAHUL SHARMA",
-        "date_of_birth": "1992-05-15",
-        "expiry_date": "2035-05-14",
-        "issuing_authority": "RTO DELHI",
-        "blood_group": "O+",
-        "vehicle_classes": "LMV, MCWG",
-    },
-    # Genuine User Driving License: BHARATH A (Government of Tamil Nadu)
-    "TN0520250014128": {
-        "document_number": "TN0520250014128",
-        "registry_document_status": "ACTIVE",
-        "name": "BHARATH A",
-        "date_of_birth": "2007-03-13",
-        "expiry_date": "2047-03-12",
-        "issuing_authority": "GOVERNMENT OF TAMIL NADU",
-        "blood_group": "A1B+",
-        "vehicle_classes": "LMV, MCWG",
-    },
-    "TN05 20250014128": {
-        "document_number": "TN05 20250014128",
-        "registry_document_status": "ACTIVE",
-        "name": "BHARATH A",
-        "date_of_birth": "2007-03-13",
-        "expiry_date": "2047-03-12",
-        "issuing_authority": "GOVERNMENT OF TAMIL NADU",
-        "blood_group": "A1B+",
-        "vehicle_classes": "LMV, MCWG",
-    },
-    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
-    "DL-0420230012345": {
-        "document_number": "DL-0420230012345",
-        "registry_document_status": "ACTIVE",
-        "name": "PRIYA SUNDAR",
-        "date_of_birth": "1994-03-22",
-        "expiry_date": "2034-03-21",
-        "issuing_authority": "RTO DELHI CENTRAL",
-        "blood_group": "B+",
-        "vehicle_classes": "MCWG, LMV",
-    },
-    "DL0420230012345": {
-        "document_number": "DL0420230012345",
-        "registry_document_status": "ACTIVE",
-        "name": "PRIYA SUNDAR",
-        "date_of_birth": "1994-03-22",
-        "expiry_date": "2034-03-21",
-        "issuing_authority": "RTO DELHI CENTRAL",
-        "blood_group": "B+",
-        "vehicle_classes": "MCWG, LMV",
-    },
-    "DL-0120180099887": {
-        "document_number": "DL-0120180099887",
-        "registry_document_status": "REVOKED",
-        "name": "KABIR MEHTA",
-        "date_of_birth": "1986-07-14",
-        "expiry_date": "2038-07-13",
-        "issuing_authority": "RTO MUMBAI WEST",
-        "blood_group": "O+",
-        "vehicle_classes": "MCWG, LMV",
-    },
-    "DL0120180099887": {
-        "document_number": "DL0120180099887",
-        "registry_document_status": "REVOKED",
-        "name": "KABIR MEHTA",
-        "date_of_birth": "1986-07-14",
-        "expiry_date": "2038-07-13",
-        "issuing_authority": "RTO MUMBAI WEST",
-        "blood_group": "O+",
-        "vehicle_classes": "MCWG, LMV",
-    },
-    # Expired DL
-    "TESTDLEXPIRED001": {
-        "document_number": "TESTDLEXPIRED001",
-        "registry_document_status": "EXPIRED",
-        "name": "TEST EXPIRED",
-        "date_of_birth": "1980-01-01",
-        "expiry_date": "2020-01-01",
-        "issuing_authority": "RTO CHENNAI",
-    },
-    # Revoked DL
-    "TESTDLREVOKED001": {
-        "document_number": "TESTDLREVOKED001",
-        "registry_document_status": "REVOKED",
-        "name": "TEST REVOKED",
-        "date_of_birth": "1975-06-15",
-        "expiry_date": "2028-06-15",
-        "issuing_authority": "RTO MUMBAI",
-    },
-    # Suspended DL
-    "TESTDLSUSPENDED001": {
-        "document_number": "TESTDLSUSPENDED001",
-        "registry_document_status": "SUSPENDED",
-        "name": "TEST SUSPENDED",
-        "date_of_birth": "1988-10-20",
-        "expiry_date": "2030-10-20",
-        "issuing_authority": "RTO BANGALORE",
-    },
-    # Mismatch DL (active record exists, but holder details differ)
-    "TESTDLMISMATCH001": {
-        "document_number": "TESTDLMISMATCH001",
-        "registry_document_status": "ACTIVE",
-        "name": "VIKRAM SINGH",
-        "date_of_birth": "1965-03-12",
-        "expiry_date": "2032-03-12",
-        "issuing_authority": "RTO JAIPUR",
-    },
-}
+class _DLRecordProxy(dict):
+    """Proxy providing backward compatibility by decrypting SQLite records on demand."""
+    def __getitem__(self, key: str):
+        res = government_registry_db.lookup_document("driving_license", key)
+        if not res:
+            raise KeyError(key)
+        return res
+
+    def __contains__(self, key: object):
+        if not isinstance(key, str):
+            return False
+        return government_registry_db.lookup_document("driving_license", key) is not None
+
+    def get(self, key: str, default=None):
+        res = government_registry_db.lookup_document("driving_license", key)
+        return res if res is not None else default
+
+    def keys(self):
+        return government_registry_db.get_all_records_for_type("driving_license").keys()
+
+    def values(self):
+        return government_registry_db.get_all_records_for_type("driving_license").values()
+
+    def items(self):
+        return government_registry_db.get_all_records_for_type("driving_license").items()
+
+_MOCK_DL_RECORDS = _DLRecordProxy()
 
 
 class MockDrivingLicenseRegistryProvider(RegistryProvider):
@@ -250,7 +167,16 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
         )
 
         field_results, status = compare_fields(request, reg_record)
+        if raw_record.get("is_blacklisted") and reg_record.registry_document_status != "SUSPENDED":
+            status = RegistryStatus.REVOKED
+
         evidence = _build_evidence(status, field_results, lookup_key)
+        if raw_record.get("is_blacklisted"):
+            evidence.insert(0, RegistryEvidence(
+                type="watchlist_hit",
+                severity="critical",
+                description=f"GOVERNMENT WATCHLIST ALERT: {raw_record.get('watchlist_reason', 'Driving licence revoked on transport watchlist.')}",
+            ))
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 

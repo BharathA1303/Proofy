@@ -18,7 +18,7 @@ const DOC_CATEGORIES = [
   {
     type: DOCUMENT_TYPES.PASSPORT,
     label: 'Passport',
-    desc: 'International travel passport with 2-line machine readable zone (MRZ)',
+    desc: 'International Travel',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -31,7 +31,7 @@ const DOC_CATEGORIES = [
   {
     type: DOCUMENT_TYPES.DRIVING_LICENSE,
     label: 'Driving Licence',
-    desc: 'State transport motor vehicle licence & identity card (Smart Card / VIZ)',
+    desc: 'Driver & Transport',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -44,7 +44,7 @@ const DOC_CATEGORIES = [
   {
     type: DOCUMENT_TYPES.NATIONAL_ID,
     label: 'National ID',
-    desc: 'National 12-digit unique identification document with Verhoeff checksum',
+    desc: 'Government ID',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -59,7 +59,7 @@ const DOC_CATEGORIES = [
   {
     type: DOCUMENT_TYPES.VISA,
     label: 'Entry Visa',
-    desc: 'Consular immigration visa counterfoil with passport association',
+    desc: 'Travel Visa',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -71,7 +71,7 @@ const DOC_CATEGORIES = [
   {
     type: DOCUMENT_TYPES.BORDER_PERMIT,
     label: 'Border Permit',
-    desc: 'Special frontier transit permit for port-of-entry land and maritime clearance',
+    desc: 'Border Transit',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -89,8 +89,13 @@ export default function Stage1Intake() {
   const [loadingSampleId, setLoadingSampleId] = useState(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState(null);
 
+  // Catchy live inspection timer states
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [isVerifyingWithTimer, setIsVerifyingWithTimer] = useState(false);
+  const [completedSeconds, setCompletedSeconds] = useState(null);
+
   const hasFile = Boolean(session.file);
-  const isProcessing = [SESSION_STATUS.UPLOADING, SESSION_STATUS.PROCESSING].includes(session.status) || isSubmitting;
+  const isProcessing = [SESSION_STATUS.UPLOADING, SESSION_STATUS.PROCESSING].includes(session.status) || isSubmitting || isVerifyingWithTimer;
 
   // Generate thumbnail URL for selected file
   useEffect(() => {
@@ -241,7 +246,31 @@ export default function Stage1Intake() {
 
   async function handleStartVerification() {
     if (!session.file) return;
-    await submitOCR(session.file, session.documentType);
+    setIsVerifyingWithTimer(true);
+    setElapsedMs(0);
+    setCompletedSeconds(null);
+    const startTime = Date.now();
+
+    const timer = setInterval(() => {
+      setElapsedMs(Date.now() - startTime);
+    }, 40);
+
+    try {
+      await submitOCR(session.file, session.documentType);
+      const totalSec = ((Date.now() - startTime) / 1000).toFixed(1);
+      setCompletedSeconds(totalSec);
+      actions.setVerificationDuration(totalSec);
+      clearInterval(timer);
+      // Brief pause so the user sees the completed duration, then automatically advance to Stage 2
+      setTimeout(() => {
+        actions.setWorkflowStage(2);
+        setIsVerifyingWithTimer(false);
+      }, 700);
+    } catch (err) {
+      console.error('Inspection process error:', err);
+      clearInterval(timer);
+      setIsVerifyingWithTimer(false);
+    }
   }
 
   return (
@@ -249,13 +278,9 @@ export default function Stage1Intake() {
       {/* ── Section 1: Header ── */}
       <div className={styles.headerBlock}>
         <div className={styles.badgeRow}>
-          <span className={styles.stageBadge}>STAGE 1 OF 4</span>
-          <span className={styles.stageTitleTag}>DOCUMENT INTAKE</span>
+          <span className={styles.stageBadge}>DOCUMENT INTAKE</span>
         </div>
-        <h2 className={styles.mainTitle}>Select Credential Category &amp; Upload Document</h2>
-        <p className={styles.mainSubtitle}>
-          Select the credential category being inspected, then upload the physical document scan or load an official reference profile.
-        </p>
+        <h2 className={styles.mainTitle}>Select Document Category</h2>
       </div>
 
       {/* ── Section 2: Document Category Cards ── */}
@@ -296,11 +321,7 @@ export default function Stage1Intake() {
           <div className={styles.sampleHeader}>
             <div className={styles.sampleTitleRow}>
               <span className={styles.sampleTitle}>Official Reference Profiles</span>
-              <span className={styles.sampleTag}>INSPECTION DOSSIERS</span>
             </div>
-            <p className={styles.sampleSubtitle}>
-              Select any pre-configured reference profile below to inspect verified government registry records, or upload a physical credential below.
-            </p>
           </div>
 
           <div className={styles.sampleGrid}>
@@ -334,14 +355,11 @@ export default function Stage1Intake() {
                 >
                   <div className={styles.sampleTop}>
                     <span className={badgeStyle}>
-                      {sample.badge || 'OFFICIAL RECORD'}
-                    </span>
-                    <span className={styles.vectorModeTag}>
-                      {isBharath ? 'PHYSICAL CREDENTIAL · LIVE MATCH REQUIRED' : 'ARCHIVED RECORD · VERIFIED ON FILE'}
+                      {sample.badge || 'OFFICIAL'}
                     </span>
                   </div>
                   <span className={styles.sampleCardLabel}>
-                    {isLoadingThis ? 'Loading from server...' : sample.label}
+                    {isLoadingThis ? 'Loading...' : sample.label}
                   </span>
                   <p className={styles.sampleCardDesc}>{sample.description}</p>
                 </button>
@@ -354,8 +372,8 @@ export default function Stage1Intake() {
       {/* ── Section 4: Physical Document Upload DropZone & Preview ── */}
       <div className={styles.uploadSection}>
         <div className={styles.uploadSectionHeader}>
-          <h3 className={styles.uploadTitle}>Upload Physical Document File / Scan</h3>
-          <span className={styles.uploadHint}>JPEG, PNG, WebP · High resolution scans or camera captures</span>
+          <h3 className={styles.uploadTitle}>Upload Document</h3>
+          <span className={styles.uploadHint}>JPEG, PNG, WebP</span>
         </div>
 
         {session.error && (
@@ -398,12 +416,12 @@ export default function Stage1Intake() {
 
             <div className={styles.previewDetails}>
               <div className={styles.previewBadgeRow}>
-                <span className={styles.loadedBadge}>DOCUMENT LOADED FOR INSPECTION</span>
+                <span className={styles.loadedBadge}>DOCUMENT READY FOR INSPECTION</span>
                 <span className={styles.categoryBadge}>{profile.label.toUpperCase()}</span>
                 {session.isMockVector ? (
-                  <span className={styles.mockModeBadge}>DIGITAL REGISTRY DOSSIER</span>
+                  <span className={styles.mockModeBadge}>SAMPLE PROFILE</span>
                 ) : (
-                  <span className={styles.realDocBadge}>PHYSICAL CREDENTIAL INTAKE</span>
+                  <span className={styles.realDocBadge}>UPLOADED DOCUMENT</span>
                 )}
               </div>
               <h3 className={styles.previewFileName}>{session.fileName}</h3>
@@ -412,9 +430,9 @@ export default function Stage1Intake() {
               </p>
               <div className={styles.previewNotice}>
                 {session.isMockVector ? (
-                  <span>Click <strong>"Start Automated Inspection"</strong> to run optical character extraction, document integrity checks, and government registry validation.</span>
+                  <span>Click <strong>"Start Automated Inspection"</strong> to verify document validity and official records.</span>
                 ) : (
-                  <span>Click <strong>"Start Automated Inspection"</strong> to verify document integrity. You will then be prompted in Stage 3 to perform live biometric face verification against the credential portrait.</span>
+                  <span>Click <strong>"Start Automated Inspection"</strong> to verify document authenticity, followed by face photo verification in Stage 3.</span>
                 )}
               </div>
             </div>
@@ -434,15 +452,86 @@ export default function Stage1Intake() {
           </div>
         )}
 
-        {/* In-Flight Processing Spinner */}
+        {/* Catchy Animated Inspection Timer */}
         {isProcessing && (
-          <div className={styles.processingCard}>
-            <div className={styles.spinnerRing} />
-            <div className={styles.processingText}>
-              <h4 className={styles.procTitle}>Executing Automated Inspection Suite...</h4>
-              <p className={styles.procDesc}>
-                Running optical character recognition, digital watermark verification, ELA anti-tampering scan, and government registry cross-referencing.
+          <div className={styles.timerCard}>
+            <div className={styles.timerVisualCol}>
+              <div className={styles.gaugeContainer}>
+                <svg className={styles.gaugeSvg} viewBox="0 0 100 100">
+                  <circle
+                    className={styles.gaugeBgCircle}
+                    cx="50"
+                    cy="50"
+                    r="42"
+                  />
+                  <circle
+                    className={styles.gaugeBarCircle}
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    style={{
+                      strokeDashoffset: `${Math.max(0, 264 - (elapsedMs / 2500) * 264)}`,
+                    }}
+                  />
+                </svg>
+                <div className={styles.gaugeCenter}>
+                  <span className={styles.gaugeSeconds}>
+                    {completedSeconds ? `${completedSeconds}s` : `${(elapsedMs / 1000).toFixed(1)}s`}
+                  </span>
+                  <span className={styles.gaugeLabel}>
+                    {completedSeconds ? 'DONE' : 'ELAPSED'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.timerDetailsCol}>
+              <div className={styles.timerStatusHeader}>
+                <span className={styles.timerLiveBadge}>
+                  <span className={`${styles.pulsingDot} ${completedSeconds ? styles.dotCompleted : ''}`} />
+                  {completedSeconds ? 'VERIFICATION COMPLETED' : 'INSPECTION IN PROGRESS'}
+                </span>
+                <span className={styles.timerSecondsBadge}>
+                  ⏱️ {completedSeconds ? `Completed in ${completedSeconds}s` : `${(elapsedMs / 1000).toFixed(1)} seconds`}
+                </span>
+              </div>
+
+              <h4 className={styles.timerMainHeading}>
+                {completedSeconds
+                  ? `Inspection Completed in ${completedSeconds}s! Proceeding to Stage 2...`
+                  : 'Automated Document Inspection Running...'}
+              </h4>
+
+              <p className={styles.timerSubText}>
+                {completedSeconds
+                  ? 'All document validity, tampering checks, and records verified. Proceeding to inspection report.'
+                  : elapsedMs < 400
+                  ? 'Extracting document text and holder identification details...'
+                  : elapsedMs < 800
+                  ? 'Verifying validity dates and document authenticity...'
+                  : elapsedMs < 1200
+                  ? 'Scanning for alterations or photo tampering...'
+                  : 'Cross-checking official records & finalizing verification report...'}
               </p>
+
+              <div className={styles.timerStepsRow}>
+                <div className={`${styles.timerStep} ${elapsedMs >= 50 ? styles.stepActive : ''} ${elapsedMs >= 400 ? styles.stepDone : ''}`}>
+                  <span className={styles.stepNum}>{elapsedMs >= 400 ? '✓' : '1'}</span>
+                  <span>Extract Details</span>
+                </div>
+                <div className={`${styles.timerStep} ${elapsedMs >= 400 ? styles.stepActive : ''} ${elapsedMs >= 800 ? styles.stepDone : ''}`}>
+                  <span className={styles.stepNum}>{elapsedMs >= 800 ? '✓' : '2'}</span>
+                  <span>Verify Dates</span>
+                </div>
+                <div className={`${styles.timerStep} ${elapsedMs >= 800 ? styles.stepActive : ''} ${elapsedMs >= 1200 ? styles.stepDone : ''}`}>
+                  <span className={styles.stepNum}>{elapsedMs >= 1200 ? '✓' : '3'}</span>
+                  <span>Tamper Check</span>
+                </div>
+                <div className={`${styles.timerStep} ${elapsedMs >= 1200 ? styles.stepActive : ''} ${completedSeconds ? styles.stepDone : ''}`}>
+                  <span className={styles.stepNum}>{completedSeconds ? '✓' : '4'}</span>
+                  <span>Official Records</span>
+                </div>
+              </div>
             </div>
           </div>
         )}

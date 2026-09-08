@@ -114,6 +114,8 @@ class OCRRegionRaw(BaseModel):
 #  Top-level response
 # ──────────────────────────────────────────────
 
+from app.schemas.quality import DocumentQualityResponse
+
 class DocumentOCRResponse(BaseModel):
     """
     Canonical response returned by POST /api/v1/verification/ocr for all documents.
@@ -129,6 +131,8 @@ class DocumentOCRResponse(BaseModel):
     traveler: TravelerFields
     mrz: Optional[MRZData] = Field(default_factory=MRZData)
     ocr: OCRMeta
+    quality: Optional[DocumentQualityResponse] = None
+    document_face_image: Optional[str] = None
 
 
 # Backward-compatible alias for existing passport tests/handlers

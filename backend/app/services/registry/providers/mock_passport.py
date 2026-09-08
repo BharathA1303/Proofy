@@ -60,122 +60,41 @@ logger = logging.getLogger(__name__)
 
 _MOCK_LATENCY_MS = 8.0   # Fixed latency for test predictability
 
+from app.services.registry.db.registry_db import government_registry_db
+
 # ──────────────────────────────────────────────────────────────────────────────
-#  DEVELOPMENT MOCK DATA
-#  These records are fictional. No real person's data is represented.
+#  ENCRYPTED GOVERNMENT REGISTRY ADAPTER
+#  People data and blacklisted entities are stored encrypted in SQLite
+#  (app/data/government_registry.db) under separate official/watchlist tables.
 # ──────────────────────────────────────────────────────────────────────────────
 
-_MOCK_RECORDS: dict[str, dict] = {
+class _PassportRecordProxy(dict):
+    """Proxy providing backward compatibility by decrypting SQLite records on demand."""
+    def __getitem__(self, key: str):
+        res = government_registry_db.lookup_document("passport", key)
+        if not res:
+            raise KeyError(key)
+        return res
 
-    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
-    "Z1234567": {
-        "document_number": "Z1234567",
-        "registry_document_status": "ACTIVE",
-        "name": "AARAV SHARMA",
-        "date_of_birth": "1990-05-15",
-        "nationality": "IND",
-        "expiry_date": "2030-01-09",
-        "issuing_authority": "REGIONAL PASSPORT OFFICE DELHI",
-        "gender": "M",
-    },
-    "Z7654321": {
-        "document_number": "Z7654321",
-        "registry_document_status": "REVOKED",
-        "name": "VIKRAM MALHOTRA",
-        "date_of_birth": "1982-11-20",
-        "nationality": "IND",
-        "expiry_date": "2028-04-11",
-        "issuing_authority": "REGIONAL PASSPORT OFFICE MUMBAI",
-        "gender": "M",
-    },
+    def __contains__(self, key: object):
+        if not isinstance(key, str):
+            return False
+        return government_registry_db.lookup_document("passport", key) is not None
 
-    # Synthetic Test Passport (matches create_synthetic_passport.py & sample_passport.jpg)
-    "T9876543": {
-        "document_number": "T9876543",
-        "registry_document_status": "ACTIVE",
-        "name": "TEST USER",
-        "date_of_birth": "1985-06-15",
-        "nationality": "IND",
-        "expiry_date": "2029-12-31",
-        "issuing_authority": "SYNTHETIC TEST AUTHORITY",
-        "gender": "M",
-    },
+    def get(self, key: str, default=None):
+        res = government_registry_db.lookup_document("passport", key)
+        return res if res is not None else default
 
-    # RECORD A: Active, all fields correctly populated
-    "TESTPASS001": {
-        "document_number": "TESTPASS001",
-        "registry_document_status": "ACTIVE",
-        "name": "TEST USER ONE",
-        "date_of_birth": "1990-01-01",
-        "nationality": "IND",
-        "expiry_date": "2030-01-01",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "M",
-    },
+    def keys(self):
+        return government_registry_db.get_all_records_for_type("passport").keys()
 
-    # RECORD B: Expired according to registry
-    "TESTEXPIRED001": {
-        "document_number": "TESTEXPIRED001",
-        "registry_document_status": "EXPIRED",
-        "name": "TEST EXPIRED",
-        "date_of_birth": "1985-06-15",
-        "nationality": "IND",
-        "expiry_date": "2020-01-01",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "F",
-    },
+    def values(self):
+        return government_registry_db.get_all_records_for_type("passport").values()
 
-    # RECORD C: Revoked — significant downstream risk signal
-    "TESTREVOKED001": {
-        "document_number": "TESTREVOKED001",
-        "registry_document_status": "REVOKED",
-        "name": "TEST REVOKED",
-        "date_of_birth": "1975-03-20",
-        "nationality": "IND",
-        "expiry_date": "2028-03-20",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "M",
-    },
+    def items(self):
+        return government_registry_db.get_all_records_for_type("passport").items()
 
-    # RECORD D: Active, but identity fields intentionally mismatch the document
-    # Used to test MISMATCH detection
-    "TESTMISMATCH001": {
-        "document_number": "TESTMISMATCH001",
-        "registry_document_status": "ACTIVE",
-        "name": "DIFFERENT NAME ENTIRELY",    # intentionally different
-        "date_of_birth": "1984-06-15",        # intentionally different year
-        "nationality": "USA",                  # intentionally different
-        "expiry_date": "2029-01-01",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "M",
-    },
-
-    # RECORD E: Suspended
-    "TESTSUSPENDED001": {
-        "document_number": "TESTSUSPENDED001",
-        "registry_document_status": "SUSPENDED",
-        "name": "TEST SUSPENDED",
-        "date_of_birth": "1980-12-10",
-        "nationality": "IND",
-        "expiry_date": "2031-12-10",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "F",
-    },
-
-    # RECORD F: Active, all fields populated for secondary testing
-    "TESTAMBIGUOUS001": {
-        "document_number": "TESTAMBIGUOUS001",
-        "registry_document_status": "ACTIVE",
-        "name": "TEST AMBIGUOUS",
-        "date_of_birth": "1992-07-04",
-        "nationality": "IND",
-        "expiry_date": "2032-07-04",
-        "issuing_authority": "DEVELOPMENT MOCK AUTHORITY",
-        "gender": "M",
-    },
-
-    # TESTNOTFOUND001 — not in dict → returns NOT_FOUND
-}
+_MOCK_RECORDS = _PassportRecordProxy()
 
 
 class MockPassportRegistryProvider(RegistryProvider):
@@ -299,9 +218,17 @@ class MockPassportRegistryProvider(RegistryProvider):
 
         # ── Run field comparator to determine status and field evidence ────
         field_results, registry_status = compare_fields(request, record)
+        if raw.get("is_blacklisted") and record.registry_document_status != "SUSPENDED":
+            registry_status = RegistryStatus.REVOKED
 
         # ── Build evidence list ────────────────────────────────────────────
         evidence = _build_evidence(registry_status, field_results, lookup_key)
+        if raw.get("is_blacklisted"):
+            evidence.insert(0, RegistryEvidence(
+                type="watchlist_hit",
+                severity="critical",
+                description=f"GOVERNMENT WATCHLIST ALERT: {raw.get('watchlist_reason', 'Credential revoked on government border watchlist.')}",
+            ))
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 

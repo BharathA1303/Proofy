@@ -97,6 +97,29 @@ function stubNotImplemented(fnName) {
 /* ------------------------------------------------------------------ */
 
 /**
+ * Pre-flight optical quality gate check (Gate 1).
+ * Calls POST /api/v1/verification/quality-check (< 20ms).
+ *
+ * @param {File} file
+ * @param {string} documentType
+ * @returns {Promise<DocumentQualityResponse>}
+ */
+export async function checkDocumentQuality(file, documentType = 'passport') {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('document_type', documentType);
+
+  try {
+    const { data } = await apiClient.post('/api/v1/verification/quality-check', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  } catch (err) {
+    throw new Error(formatError(err, 'Failed to evaluate document quality.'));
+  }
+}
+
+/**
  * Run OCR extraction on a document image.
  *
  * Phase 1: POST /api/v1/verification/ocr

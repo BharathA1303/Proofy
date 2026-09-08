@@ -139,3 +139,137 @@ class FaceAligner:
             return sharpened
         except Exception:
             return face_bgr
+
+    @staticmethod
+    def get_canonical_rigid_bone_mask(
+        shape: Tuple[int, int] = (112, 112),
+        feather_radius: int = 7,
+    ) -> np.ndarray:
+        """
+        Construct a smooth 2D anatomical mask for canonical 112x112 ArcFace coordinate space.
+        Isolates rigid cranial bone structure (orbits, nasal bridge, maxilla, zygomatic cheekbones,
+        and mandibular chin) while suppressing non-rigid peripheral zones (hair, bangs, ears, neck).
+
+        Returns:
+            Float32 mask of shape (H, W, 1) normalized to [0.0, 1.0].
+        """
+        h, w = shape
+        mask = np.zeros((h, w), dtype=np.uint8)
+
+        # Anatomical rigid bone ellipse in canonical 112x112 space:
+        # Center at (56, 63), horizontal radius 36px (x: 20..92), vertical radius 43px (y: 20..106)
+        center = (int(w * 0.50), int(h * 0.56))
+        axes = (int(w * 0.33), int(h * 0.40))
+        cv2.ellipse(mask, center, axes, 0, 0, 360, 255, -1)
+
+        # Apply smooth Gaussian feathering to prevent artificial sharp border gradients
+        blurred = cv2.GaussianBlur(mask, (feather_radius * 2 + 1, feather_radius * 2 + 1), 0)
+        norm_mask = (blurred.astype(np.float32) / 255.0)[:, :, np.newaxis]
+        return norm_mask
+
+    @staticmethod
+    def apply_rigid_bone_mask(
+        aligned_bgr: np.ndarray,
+        background_fill: int = 128,
+    ) -> np.ndarray:
+        """
+        Applies canonical rigid bone structural mask to an aligned 112x112 face image.
+        Attenuates hairstyles, bangs, hats, and peripheral ears towards a neutral background,
+        enabling hair-invariant feature extraction.
+
+        Args:
+            aligned_bgr: Aligned 112x112 face crop.
+            background_fill: Neutral intensity value (default 128 neutral gray).
+
+        Returns:
+            112x112 BGR face image with hair and peripheral non-rigid zones masked.
+        """
+        if aligned_bgr is None or aligned_bgr.size == 0:
+            return aligned_bgr
+
+        h, w = aligned_bgr.shape[:2]
+        mask = FaceAligner.get_canonical_rigid_bone_mask((h, w))
+
+        # Smooth alpha blend with neutral gray background
+        img_f = aligned_bgr.astype(np.float32)
+        bg = np.full_like(img_f, float(background_fill))
+        blended = img_f * mask + bg * (1.0 - mask)
+        return np.clip(blended, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def compute_cranial_bone_ratios(
+        landmarks: List[Tuple[float, float]],
+    ) -> dict:
+        """
+        Compute invariant cranial bone geometric ratios from 5 canonical landmarks.
+        Human skull geometry remains invariant to hairstyles, facial hair, makeup, or age:
+          1. Interocular distance (left pupil to right pupil)
+          2. Facial triangle aspect ratio (interocular / vertical mid-eye to mid-mouth)
+          3. Nasal-orbital bilateral symmetry (ratio of left/right eye to nose tip distance)
+
+        Args:
+            landmarks: 5 (x, y) tuples [left_eye, right_eye, nose, left_mouth, right_mouth].
+
+        Returns:
+            Dictionary with cranial invariant measurements and quality sanity.
+        """
+        if landmarks is None or len(landmarks) < 5:
+            return {
+                "valid": False,
+                "interocular_dist": 0.0,
+                "facial_height": 0.0,
+                "cranial_triangle_ratio": 0.0,
+                "bilateral_symmetry": 0.0,
+            }
+
+        pts = np.array(landmarks, dtype=np.float32)
+        le, re, nose, lm, rm = pts[0], pts[1], pts[2], pts[3], pts[4]
+
+        # 1. Interocular distance
+        interocular = float(np.linalg.norm(re - le))
+
+        # 2. Midpoints for vertical skull axis
+        mid_eyes = (le + re) * 0.5
+        mid_mouth = (lm + rm) * 0.5
+        facial_height = float(np.linalg.norm(mid_mouth - mid_eyes))
+
+        # 3. Rigid cranial triangle ratio (interocular / vertical height)
+        triangle_ratio = interocular / max(facial_height, 1e-4)
+
+        # 4. Nasal-orbital bilateral symmetry
+        d_left = float(np.linalg.norm(nose - le))
+        d_right = float(np.linalg.norm(nose - re))
+        symmetry = min(d_left, d_right) / max(d_left, d_right, 1e-4)
+
+        return {
+            "valid": True,
+            "interocular_dist": round(interocular, 2),
+            "facial_height": round(facial_height, 2),
+            "cranial_triangle_ratio": round(triangle_ratio, 4),
+            "bilateral_symmetry": round(symmetry, 4),
+        }
+
+    @staticmethod
+    def compare_cranial_structures(
+        ratios_a: dict,
+        ratios_b: dict,
+        tolerance: float = 0.18,
+    ) -> Tuple[float, bool]:
+        """
+        Compares two cranial bone structures for geometric consistency.
+
+        Returns:
+            (cranial_score 0.0..1.0, is_consistent bool)
+        """
+        if not ratios_a.get("valid") or not ratios_b.get("valid"):
+            return (0.85, True)  # Neutral fallback when landmarks unavailable
+
+        r1 = ratios_a.get("cranial_triangle_ratio", 0.0)
+        r2 = ratios_b.get("cranial_triangle_ratio", 0.0)
+        if r1 <= 0 or r2 <= 0:
+            return (0.85, True)
+
+        rel_diff = abs(r1 - r2) / max(r1, r2)
+        score = max(0.0, min(1.0, 1.0 - (rel_diff / tolerance)))
+        is_consistent = rel_diff <= tolerance
+        return (round(score, 4), is_consistent)

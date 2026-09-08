@@ -44,6 +44,8 @@ export const ACTIONS = {
   SET_IS_MOCK_VECTOR:    'SET_IS_MOCK_VECTOR',
   SET_CAPTURED_LIVE_IMAGE:'SET_CAPTURED_LIVE_IMAGE',
   SET_DOCUMENT_FACE_IMAGE:'SET_DOCUMENT_FACE_IMAGE',
+  SET_VERIFICATION_DURATION:'SET_VERIFICATION_DURATION',
+  SET_DOCUMENT_QUALITY:  'SET_DOCUMENT_QUALITY',
 
   SET_FORENSIC_EVIDENCE: 'SET_FORENSIC_EVIDENCE',
   SET_RISK:              'SET_RISK',
@@ -329,6 +331,12 @@ export function verificationReducer(state, action) {
 
     case ACTIONS.SET_DOCUMENT_FACE_IMAGE:
       return { ...state, documentFaceImage: action.payload };
+
+    case ACTIONS.SET_VERIFICATION_DURATION:
+      return { ...state, verificationDuration: action.payload };
+
+    case ACTIONS.SET_DOCUMENT_QUALITY:
+      return { ...state, documentQuality: action.payload };
 
     /**
      * CLEAR_ERROR

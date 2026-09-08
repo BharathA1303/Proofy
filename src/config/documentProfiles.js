@@ -58,7 +58,7 @@ const COMMON_FIELDS = {
   issuedDate:  { key: 'issuedDate',  label: 'Issue Date',       placeholder: '—' },
   placeOfBirth:{ key: 'placeOfBirth',label: 'Place of Birth',   placeholder: '—' },
   gender:      { key: 'gender',      label: 'Gender',           placeholder: '—' },
-  mrz:         { key: 'mrz',         label: 'MRZ Line',         placeholder: '—' },
+  mrz:         { key: 'mrz',         label: 'Machine-Readable Line', placeholder: '—' },
   vehicleClass:{ key: 'vehicleClass',label: 'Vehicle Class',    placeholder: '—' },
   permitType:  { key: 'permitType',  label: 'Permit Type',      placeholder: '—' },
   portOfEntry: { key: 'portOfEntry', label: 'Port of Entry',    placeholder: '—' },
@@ -75,7 +75,7 @@ const COMMON_FIELDS = {
   maskedIdentityNumber: { key: 'maskedIdentityNumber', label: 'National ID #', placeholder: '—' },
   yearOfBirth:    { key: 'yearOfBirth',    label: 'Year of Birth',    placeholder: '—' },
   address:        { key: 'address',        label: 'Address',          placeholder: '—' },
-  qrPayload:      { key: 'qrPayload',      label: 'QR Payload',       placeholder: '—' },
+  qrPayload:      { key: 'qrPayload',      label: 'QR Code Data',     placeholder: '—' },
 };
 
 /**

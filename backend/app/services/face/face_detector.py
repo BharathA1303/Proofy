@@ -237,5 +237,29 @@ class FaceDetector:
 
         return image_bgr[y1:y2, x1:x2].copy()
 
+    @staticmethod
+    def crop_portrait(
+        image_bgr: np.ndarray,
+        box: DetectedFaceBox,
+        margin_top: float = 0.25,
+        margin_bot: float = 0.28,
+        margin_side: float = 0.22,
+    ) -> np.ndarray:
+        """
+        Extract portrait-proportioned crop with context margins,
+        safely bounded to image boundaries.
+        """
+        h, w = image_bgr.shape[:2]
+        mx = int(box.width * margin_side)
+        my_top = int(box.height * margin_top)
+        my_bot = int(box.height * margin_bot)
+
+        x1 = max(0, box.x - mx)
+        y1 = max(0, box.y - my_top)
+        x2 = min(w, box.x + box.width + mx)
+        y2 = min(h, box.y + box.height + my_bot)
+
+        return image_bgr[y1:y2, x1:x2].copy()
+
 
 face_detector = FaceDetector()

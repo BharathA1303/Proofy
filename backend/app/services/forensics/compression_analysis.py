@@ -34,9 +34,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 # Relative difference in blockiness score between regions before we call
-# it a notable inconsistency. Chosen conservatively for this prototype.
-INCONSISTENCY_RATIO_SUSPICIOUS = 1.8
-INCONSISTENCY_RATIO_HIGH = 3.0
+# it a notable inconsistency. Chosen conservatively to accommodate natural
+# frequency differences between smooth portrait photos and high-contrast text.
+INCONSISTENCY_RATIO_SUSPICIOUS = 5.0
+INCONSISTENCY_RATIO_HIGH = 10.0
 
 JPEG_BLOCK = 8
 

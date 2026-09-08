@@ -127,6 +127,7 @@ html {
   scroll-behavior: smooth;
   background-color: var(--color-bg);
   color-scheme: light;
+  overflow-x: hidden;
 }
 
 body {
@@ -138,6 +139,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* ---------- Typography Reset ---------- */
@@ -238,4 +247,48 @@ textarea:focus {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ---------- Global Print Stylesheet ---------- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  /* Hide web application header, stepper, buttons, and navigation chrome */
+  header,
+  nav,
+  [class*="header"],
+  [class*="headerInner"],
+  [class*="stepperContainer"],
+  [class*="stepperTrack"],
+  [class*="stepperRight"],
+  [class*="resetBtn"],
+  [class*="removeBtn"],
+  [class*="actionBar"],
+  button {
+    display: none !important;
+  }
+
+  body, html, #root {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+  }
+
+  main, [class*="main"], [class*="workspace"], [class*="stageContent"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
 }

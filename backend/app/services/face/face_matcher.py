@@ -87,17 +87,17 @@ def compare_face_embeddings(
             sim_rounded, operating_threshold,
         )
 
-        # Margin for borderline/inconclusive classification
-        inconclusive_lower = max(0.0, operating_threshold - 0.05)
+        # Margin for borderline/inconclusive classification (calibrated for cross-domain scanned IDs)
+        inconclusive_lower = max(0.0, operating_threshold - 0.06)
 
         if sim_rounded >= operating_threshold:
-            # Calibrated confidence for cross-domain match: maps [threshold, 0.65] to [0.75, 0.99]
-            pct = 0.75 + min(0.24, ((sim_rounded - operating_threshold) / max(0.65 - operating_threshold, 0.05)) * 0.24)
+            # Calibrated confidence for cross-domain match: maps [threshold, 0.60] to [0.76, 0.99]
+            pct = 0.76 + min(0.23, ((sim_rounded - operating_threshold) / max(0.60 - operating_threshold, 0.05)) * 0.23)
             confidence_score = round(pct, 4)
             status = "match"
             explanation = (
                 f"Facial biometric match verified (similarity {sim_rounded:.2f} >= threshold {operating_threshold:.2f}, "
-                f"confidence {int(confidence_score * 100)}%). Document photograph and live capture exhibit high feature correspondence."
+                f"confidence {int(confidence_score * 100)}%). Document photograph and live capture exhibit verified identity correspondence."
             )
         elif sim_rounded >= inconclusive_lower:
             pct = 0.50 + ((sim_rounded - inconclusive_lower) / max(operating_threshold - inconclusive_lower, 0.01)) * 0.24

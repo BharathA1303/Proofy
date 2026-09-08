@@ -178,6 +178,18 @@ class FaceMatchResult(BaseModel):
         default="",
         description="Deterministic explanation of comparison result",
     )
+    hair_invariant: bool = Field(
+        default=True,
+        description="Indicates whether canonical rigid cranial bone structural masking was applied to eliminate hair/bangs interference",
+    )
+    cranial_bone_score: Optional[float] = Field(
+        default=None,
+        description="Rigid cranial bone structural similarity ratio (0.0 to 1.0)",
+    )
+    cranial_metrics: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Detailed rigid cranial bone ratio breakdown (interocular, facial height, triangle ratio, symmetry)",
+    )
 
 
 class FaceVerificationResponse(BaseModel):

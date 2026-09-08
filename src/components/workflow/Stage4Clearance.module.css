@@ -4,6 +4,11 @@
   gap: var(--space-6);
 }
 
+.printHeader,
+.printFooter {
+  display: none;
+}
+
 .headerBlock {
   display: flex;
   flex-direction: column;
@@ -101,6 +106,27 @@
   flex-direction: column;
 }
 
+.heroMetaBadges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
+.heroSpeedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
 .heroPreTitle {
   font-size: 11px;
   font-weight: 800;
@@ -183,6 +209,15 @@
   font-weight: 600;
 }
 
+.stampSpeed {
+  font-size: 9px;
+  font-weight: 800;
+  color: currentColor;
+  margin: 2px 0;
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.03em;
+}
+
 .stampId {
   font-size: 8px;
   font-family: var(--font-family-mono);
@@ -192,8 +227,20 @@
 /* Dossier Grid */
 .dossierGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+  .dossierGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dossierGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dossierCard {
@@ -346,7 +393,8 @@
 .miniPhoto {
   width: 90px;
   height: 110px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #0f172a;
   border-radius: var(--radius-md);
   border: 1.5px solid #cbd5e1;
 }
@@ -423,6 +471,12 @@
 .dotRed {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.dotSpeed {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 11px;
 }
 
 .checkContent {
@@ -520,17 +574,288 @@
 @media (max-width: 900px) {
   .decisionHero {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    text-align: center;
+    gap: var(--space-4);
+  }
+  .heroLeft {
+    flex-direction: column;
+    align-items: center;
+  }
+  .heroMetaBadges {
+    justify-content: center;
+  }
+  .stampBorder {
+    align-self: center;
+    margin: 0 auto;
   }
   .actionBar {
     flex-direction: column;
     gap: var(--space-3);
     align-items: stretch;
+    padding: var(--space-4);
   }
   .actionRight {
     flex-direction: column;
   }
   .nextDocBtn, .printBtn, .secondaryBtn {
     justify-content: center;
+    width: 100%;
+  }
+}
+
+/* =============================================================
+   Dedicated Official Print Certificate Stylesheet
+   ============================================================= */
+@media print {
+  .printHeader {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0f172a;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .printBrandRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .printBrandLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .printLogoBox {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .printLogoImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .printBrandTitle {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .printBrandSub {
+    font-size: 9.5px;
+    color: #475569;
+    margin: 2px 0 0 0;
+  }
+
+  .printStatusStamp {
+    flex-shrink: 0;
+  }
+
+  .printBadgeApproved {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    color: #15803d;
+    border: 2px solid #15803d;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    background: #f0fdf4 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printBadgeRejected {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    color: #b91c1c;
+    border: 2px solid #b91c1c;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    background: #fef2f2 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printMetaGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printMetaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .printMetaLabel {
+    font-size: 8px;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.06em;
+  }
+
+  .printMetaValue {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0f172a;
+    font-family: var(--font-family-mono);
+  }
+
+  .printMetaValueSpeed {
+    font-size: 10px;
+    font-weight: 800;
+    color: #1d4ed8;
+  }
+
+  /* Hide Web Chrome & Interactive Buttons */
+  .headerBlock,
+  .actionBar {
+    display: none !important;
+  }
+
+  .stageContainer {
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .decisionHero {
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    border-width: 1.5px !important;
+    margin-bottom: 8px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .heroTitle {
+    font-size: 1.15rem !important;
+    margin-bottom: 3px !important;
+  }
+
+  .heroExplanation {
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    max-width: 520px !important;
+  }
+
+  .stampBorder {
+    padding: 6px 12px !important;
+    border-width: 2px !important;
+  }
+
+  .stampStatus {
+    font-size: 12px !important;
+  }
+
+  /* Clean, Structured 2-column + full-width layout */
+  .dossierGrid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .dossierCard {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Card C (Security Audit) spans both columns at bottom for single-page fit */
+  .dossierCard:nth-child(3) {
+    grid-column: 1 / -1 !important;
+  }
+
+  .cardHeader {
+    padding: 5px 10px !important;
+    background: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cardTitle {
+    font-size: 11px !important;
+  }
+
+  .cardBody {
+    padding: 8px 10px !important;
+    gap: 5px !important;
+  }
+
+  .rowItem {
+    padding-bottom: 3px !important;
+    font-size: 10px !important;
+  }
+
+  .miniPhoto {
+    width: 60px !important;
+    height: 72px !important;
+  }
+
+  .dossierCard:nth-child(3) .checklist {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px 14px !important;
+  }
+
+  .checkName {
+    font-size: 10px !important;
+  }
+
+  .checkStatus {
+    font-size: 9px !important;
+  }
+
+  .printFooter {
+    display: block !important;
+    margin-top: 10px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .printFooterDivider {
+    height: 1px;
+    background: #cbd5e1;
+    margin-bottom: 4px;
+  }
+
+  .printFooterText {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 8px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
   }
 }

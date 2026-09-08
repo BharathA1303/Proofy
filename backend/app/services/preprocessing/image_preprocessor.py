@@ -32,7 +32,8 @@ from PIL import Image, ImageOps
 logger = logging.getLogger(__name__)
 
 # Maximum dimension (width or height) before we downscale
-_MAX_DIMENSION = 4000
+# Optimized to 1600px for rapid high-accuracy OCR throughput without memory bloat
+_MAX_DIMENSION = 1600
 # Minimum dimension — warn if smaller (may degrade OCR quality)
 _MIN_DIMENSION = 200
 

@@ -35,7 +35,7 @@ def _crop_to_b64(crop_np: Optional[np.ndarray]) -> Optional[str]:
     if crop_np is None or not isinstance(crop_np, np.ndarray) or crop_np.size == 0:
         return None
     try:
-        success, buf = cv2.imencode(".jpg", crop_np, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        success, buf = cv2.imencode(".jpg", crop_np, [cv2.IMWRITE_JPEG_QUALITY, 95])
         if success:
             return f"data:image/jpeg;base64,{base64.b64encode(buf.tobytes()).decode('ascii')}"
     except Exception:
@@ -56,10 +56,12 @@ from app.schemas.face_verification import (
 from app.services.face.arcface_embedding import ArcFaceEmbeddingModel
 from app.services.face.face_aligner import FaceAligner
 from app.services.face.face_detector import FaceDetector, face_detector
+from app.services.face.face_enhancer import DocumentFaceEnhancer
 from app.services.face.face_matcher import compare_face_embeddings
 from app.services.face.face_quality import FaceQualityResult, evaluate_face_quality
 from app.services.face.minifasnet_pad import MiniFASNetPAD
 from app.services.face.secondary_pad import SecondaryOpticalPAD
+from app.services.face.session_store import session_document_store
 
 logger = logging.getLogger(__name__)
 
@@ -138,30 +140,51 @@ class FaceVerificationService:
                 summary="Failed to decode biometric image payloads.",
             )
 
-        # ── 2. Document Face Localization ─────────────────────────────
-        doc_detect = self.detector.detect_faces(doc_img, is_document=True)
-        if doc_detect.face_count == 0:
-            logger.warning("No face detected on document (session=%s)", verification_id)
-            return self._build_document_face_missing_response(
-                verification_id, document_type, doc_detect.detector_used
-            )
+        # ── 2. Document Face Localization & Fast-Path Cache ───────────
+        cached_face = session_document_store.get_face_cache(verification_id)
+        doc_aligned = None
+        doc_embedding = None
 
-        if doc_detect.face_count > 1:
-            logger.warning("Multiple faces (%d) detected on document", doc_detect.face_count)
-            return self._build_multiple_faces_response(
-                verification_id, document_type, is_document=True, count=doc_detect.face_count
-            )
+        if cached_face is not None:
+            doc_box = cached_face["doc_box"]
+            doc_crop = cached_face["doc_crop"]
+            doc_aligned = cached_face.get("doc_aligned")
+            doc_embedding = cached_face.get("doc_embedding")
+            doc_detector_used = cached_face.get("detector_used", "InsightFace-SCRFD-10G")
+            doc_quality = evaluate_face_quality(doc_crop, is_document=True)
+            logger.info("Fast-path: Reused cached document face for session=%s", verification_id)
+        else:
+            doc_detect = self.detector.detect_faces(doc_img, is_document=True)
+            if doc_detect.face_count == 0:
+                logger.warning("No face detected on document (session=%s)", verification_id)
+                return self._build_document_face_missing_response(
+                    verification_id, document_type, doc_detect.detector_used
+                )
 
-        doc_box = doc_detect.faces[0]
-        doc_crop = self.detector.crop_face(doc_img, doc_box)
-        doc_quality = evaluate_face_quality(doc_crop, is_document=True)
+            if doc_detect.face_count > 1:
+                logger.warning("Multiple faces (%d) detected on document", doc_detect.face_count)
+                return self._build_multiple_faces_response(
+                    verification_id, document_type, is_document=True, count=doc_detect.face_count
+                )
+
+            doc_box = doc_detect.faces[0]
+            doc_detector_used = doc_detect.detector_used
+            # Extract portrait crop with balanced margins (with mock fallback to crop_face)
+            doc_crop_candidate = getattr(self.detector, "crop_portrait", self.detector.crop_face)(doc_img, doc_box)
+            if isinstance(doc_crop_candidate, np.ndarray):
+                doc_crop_raw = doc_crop_candidate
+            else:
+                doc_crop_raw = self.detector.crop_face(doc_img, doc_box)
+            # Inbuilt Super-Resolution & Quality Enhancement Layer
+            doc_crop = DocumentFaceEnhancer.enhance_portrait_crop(doc_crop_raw)
+            doc_quality = evaluate_face_quality(doc_crop, is_document=True)
 
         # ── 3. Live Camera Face Localization ──────────────────────────
         live_detect = self.detector.detect_faces(live_img, is_document=False)
         if live_detect.face_count == 0:
             logger.warning("No face detected in live capture (session=%s)", verification_id)
             return self._build_live_face_missing_response(
-                verification_id, document_type, doc_quality, doc_detect.detector_used, live_detect.detector_used
+                verification_id, document_type, doc_quality, doc_detector_used, live_detect.detector_used
             )
 
         if live_detect.face_count > 1:
@@ -184,16 +207,10 @@ class FaceVerificationService:
                 else:
                     s_img = cv2.imdecode(np.frombuffer(b, np.uint8), cv2.IMREAD_COLOR)
                 if s_img is not None:
-                    s_det = self.detector.detect_faces(s_img, is_document=False)
-                    if s_det.has_single_face:
-                        s_crop = self.detector.crop_face(s_img, s_det.faces[0])
-                        sequence_items.append((s_crop, s_det.faces[0].bbox, s_img))
-                        sequence_crops.append(s_crop)
-                    else:
-                        # Use same bounding box as live anchor if secondary frame detection misses
-                        s_crop = self.detector.crop_face(s_img, live_box)
-                        sequence_items.append((s_crop, live_box.bbox, s_img))
-                        sequence_crops.append(s_crop)
+                    # Fast sequence crop reusing anchor live_box (avoids 400ms SCRFD re-detection per frame)
+                    s_crop = self.detector.crop_face(s_img, live_box)
+                    sequence_items.append((s_crop, live_box.bbox, s_img))
+                    sequence_crops.append(s_crop)
 
         # ── 5. Quality Gate Evaluation ────────────────────────────────
         if not doc_quality.is_acceptable or not live_quality.is_acceptable:
@@ -207,7 +224,7 @@ class FaceVerificationService:
                 document_type,
                 doc_quality,
                 live_quality,
-                doc_detect.detector_used,
+                doc_detector_used,
                 live_detect.detector_used,
             )
 
@@ -231,10 +248,11 @@ class FaceVerificationService:
 
         # ── 7. Face Alignment to ArcFace Canonical Template ───────────
         try:
-            if doc_box.landmarks and len(doc_box.landmarks) == 5:
-                doc_aligned = self.aligner.align_face_5point(doc_img, doc_box.landmarks, (112, 112))
-            else:
-                doc_aligned = self.aligner.align_bbox_fallback(doc_img, doc_box.bbox, target_size=(112, 112))
+            if doc_aligned is None:
+                if doc_box.landmarks and len(doc_box.landmarks) == 5:
+                    doc_aligned = self.aligner.align_face_5point(doc_img, doc_box.landmarks, (112, 112))
+                else:
+                    doc_aligned = self.aligner.align_bbox_fallback(doc_img, doc_box.bbox, target_size=(112, 112))
 
             if live_box.landmarks and len(live_box.landmarks) == 5:
                 live_aligned = self.aligner.align_face_5point(live_img, live_box.landmarks, (112, 112))
@@ -258,9 +276,10 @@ class FaceVerificationService:
             )
 
         try:
-            # Enhance document facial contrast and suppress print/scanning noise for robust cross-domain matching
-            doc_aligned_enh = self.aligner.enhance_document_face(doc_aligned)
-            doc_embedding = self.embedding_model.get_embedding(doc_aligned_enh)
+            if doc_embedding is None:
+                # Enhance document facial contrast and suppress print/scanning noise for robust cross-domain matching
+                doc_aligned_enh = self.aligner.enhance_document_face(doc_aligned)
+                doc_embedding = self.embedding_model.get_embedding(doc_aligned_enh)
             live_embedding = self.embedding_model.get_embedding(live_aligned)
         except Exception as exc:
             logger.error("Embedding generation failed: %s", exc)
@@ -270,6 +289,17 @@ class FaceVerificationService:
                 status="failed",
                 overall="PROCESSING_ERROR",
                 summary=f"Feature extraction failure: {exc}",
+            )
+
+        # Store pre-extracted document features in ephemeral cache for instantaneous re-verifications
+        if cached_face is None:
+            session_document_store.set_face_cache(
+                verification_id=verification_id,
+                doc_box=doc_box,
+                doc_crop=doc_crop,
+                doc_aligned=doc_aligned,
+                doc_embedding=doc_embedding,
+                detector_used=doc_detector_used,
             )
 
         # ── 9. Cosine Similarity Matching ─────────────────────────────
@@ -323,7 +353,7 @@ class FaceVerificationService:
             status="completed",
             overall_assessment=overall_status,
             overall_biometric_status=overall_status,
-            document_face=self._to_doc_face_result(doc_quality, doc_detect.detector_used),
+            document_face=self._to_doc_face_result(doc_quality, doc_detector_used),
             live_face=self._to_live_face_result(live_quality, live_detect.detector_used),
             anti_spoof=AntiSpoofResult(
                 model=pad_result.model_name,

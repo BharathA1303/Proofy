@@ -138,10 +138,37 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.stationTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .stationTitle {
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-primary);
+}
+
+.viewToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.viewToggleBtn:hover {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .stationTag {
@@ -158,17 +185,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f172a;
-  padding: var(--space-4);
+  background: #0b1120;
+  padding: var(--space-3);
   overflow: hidden;
+  position: relative;
 }
 
+/* Extracted Face Photo — natural proportion, centered, never cut off */
 .facePhoto {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Full Document Credential Preview — 100% visible, zero cutoffs */
+.fullDocumentImage {
+  max-width: 96%;
+  max-height: 96%;
   object-fit: contain;
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .facePlaceholder {
@@ -227,31 +267,170 @@
   object-fit: cover;
 }
 
-/* Workstation Face Oval Guide */
-.faceOvalGuide {
+/* Modern Biometric Viewfinder HUD */
+.biometricHud {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 160px;
-  height: 220px;
-  border: 2.5px dashed #38bdf8;
-  border-radius: 50%;
-  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+  inset: 0;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.guideText {
+/* Top HUD status badge */
+.hudTopBadge {
   position: absolute;
-  bottom: 16px;
-  background: rgba(15, 23, 42, 0.85);
+  top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 9999px;
+  color: #38bdf8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hudPulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: hudPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hudPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.45;
+  }
+}
+
+/* Central Reticle Box */
+.reticleBox {
+  width: 220px;
+  height: 250px;
+  position: relative;
+  border: 1px dashed rgba(56, 189, 248, 0.22);
+  border-radius: 14px;
+}
+
+/* Sleek Corner Brackets */
+.reticleCorner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-color: #38bdf8;
+  border-style: solid;
+  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+}
+
+.cornerTL {
+  top: -2px;
+  left: -2px;
+  border-width: 3.5px 0 0 3.5px;
+  border-top-left-radius: 10px;
+}
+
+.cornerTR {
+  top: -2px;
+  right: -2px;
+  border-width: 3.5px 3.5px 0 0;
+  border-top-right-radius: 10px;
+}
+
+.cornerBL {
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 3.5px 3.5px;
+  border-bottom-left-radius: 10px;
+}
+
+.cornerBR {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 3.5px 3.5px 0;
+  border-bottom-right-radius: 10px;
+}
+
+/* Animated Biometric Scan Beam */
+.scanBeam {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.2) 15%, #38bdf8 50%, rgba(56, 189, 248, 0.2) 85%, transparent 100%);
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px rgba(56, 189, 248, 0.4);
+  animation: scanBeamAnim 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes scanBeamAnim {
+  0% {
+    top: 8px;
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(100% - 10px);
+    opacity: 0.35;
+  }
+}
+
+/* Subtle Crosshair Alignment Ticks */
+.crosshairH {
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  right: -6px;
+  height: 1px;
+  background: linear-gradient(90deg, #38bdf8 0%, rgba(56, 189, 248, 0.1) 20%, transparent 40%, transparent 60%, rgba(56, 189, 248, 0.1) 80%, #38bdf8 100%);
+  transform: translateY(-50%);
+  opacity: 0.65;
+}
+
+.crosshairV {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  bottom: -6px;
+  width: 1px;
+  background: linear-gradient(180deg, #38bdf8 0%, rgba(56, 189, 248, 0.1) 20%, transparent 40%, transparent 60%, rgba(56, 189, 248, 0.1) 80%, #38bdf8 100%);
+  transform: translateX(-50%);
+  opacity: 0.65;
+}
+
+/* Bottom Guidance Pill */
+.guidePill {
+  position: absolute;
+  bottom: 14px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 999px;
   letter-spacing: 0.04em;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .capturedPhotoContainer {
@@ -261,18 +440,26 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  background: #0b1120;
 }
 
-.capturedTag {
+.capturedTagBadge {
   position: absolute;
-  bottom: 12px;
-  background: rgba(15, 23, 42, 0.85);
-  color: #38bdf8;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
+  bottom: 14px;
+  background: rgba(16, 185, 129, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 9999px;
   letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 /* Standby Camera Box */
@@ -543,18 +730,31 @@
 }
 
 @media (max-width: 900px) {
+  .titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .statusPill {
+    align-self: flex-start;
+  }
   .comparisonGrid {
     grid-template-columns: 1fr;
   }
   .resultsGrid {
     grid-template-columns: 1fr;
   }
+  .faceDisplayBox {
+    height: 280px;
+  }
   .actionBar {
     flex-direction: column;
     gap: var(--space-3);
     align-items: stretch;
+    padding: var(--space-4);
   }
   .proceedBtn, .backBtn {
     justify-content: center;
+    width: 100%;
   }
 }

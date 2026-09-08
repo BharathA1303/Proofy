@@ -9,7 +9,6 @@
  *   Stage 4: Clearance Decision (Official Disposition Dossier)
  */
 import { useVerification } from '../../state/verification/useVerification.js';
-import StageStepper from '../workflow/StageStepper.jsx';
 import Stage1Intake from '../workflow/Stage1Intake.jsx';
 import Stage2Inspection from '../workflow/Stage2Inspection.jsx';
 import Stage3Biometrics from '../workflow/Stage3Biometrics.jsx';
@@ -27,9 +26,6 @@ export default function DocumentWorkspace() {
       role="tabpanel"
       aria-labelledby={`tab-${session.documentType}`}
     >
-      {/* 4-Stage Workflow Stepper */}
-      <StageStepper />
-
       {/* Progressive Stage Content */}
       <div className={styles.stageContent}>
         {currentStage === 1 && <Stage1Intake />}

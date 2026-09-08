@@ -1,3 +1,5 @@
+/* StageStepper.module.css */
+
 .stepperContainer {
   display: flex;
   align-items: center;
@@ -11,42 +13,55 @@
   gap: var(--space-4);
 }
 
+/* Header Integration Mode (Transparent & Compact) */
+.headerMode {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
 .stepperTrack {
   display: flex;
   align-items: center;
   flex: 1;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .stageWrapper {
   display: flex;
   align-items: center;
-  flex: 1;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .stepButton {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  gap: 8px;
+  padding: 5px 10px;
   border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: transparent;
   transition: all var(--transition-fast);
   cursor: pointer;
   text-align: left;
-  flex: 1;
+  white-space: nowrap;
+}
+
+.headerMode .stepButton {
+  padding: 4px 8px;
+  border-radius: 8px;
 }
 
 .stepButton:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .iconCircle {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -61,15 +76,15 @@
 }
 
 .stepTitle {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .stepSubtitle {
-  font-size: var(--font-size-2xs);
+  font-size: 10px;
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 /* Active State */
@@ -81,22 +96,24 @@
 .stepActive .iconCircle {
   background: var(--color-accent);
   color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .stepActive .stepTitle {
   color: var(--color-accent);
+  font-weight: 700;
 }
 
 .activePill {
-  margin-left: auto;
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 8px;
+  font-weight: 800;
   letter-spacing: 0.05em;
   background: var(--color-accent);
   color: #ffffff;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 999px;
+  line-height: 1.1;
+  margin-left: 2px;
 }
 
 /* Completed State */
@@ -112,6 +129,7 @@
 
 .stepCompleted .stepTitle {
   color: #166534;
+  font-weight: 600;
 }
 
 /* Accessible Unlocked */
@@ -121,6 +139,10 @@
 
 .stepAccessible .iconCircle {
   background: #e2e8f0;
+  color: var(--color-text-secondary);
+}
+
+.stepAccessible .stepTitle {
   color: var(--color-text-secondary);
 }
 
@@ -137,7 +159,7 @@
 /* Connector Line */
 .connectorLine {
   height: 2px;
-  flex: 0 0 24px;
+  flex: 0 0 14px;
   background: #e2e8f0;
   border-radius: 2px;
   transition: background var(--transition-fast);
@@ -157,7 +179,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: 4px 10px;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
@@ -174,12 +196,85 @@
   border-color: #fca5a5;
 }
 
-@media (max-width: 1024px) {
-  .stepperContainer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .connectorLine {
-    display: none;
-  }
+/* =============================================================
+   Mobile Ribbon Strip
+   ============================================================= */
+.mobileStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.mobileStrip::-webkit-scrollbar {
+  display: none;
+}
+
+.mobilePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.mobilePillIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobilePillText {
+  line-height: 1;
+}
+
+.mobilePillActive {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #93c5fd;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.12);
+}
+
+.mobileActiveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #2563eb;
+}
+
+.mobilePillCompleted {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.mobilePillAccessible {
+  background: #ffffff;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.mobilePillAccessible:hover {
+  background: #f8fafc;
+}
+
+.mobilePillLocked {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  opacity: 0.55;
+  cursor: not-allowed;
 }

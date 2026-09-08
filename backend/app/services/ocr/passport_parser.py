@@ -141,6 +141,10 @@ def _normalize_mrz_line(text: str) -> str:
     # Correct dropped '<' after passport indicator (e.g. PINDSHARMA -> P<INDSHARMA)
     if re.match(r"^P[A-Z]{3}", normalized) and not normalized.startswith("P<") and "<" in normalized:
         normalized = f"P<{normalized[1:]}"
+    # Correct dropped '<' between 8-char passport number and check digit (e.g. Z12345671IND -> Z1234567<1IND)
+    m2 = re.match(r"^([A-Z0-9]{8})([0-9])([A-Z]{3})(\d{6}.*)", normalized)
+    if m2:
+        normalized = f"{m2.group(1)}<{m2.group(2)}{m2.group(3)}{m2.group(4)}"
     return normalized
 
 

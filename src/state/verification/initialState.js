@@ -100,6 +100,8 @@ export function createInitialSession(documentType = DOCUMENT_TYPES.PASSPORT) {
     isMockVector: false,
     capturedLiveImage: null,
     documentFaceImage: null,
+    verificationDuration: null,
+    documentQuality: null,
 
     /** Active pipeline milestone: 0 = standby, 1 = extraction, 2 = validation, 3 = forensics, 4 = biometrics, 5 = registryRisk */
     activeMilestone: 0,

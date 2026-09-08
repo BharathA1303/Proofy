@@ -31,106 +31,39 @@ from app.services.documents.border_permit.border_permit_field_normalizer import 
 )
 from app.services.registry.base import RegistryProvider
 from app.services.registry.comparator import compare_fields
+from app.services.registry.db.registry_db import government_registry_db
 
 logger = logging.getLogger(__name__)
 
 _MOCK_LATENCY_MS = 50.0
 
-_MOCK_BP_RECORDS: dict[str, dict] = {
-    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
-    "BP-2026-880011": {
-        "document_number": "BP-2026-880011",
-        "registry_document_status": "ACTIVE",
-        "name": "ELENA ROSTOVA",
-        "date_of_birth": "1991-10-12",
-        "expiry_date": "2026-12-31",
-        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
-        "passport_number": "Z1234567",
-    },
-    "BP2026880011": {
-        "document_number": "BP2026880011",
-        "registry_document_status": "ACTIVE",
-        "name": "ELENA ROSTOVA",
-        "date_of_birth": "1991-10-12",
-        "expiry_date": "2026-12-31",
-        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
-        "passport_number": "Z1234567",
-    },
-    "BP-2025-443322": {
-        "document_number": "BP-2025-443322",
-        "registry_document_status": "REVOKED",
-        "name": "MARCUS VANCE",
-        "date_of_birth": "1983-06-20",
-        "expiry_date": "2026-06-01",
-        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
-        "passport_number": "Z7654321",
-    },
-    "BP2025443322": {
-        "document_number": "BP2025443322",
-        "registry_document_status": "REVOKED",
-        "name": "MARCUS VANCE",
-        "date_of_birth": "1983-06-20",
-        "expiry_date": "2026-06-01",
-        "issuing_authority": "BORDER IMMIGRATION & LABOUR AUTHORITY",
-        "passport_number": "Z7654321",
-    },
-    # Active valid Border Permit matching test sample
-    "TESTBP001": {
-        "document_number": "TESTBP001",
-        "registry_document_status": "ACTIVE",
-        "name": "ALEX DUPONT",
-        "date_of_birth": "1990-08-12",
-        "expiry_date": "2026-12-31",
-        "issuing_authority": "Border Management Authority",
-        "passport_number": "P1234567",
-    },
-    # Synthetic canonical permit number
-    "BP2026000123": {
-        "document_number": "BP2026000123",
-        "registry_document_status": "ACTIVE",
-        "name": "ALEX DUPONT",
-        "date_of_birth": "1990-08-12",
-        "expiry_date": "2026-12-31",
-        "issuing_authority": "Border Management Authority",
-        "passport_number": "P1234567",
-    },
-    # Expired status test record
-    "TESTBPEXPIRED001": {
-        "document_number": "TESTBPEXPIRED001",
-        "registry_document_status": "EXPIRED",
-        "name": "TEST EXPIRED",
-        "date_of_birth": "1980-01-01",
-        "expiry_date": "2020-01-01",
-        "issuing_authority": "Border Management Authority",
-    },
-    # Revoked status test record
-    "TESTBPREVOKED001": {
-        "document_number": "TESTBPREVOKED001",
-        "registry_document_status": "REVOKED",
-        "name": "TEST REVOKED",
-        "date_of_birth": "1975-06-15",
-        "expiry_date": "2027-01-01",
-        "issuing_authority": "Border Management Authority",
-    },
-    # Suspended status test record
-    "TESTBPSUSPENDED001": {
-        "document_number": "TESTBPSUSPENDED001",
-        "registry_document_status": "SUSPENDED",
-        "name": "TEST SUSPENDED",
-        "date_of_birth": "1988-10-20",
-        "expiry_date": "2026-06-30",
-        "issuing_authority": "Border Management Authority",
-    },
-    # Mismatch test record (name discrepancy)
-    "TESTBPMISMATCH001": {
-        "document_number": "TESTBPMISMATCH001",
-        "registry_document_status": "ACTIVE",
-        "name": "COMPLETELY DIFFERENT PERSON",
-        "date_of_birth": "1990-08-12",
-        "expiry_date": "2026-12-31",
-        "issuing_authority": "Border Management Authority",
-    },
-}
+class _BPRecordProxy(dict):
+    """Proxy providing backward compatibility by decrypting SQLite records on demand."""
+    def __getitem__(self, key: str):
+        res = government_registry_db.lookup_document("border_permit", key)
+        if not res:
+            raise KeyError(key)
+        return res
+
+    def __contains__(self, key: object):
+        if not isinstance(key, str):
+            return False
+        return government_registry_db.lookup_document("border_permit", key) is not None
+
+    def get(self, key: str, default=None):
+        res = government_registry_db.lookup_document("border_permit", key)
+        return res if res is not None else default
+
+    def keys(self):
+        return government_registry_db.get_all_records_for_type("border_permit").keys()
+
+    def values(self):
+        return government_registry_db.get_all_records_for_type("border_permit").values()
+
+    def items(self):
+        return government_registry_db.get_all_records_for_type("border_permit").items()
+
+_MOCK_BP_RECORDS = _BPRecordProxy()
 
 
 class MockBorderPermitRegistryProvider(RegistryProvider):
@@ -232,7 +165,16 @@ class MockBorderPermitRegistryProvider(RegistryProvider):
         )
 
         field_results, status = compare_fields(request, reg_record)
+        if record_data.get("is_blacklisted") and reg_record.registry_document_status != "SUSPENDED":
+            status = RegistryStatus.REVOKED
+
         evidence = _build_evidence(status, field_results, doc_num_key)
+        if record_data.get("is_blacklisted"):
+            evidence.insert(0, RegistryEvidence(
+                type="watchlist_hit",
+                severity="critical",
+                description=f"GOVERNMENT WATCHLIST ALERT: {record_data.get('watchlist_reason', 'Border permit revoked on security watchlist.')}",
+            ))
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 

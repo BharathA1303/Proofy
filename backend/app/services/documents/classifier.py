@@ -66,17 +66,28 @@ def detect_document_type_from_text(raw_text: str) -> Optional[str]:
     if has_visa_header or (has_visa_word and "CONSULAR" in upper) or has_visa_mrz:
         return "visa"
 
-    # 2. Passport Markers
+    # 2. Border Permit / Work Permit Markers
+    # Checked before Passport because Border / Work Permits routinely cite "Passport Number: ..."
+    has_permit_header = any(k in upper for k in [
+        "BORDER PERMIT", "ENTRY PERMIT", "CROSS-BORDER", "WORK PERMIT",
+        "EMPLOYMENT PERMIT", "CROSSING PERMIT", "BORDER CONTROL", "REGIONAL BORDER",
+        "BORDER MANAGEMENT"
+    ]) or bool(re.search(r"\bPERMIT\s*NO\b", upper)) or bool(re.search(r"\bBP[-0-9]{5,}\b", upper))
+
+    if has_permit_header:
+        return "border_permit"
+
+    # 3. Passport Markers
     # TD3 Passports prominently declare "PASSPORT", "REPUBLIC OF INDIA PASSPORT",
     # or have a TD3 MRZ beginning with 'P<'.
     has_passport_header = bool(re.search(r"\bPASSPORT\b", upper)) or "REPUBLIC OF INDIA" in upper or "PASSEPORT" in upper
     has_passport_mrz = bool(re.search(r"\bP<[A-Z]{3}", upper))
 
-    # Guard: Ensure it's not a Visa citing a passport
-    if (has_passport_header or has_passport_mrz) and not ("ENTRY VISA" in upper or "VISA NUMBER" in upper):
+    # Guard: Ensure it's not a Visa or Permit citing a passport
+    if (has_passport_header or has_passport_mrz) and not ("ENTRY VISA" in upper or "VISA NUMBER" in upper or has_permit_header):
         return "passport"
 
-    # 3. Driving License Markers
+    # 4. Driving License Markers
     has_dl_header = any(k in upper for k in [
         "DRIVING LICENCE", "DRIVING LICENSE", "UNION OF INDIA DRIVING",
         "TRANSPORT DEPARTMENT", "MOTOR VEHICLES", "FORM 7", "COV", "MCWG"
@@ -85,22 +96,13 @@ def detect_document_type_from_text(raw_text: str) -> Optional[str]:
     if has_dl_header:
         return "driving_license"
 
-    # 4. National ID / Aadhaar Markers
+    # 5. National ID / Aadhaar Markers
     has_nid_header = any(k in upper for k in [
         "AADHAAR", "UNIQUE IDENTIFICATION", "MERA AADHAAR", "GOVERNMENT OF INDIA", "ENROLMENT NO"
     ]) or bool(re.search(r"\b\d{4}\s\d{4}\s\d{4}\b", upper))
 
     if has_nid_header and not has_passport_header and not has_dl_header:
         return "national_id"
-
-    # 5. Border Permit / Work Permit Markers
-    has_permit_header = any(k in upper for k in [
-        "BORDER PERMIT", "ENTRY PERMIT", "CROSS-BORDER", "WORK PERMIT",
-        "EMPLOYMENT PERMIT", "CROSSING PERMIT", "BORDER CONTROL"
-    ]) or bool(re.search(r"\bPERMIT\s*NO\b", upper))
-
-    if has_permit_header:
-        return "border_permit"
 
     return None
 

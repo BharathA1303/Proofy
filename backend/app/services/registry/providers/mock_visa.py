@@ -27,98 +27,39 @@ from app.schemas.registry import (
 )
 from app.services.registry.base import RegistryProvider
 from app.services.registry.comparator import compare_fields
+from app.services.registry.db.registry_db import government_registry_db
 
 logger = logging.getLogger(__name__)
 
 _MOCK_LATENCY_MS = 50.0
 
-_MOCK_VISA_RECORDS: dict[str, dict] = {
-    # Pre-populated Synthetic Reference Registry (Official & Blacklist)
-    "V1002003": {
-        "document_number": "V1002003",
-        "registry_document_status": "ACTIVE",
-        "name": "AARAV SHARMA",
-        "date_of_birth": "1990-05-15",
-        "nationality": "IND",
-        "expiry_date": "2028-01-31",
-        "issuing_authority": "CONSULAR SECTION DELHI",
-        "gender": "M",
-        "passport_number": "Z1234567",
-        "visa_type": "BUSINESS",
-    },
-    "V7008009": {
-        "document_number": "V7008009",
-        "registry_document_status": "REVOKED",
-        "name": "VIKRAM MALHOTRA",
-        "date_of_birth": "1982-11-20",
-        "nationality": "IND",
-        "expiry_date": "2027-05-09",
-        "issuing_authority": "CONSULAR SECTION MUMBAI",
-        "gender": "M",
-        "passport_number": "Z7654321",
-        "visa_type": "TOURIST",
-    },
-    "TESTVISA001": {
-        "document_number": "TESTVISA001",
-        "registry_document_status": "ACTIVE",
-        "name": "SARAH CONNOR",
-        "date_of_birth": "1985-05-12",
-        "nationality": "USA",
-        "expiry_date": "2033-01-15",
-        "issuing_authority": "EMBASSY LONDON",
-        "gender": "F",
-        "passport_number": "P9876543",
-        "visa_type": "B1/B2",
-    },
-    # Expired visa
-    "TESTVISAEXPIRED001": {
-        "document_number": "TESTVISAEXPIRED001",
-        "registry_document_status": "EXPIRED",
-        "name": "TEST EXPIRED",
-        "date_of_birth": "1980-01-01",
-        "nationality": "GBR",
-        "expiry_date": "2020-01-01",
-        "issuing_authority": "CONSULAR POST SYNTHETIC",
-        "passport_number": "T1111111",
-        "visa_type": "TOURIST",
-    },
-    # Revoked visa
-    "TESTVISAREVOKED001": {
-        "document_number": "TESTVISAREVOKED001",
-        "registry_document_status": "REVOKED",
-        "name": "TEST REVOKED",
-        "date_of_birth": "1975-06-15",
-        "nationality": "CAN",
-        "expiry_date": "2028-06-15",
-        "issuing_authority": "CONSULAR POST SYNTHETIC",
-        "passport_number": "T2222222",
-        "visa_type": "BUSINESS",
-    },
-    # Mismatch visa (active but fields differ)
-    "TESTVISAMISMATCH001": {
-        "document_number": "TESTVISAMISMATCH001",
-        "registry_document_status": "ACTIVE",
-        "name": "COMPLETELY DIFFERENT PERSON",
-        "date_of_birth": "1960-05-10",
-        "nationality": "USA",
-        "expiry_date": "2030-05-10",
-        "issuing_authority": "CONSULAR POST SYNTHETIC",
-        "passport_number": "WRONGPPT999",
-        "visa_type": "TOURIST",
-    },
-    # Suspended visa
-    "TESTVISASUSPENDED001": {
-        "document_number": "TESTVISASUSPENDED001",
-        "registry_document_status": "SUSPENDED",
-        "name": "TEST SUSPENDED",
-        "date_of_birth": "1992-11-20",
-        "nationality": "IND",
-        "expiry_date": "2029-11-20",
-        "issuing_authority": "CONSULAR POST SYNTHETIC",
-        "passport_number": "T3333333",
-        "visa_type": "WORK",
-    },
-}
+class _VisaRecordProxy(dict):
+    """Proxy providing backward compatibility by decrypting SQLite records on demand."""
+    def __getitem__(self, key: str):
+        res = government_registry_db.lookup_document("visa", key)
+        if not res:
+            raise KeyError(key)
+        return res
+
+    def __contains__(self, key: object):
+        if not isinstance(key, str):
+            return False
+        return government_registry_db.lookup_document("visa", key) is not None
+
+    def get(self, key: str, default=None):
+        res = government_registry_db.lookup_document("visa", key)
+        return res if res is not None else default
+
+    def keys(self):
+        return government_registry_db.get_all_records_for_type("visa").keys()
+
+    def values(self):
+        return government_registry_db.get_all_records_for_type("visa").values()
+
+    def items(self):
+        return government_registry_db.get_all_records_for_type("visa").items()
+
+_MOCK_VISA_RECORDS = _VisaRecordProxy()
 
 
 class MockVisaRegistryProvider(RegistryProvider):
@@ -215,7 +156,16 @@ class MockVisaRegistryProvider(RegistryProvider):
         )
 
         field_results, registry_status = compare_fields(request, record)
+        if raw.get("is_blacklisted") and record.registry_document_status != "SUSPENDED":
+            registry_status = RegistryStatus.REVOKED
+
         evidence = _build_evidence(registry_status, field_results, lookup_key)
+        if raw.get("is_blacklisted"):
+            evidence.insert(0, RegistryEvidence(
+                type="watchlist_hit",
+                severity="critical",
+                description=f"GOVERNMENT WATCHLIST ALERT: {raw.get('watchlist_reason', 'Consular visa revoked on international immigration watchlist.')}",
+            ))
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 

@@ -47,16 +47,28 @@ async def lifespan(app: FastAPI):
     logger.info("DVS backend starting up (version=%s)", settings.APP_VERSION)
 
     try:
+        # 1. Initialize encrypted Government Registry SQLite Database
+        from app.services.registry.db.registry_db import government_registry_db
+        government_registry_db.seed_initial_records()
+        logger.info("Encrypted Government Registry Database online.")
+
+        # 2. Initialize PaddleOCR engine
         ocr_engine.init_engine(
             lang=settings.OCR_LANG,
             use_angle_cls=settings.OCR_USE_ANGLE_CLS,
             use_gpu=settings.OCR_USE_GPU,
         )
         logger.info("OCR engine ready.")
+
+        # 3. Warm up OCR engine with a lightweight pass to eliminate first-user inference latency
+        import numpy as np
+        import cv2
+        dummy = np.zeros((80, 200, 3), dtype=np.uint8)
+        cv2.putText(dummy, "WARMUP", (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
+        ocr_engine.run_ocr(dummy)
+        logger.info("OCR engine warmed up successfully.")
     except Exception as exc:
-        logger.critical("OCR engine failed to initialize: %s", exc)
-        # Do not swallow — raise to prevent the server from accepting requests
-        # with a broken OCR engine
+        logger.critical("Engine startup failed: %s", exc)
         raise
 
     yield  # Application runs here

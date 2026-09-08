@@ -179,6 +179,18 @@ export function VerificationProvider({ children }) {
       []
     ),
 
+    /** Store elapsed verification duration in seconds */
+    setVerificationDuration: useCallback(
+      (duration) => dispatch({ type: ACTIONS.SET_VERIFICATION_DURATION, payload: duration }),
+      []
+    ),
+
+    /** Store pre-OCR document optical quality assessment */
+    setDocumentQuality: useCallback(
+      (quality) => dispatch({ type: ACTIONS.SET_DOCUMENT_QUALITY, payload: quality }),
+      []
+    ),
+
     /** Clear error state */
     clearError: useCallback(
       () => dispatch({ type: ACTIONS.CLEAR_ERROR }),
