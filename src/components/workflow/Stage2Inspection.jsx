@@ -8,14 +8,12 @@
  *   - Plain-language officer directives without distracting technical jargon.
  *   - Collapsible "Technical Audit & Forensic Logs" for audit engineers.
  */
-import { useState } from 'react';
 import { useVerification } from '../../state/verification/useVerification.js';
 import { DOCUMENT_PROFILES, DOCUMENT_TYPES } from '../../config/documentProfiles.js';
 import styles from './Stage2Inspection.module.css';
 
 export default function Stage2Inspection() {
   const { session, actions } = useVerification();
-  const [showTechnicalLogs, setShowTechnicalLogs] = useState(false);
 
   const profile = DOCUMENT_PROFILES[session.documentType] || DOCUMENT_PROFILES[DOCUMENT_TYPES.PASSPORT];
   const traveler = session.traveler || {};
@@ -78,6 +76,10 @@ export default function Stage2Inspection() {
                 ? 'DOCUMENT VERIFIED AUTHENTIC'
                 : isBlacklisted
                 ? 'CRITICAL: WATCHLIST ALERT'
+                : !isTamperClean
+                ? 'DEFECTIVE / ALTERATION DETECTED'
+                : regStatus === 'NOT_FOUND' || !isRegistryCleared
+                ? 'UNREGISTERED / NOT IN DATABASE'
                 : hasCriticalWarning
                 ? 'DEFECTIVE / COUNTERFEIT DETECTED'
                 : 'OFFICER REVIEW ADVISED'}
@@ -140,26 +142,12 @@ export default function Stage2Inspection() {
               </div>
               <div className={styles.fieldItem}>
                 <span className={styles.fieldLabel}>ISSUE DATE</span>
-                <span className={styles.fieldValue}>{traveler.issuedDate || traveler.validFrom || '—'}</span>
+                <span className={styles.fieldValue}>{traveler.issuedDate || traveler.issueDate || '—'}</span>
               </div>
               <div className={styles.fieldItem}>
                 <span className={styles.fieldLabel}>ISSUING AUTHORITY</span>
-                <span className={styles.fieldValue}>{traveler.authority || traveler.state || 'GOVERNMENT OF INDIA'}</span>
+                <span className={styles.fieldValue}>{traveler.authority || traveler.issuingAuthority || '—'}</span>
               </div>
-
-              {/* Contextual Document Fields */}
-              {traveler.bloodGroup && (
-                <div className={styles.fieldItem}>
-                  <span className={styles.fieldLabel}>BLOOD GROUP</span>
-                  <span className={styles.fieldValueHighlight}>{traveler.bloodGroup}</span>
-                </div>
-              )}
-              {traveler.vehicleClass && (
-                <div className={styles.fieldItem}>
-                  <span className={styles.fieldLabel}>VEHICLE CLASS</span>
-                  <span className={styles.fieldValue}>{traveler.vehicleClass}</span>
-                </div>
-              )}
               {traveler.nationality && (
                 <div className={styles.fieldItem}>
                   <span className={styles.fieldLabel}>NATIONALITY</span>
@@ -170,6 +158,12 @@ export default function Stage2Inspection() {
                 <div className={styles.fieldItem}>
                   <span className={styles.fieldLabel}>GENDER</span>
                   <span className={styles.fieldValue}>{traveler.gender}</span>
+                </div>
+              )}
+              {traveler.bloodGroup && (
+                <div className={styles.fieldItem}>
+                  <span className={styles.fieldLabel}>BLOOD GROUP</span>
+                  <span className={styles.fieldValueHighlight}>{traveler.bloodGroup}</span>
                 </div>
               )}
             </div>
@@ -197,13 +191,13 @@ export default function Stage2Inspection() {
               )}
             </div>
             <span className={styles.secStatusTag}>
-              {isTamperClean ? 'VERIFIED AUTHENTIC' : 'TAMPERING SUSPECTED'}
+              {isTamperClean ? 'SUBSTRATE INTACT' : 'TAMPERING SUSPECTED'}
             </span>
           </div>
           <h4 className={styles.secTitle}>Document Authenticity</h4>
           <p className={styles.secDesc}>
             {isTamperClean
-              ? 'No structural tampering, photo alterations, or digital editing detected on this document.'
+              ? 'No structural tampering, photo alterations, or digital splicing detected on this document image.'
               : 'Suspicious photo modifications or digital alterations detected on this document.'}
           </p>
         </div>
@@ -227,7 +221,13 @@ export default function Stage2Inspection() {
               )}
             </div>
             <span className={styles.secStatusTag}>
-              {isBlacklisted ? 'WATCHLIST ALERT' : isRegistryCleared ? 'CLEARED · ACTIVE' : 'RECORDS UNVERIFIED'}
+              {isBlacklisted
+                ? 'WATCHLIST ALERT'
+                : isRegistryCleared
+                ? 'CLEARED · ACTIVE'
+                : regStatus === 'NOT_FOUND'
+                ? 'NOT REGISTERED IN DATABASE'
+                : 'RECORDS UNVERIFIED'}
             </span>
           </div>
           <h4 className={styles.secTitle}>Government Records Status</h4>
@@ -238,6 +238,8 @@ export default function Stage2Inspection() {
                  'CRITICAL ALERT: This document number is officially REVOKED/SUSPENDED on national security watchlists.')
               : isRegistryCleared
               ? `Document number is verified ACTIVE and registered to ${traveler.name || 'holder'} in official records.`
+              : regStatus === 'NOT_FOUND'
+              ? `Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} is NOT registered in the official Government of India database (Sarathi / Vahan). Unregistered credential.`
               : 'Central records cross-reference returned cautionary flags or pending status.'}
           </p>
         </div>
@@ -297,7 +299,13 @@ export default function Stage2Inspection() {
               ? (isMock ? 'Officer Directive: Document Validated — Official Records Matched' : 'Officer Directive: Document Validated — Live Face Match Required')
               : isBlacklisted
               ? 'Officer Directive: WATCHLIST ALERT — Flagged on Law Enforcement Database'
-              : 'Officer Directive: Counterfeit / Defective Document Detected'}
+              : !isTamperClean
+              ? 'Officer Directive: Counterfeit / Altered Document Suspected'
+              : regStatus === 'NOT_FOUND' || !isRegistryCleared
+              ? 'Officer Directive: Unregistered Document — Not Found in Government Registry'
+              : !isDocValid
+              ? 'Officer Directive: Document Format / Validity Defect'
+              : 'Officer Directive: Secondary Inspection Advised'}
           </h4>
           <p className={styles.dirDesc}>
             {isCleanGenuine
@@ -306,58 +314,15 @@ export default function Stage2Inspection() {
                   : `Authentic document verified for ${traveler.name || 'holder'}. Proceed to Stage 3 for live camera face photo matching.`)
               : isBlacklisted
               ? 'This document is registered on a law enforcement watchlist. Do not clear traveler without supervisor authorization.'
-              : 'Defects or alteration marks were identified during automated inspection.'}
+              : !isTamperClean
+              ? 'Digital alterations, photo replacement, or substrate tampering marks were detected during automated inspection.'
+              : regStatus === 'NOT_FOUND' || !isRegistryCleared
+              ? `The document number (${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'}) is NOT found in official Government of India records. It cannot be cleared as a legitimate document.`
+              : !isDocValid
+              ? (session.validationDetail?.errors?.[0] || 'Required document fields or validity dates fail official government specifications.')
+              : 'Discrepancies identified during automated inspection. Refer traveler for secondary verification.'}
           </p>
         </div>
-      </div>
-
-      {/* ── Section 4: Collapsible Technical Diagnostics (Clean for Officers) ── */}
-      <div className={styles.technicalAccordion}>
-        <button
-          type="button"
-          className={styles.accordionToggle}
-          onClick={() => setShowTechnicalLogs(!showTechnicalLogs)}
-          aria-expanded={showTechnicalLogs}
-        >
-          <div className={styles.accordionLeft}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            <span>System Verification Details</span>
-          </div>
-          <span className={styles.accordionArrow}>{showTechnicalLogs ? '▲ Collapse' : '▼ Expand'}</span>
-        </button>
-
-        {showTechnicalLogs && (
-          <div className={styles.technicalContent}>
-            <div className={styles.techGrid}>
-              <div className={styles.techItem}>
-                <span className={styles.techLabel}>Text Extraction Quality</span>
-                <span className={styles.techValue}>{result.overallConfidence ? `${Math.round(result.overallConfidence * 100)}%` : 'High Accuracy (99%)'}</span>
-              </div>
-              <div className={styles.techItem}>
-                <span className={styles.techLabel}>Document Tamper Assessment</span>
-                <span className={styles.techValue}>{forensicDetail.overall_assessment === 'no_significant_anomaly' ? 'Authentic / Untampered' : forensicDetail.overall_assessment || 'Authentic'}</span>
-              </div>
-              <div className={styles.techItem}>
-                <span className={styles.techLabel}>Verification Source</span>
-                <span className={styles.techValue}>{registryDetail?.registry?.provider || 'Official Records Engine'}</span>
-              </div>
-              <div className={styles.techItem}>
-                <span className={styles.techLabel}>Verification Reference ID</span>
-                <span className={styles.techValueMono}>{session.sessionId || 'id-session-live'}</span>
-              </div>
-            </div>
-
-            {traveler.mrz && (
-              <div className={styles.rawMrzBox}>
-                <span className={styles.rawMrzLabel}>Machine-Readable Code:</span>
-                <code className={styles.rawMrzCode}>{traveler.mrz}</code>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ── Section 5: Stage Navigation Actions ── */}

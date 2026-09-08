@@ -117,6 +117,11 @@ def run_ela(image_np_bgr: np.ndarray) -> ELAResult:
 
     flagged_area_ratio = flagged_pixels / (h * w) if h * w else 0.0
 
+    has_localized_anomaly = (
+        (len(regions) >= 2 and max((r.mean_error for r in regions), default=0.0) >= 12.0)
+        or (flagged_area_ratio >= SUSPICIOUS_AREA_RATIO)
+    )
+
     if flagged_area_ratio >= HIGH_CONCERN_AREA_RATIO:
         status, severity = "suspicious", "high"
         description = (
@@ -125,13 +130,12 @@ def run_ela(image_np_bgr: np.ndarray) -> ELAResult:
             "statistical baseline for this document. This is an indicator, not proof, "
             "of localized editing."
         )
-    elif flagged_area_ratio >= SUSPICIOUS_AREA_RATIO:
+    elif has_localized_anomaly:
         status, severity = "suspicious", "medium"
         description = (
-            f"Error Level Analysis found localized regions ({flagged_area_ratio * 100:.1f}% "
-            "of image area) with compression error above the image's statistical baseline. "
-            "This can indicate localized editing, but can also occur naturally at sharp "
-            "edges, text, or printed security patterns."
+            f"Error Level Analysis found localized anomalies ({len(regions)} block(s), "
+            f"{flagged_area_ratio * 100:.1f}% of image area) with compression error above baseline. "
+            "This can indicate localized digital editing or spliced content."
         )
     else:
         status, severity = "normal", "low"

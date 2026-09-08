@@ -251,7 +251,7 @@ def _build_evidence(
         evidence.append(RegistryEvidence(
             type="registry_lookup",
             severity="warning",
-            description=f"No development sandbox record found for driving license '{doc_num}'.",
+            description=f"No record found for driving license '{doc_num}' in the official Government of India Sarathi / Vahan national transport registry.",
         ))
     elif registry_status == RegistryStatus.REVOKED:
         evidence.append(RegistryEvidence(

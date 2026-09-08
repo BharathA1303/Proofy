@@ -30,7 +30,11 @@ logger = logging.getLogger(__name__)
 # General-purpose raster editors. Presence alone is a very weak signal —
 # scans and phone photos are also routinely reprocessed by legitimate
 # document-management software.
-_EDITOR_SOFTWARE_MARKERS = ("photoshop", "gimp", "paint.net")
+_EDITOR_SOFTWARE_MARKERS = (
+    "photoshop", "gimp", "paint.net", "paint", "mspaint",
+    "canva", "picsart", "pixlr", "adobe", "lightroom",
+    "snapseed", "corel", "affinity", "befunky", "fotor", "photoscape",
+)
 
 _TAG_NAMES = {v: k for k, v in ExifTags.TAGS.items()}
 

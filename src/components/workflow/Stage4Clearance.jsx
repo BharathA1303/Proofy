@@ -156,6 +156,14 @@ export default function Stage4Clearance() {
                 ? 'CLEARANCE APPROVED: TRAVELER ADMITTED'
                 : isBlacklisted
                 ? 'CLEARANCE DENIED: WATCHLIST ALERT'
+                : !isTamperClean
+                ? 'CLEARANCE REJECTED: TAMPERED CREDENTIAL'
+                : regStatus === 'NOT_FOUND' || !isRegistryCleared
+                ? 'CLEARANCE REJECTED: UNREGISTERED CREDENTIAL'
+                : !isFaceMatch
+                ? 'CLEARANCE REJECTED: BIOMETRIC MISMATCH'
+                : !isStampClean
+                ? 'CLEARANCE REJECTED: STAMP FORGERY'
                 : 'CLEARANCE REJECTED / REFER TO SECONDARY'}
             </h1>
             <p className={styles.heroExplanation}>
@@ -167,6 +175,10 @@ export default function Stage4Clearance() {
                 ? (registryDetail?.evidence?.find((e) => e.severity === 'critical')?.description
                     ? `WATCHLIST ALERT: ${registryDetail.evidence.find((e) => e.severity === 'critical').description}`
                     : 'CRITICAL ALERT: Document number is flagged on security watchlists. Traveler must be referred for secondary inspection.')
+                : !isTamperClean
+                ? 'TAMPERING DETECTED: Digital alterations, photo replacement, or substrate splicing detected during automated inspection.'
+                : regStatus === 'NOT_FOUND' || !isRegistryCleared
+                ? `UNREGISTERED CREDENTIAL: Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} does not exist in official Government of India records (Sarathi / National Database). Unverified or fabricated document.`
                 : !isFaceMatch
                 ? 'FACE MISMATCH: Live face does not match the document photograph.'
                 : !isStampClean
@@ -314,7 +326,7 @@ export default function Stage4Clearance() {
                 <div className={`${styles.checkDot} ${isTamperClean ? styles.dotGreen : styles.dotRed}`}>✓</div>
                 <div className={styles.checkContent}>
                   <span className={styles.checkName}>Document Integrity &amp; Tamper Check</span>
-                  <span className={styles.checkStatus}>{isTamperClean ? 'Passed · No alteration detected' : 'Failed · Tampering suspected'}</span>
+                  <span className={styles.checkStatus}>{isTamperClean ? 'Passed · Substrate & photo integrity intact' : 'Failed · Tampering / alteration detected'}</span>
                 </div>
               </div>
 
@@ -343,7 +355,9 @@ export default function Stage4Clearance() {
                           : 'ALERT: Revoked in official records')
                       : isRegistryCleared
                       ? 'Passed · Confirmed ACTIVE & verified'
-                      : 'Pending cross-reference'}
+                      : regStatus === 'NOT_FOUND'
+                      ? 'Failed · Not found in Government of India registry'
+                      : 'Failed · Unverified official records'}
                   </span>
                 </div>
               </div>
