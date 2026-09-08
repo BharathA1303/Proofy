@@ -178,7 +178,7 @@ export default function Stage4Clearance() {
                 : !isTamperClean
                 ? 'TAMPERING DETECTED: Digital alterations, photo replacement, or substrate splicing detected during automated inspection.'
                 : regStatus === 'NOT_FOUND' || !isRegistryCleared
-                ? `UNREGISTERED CREDENTIAL: Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} does not exist in official Government of India records (Sarathi / National Database). Unverified or fabricated document.`
+                ? `UNREGISTERED CREDENTIAL: Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} does not exist in official Government records. Unverified or fabricated document.`
                 : !isFaceMatch
                 ? 'FACE MISMATCH: Live face does not match the document photograph.'
                 : !isStampClean

@@ -239,7 +239,7 @@ export default function Stage2Inspection() {
               : isRegistryCleared
               ? `Document number is verified ACTIVE and registered to ${traveler.name || 'holder'} in official records.`
               : regStatus === 'NOT_FOUND'
-              ? `Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} is NOT registered in the official Government of India database (Sarathi / Vahan). Unregistered credential.`
+              ? `Document number ${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'} is NOT registered in official Government records. Unregistered credential.`
               : 'Central records cross-reference returned cautionary flags or pending status.'}
           </p>
         </div>

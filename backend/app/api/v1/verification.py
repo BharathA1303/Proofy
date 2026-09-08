@@ -820,7 +820,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "official",
             "filename": "DL_Priya_Sundar_Official.jpg",
             "url": "/api/v1/verification/sample/driving_license?variant=official",
-            "description": "Original driving license: Priya Sundar (DL-0420230012345). Active and verified in Sarathi registry.",
+            "description": "Original driving license: Priya Sundar (DL-0420230012345). Active and verified in official government registry.",
         },
         {
             "id": "dl_blacklist",
