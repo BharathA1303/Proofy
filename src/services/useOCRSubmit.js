@@ -29,6 +29,7 @@ const SIGNAL_LABELS = {
   photo_boundary: 'Photo Boundary',
   compression: 'Compression Analysis',
   metadata: 'Metadata',
+  stamp: 'Immigration Stamp & Consular Seal',
 };
 
 function mapSignalSeverity(status, severity) {

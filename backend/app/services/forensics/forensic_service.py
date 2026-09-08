@@ -42,6 +42,7 @@ from app.services.forensics.ela import run_ela
 from app.services.forensics.image_quality import assess_image_quality
 from app.services.forensics.metadata_analysis import analyze_metadata
 from app.services.forensics.photo_boundary import analyze_photo_boundary, detect_photo_region
+from app.services.forensics.stamp_analysis import analyze_document_stamps
 
 logger = logging.getLogger(__name__)
 
@@ -202,16 +203,37 @@ def run_forensic_analysis(
         metrics={"field_count": len(metadata_result.fields_present)},
     )
 
-    signals = [ela_signal, boundary_signal, compression_signal, metadata_signal]
+    # ── Stamp & Consular Seal Analysis ────────────────────────────────────
+    stamp_result = analyze_document_stamps(image_np_bgr, document_type=document_type)
+    stamp_region = (
+        PhotoRegionBox(
+            x=stamp_result.indicators[0].region_box["x"],
+            y=stamp_result.indicators[0].region_box["y"],
+            width=stamp_result.indicators[0].region_box["width"],
+            height=stamp_result.indicators[0].region_box["height"],
+        )
+        if stamp_result.indicators and stamp_result.indicators[0].region_box
+        else None
+    )
+    stamp_signal = ForensicSignal(
+        type="stamp",
+        status=stamp_result.status,
+        severity=stamp_result.severity,
+        confidence=stamp_result.confidence,
+        description=stamp_result.description,
+        region=stamp_region,
+        metrics=stamp_result.metrics,
+    )
+
+    signals = [ela_signal, boundary_signal, compression_signal, metadata_signal, stamp_signal]
 
     # ── Aggregation ───────────────────────────────────────────────────────
-    # Only signals that actually produced a measurement vote; "unavailable"
-    # and "insufficient_data" signals are excluded from the vote (they are
-    # still reported to the caller for transparency).
+    # Only signals that actually produced a measurement vote; "unavailable",
+    # "insufficient_data", and "not_applicable" signals are excluded from the vote.
     votes = [
         SignalVote(type=s.type, status=s.status, severity=s.severity)
         for s in signals
-        if s.status not in ("unavailable", "insufficient_data")
+        if s.status not in ("unavailable", "insufficient_data", "not_applicable")
     ]
     # Metadata can never contribute a "strong" vote on its own — cap it.
     for v in votes:

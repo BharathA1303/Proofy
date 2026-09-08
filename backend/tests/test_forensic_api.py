@@ -54,7 +54,7 @@ class TestForensicEndpoint:
             "no_significant_anomaly", "suspicious", "high_forensic_concern",
         )
         assert isinstance(forensic["signals"], list)
-        assert len(forensic["signals"]) == 4
+        assert len(forensic["signals"]) == 5
 
         for signal in forensic["signals"]:
             assert signal["status"] not in ("forged", "fake")

@@ -27,8 +27,14 @@ export default function Stage4Clearance() {
     ? true // Mock vectors bypass live camera matching
     : (biometrics?.overallAssessment === 'FACE_MATCH' || biometrics?.faceMatchResult?.status === 'match');
 
+  // Stamp verification determination for Indian travel credentials (Passport, Visa, Border Permit)
+  const normDocType = (session.documentType || 'passport').toLowerCase();
+  const isStampApplicable = ['passport', 'visa', 'border_permit', 'borderpermit', 'work_permit', 'workpermit'].includes(normDocType);
+  const stampSignal = session.forensicDetail?.signals?.find((s) => s.type === 'stamp');
+  const isStampClean = !stampSignal || stampSignal.status !== 'suspicious';
+
   // Final Overall Clearance Status
-  const isApproved = isDocValid && isTamperClean && isRegistryCleared && !isBlacklisted && isFaceMatch;
+  const isApproved = isDocValid && isTamperClean && isRegistryCleared && !isBlacklisted && isFaceMatch && isStampClean;
 
   const matchPercent = biometrics?.faceMatch ?? (biometrics?.faceMatchResult?.similarity ? Math.round(biometrics.faceMatchResult.similarity * 100) : null);
 
@@ -163,6 +169,8 @@ export default function Stage4Clearance() {
                     : 'CRITICAL ALERT: Document number is flagged on security watchlists. Traveler must be referred for secondary inspection.')
                 : !isFaceMatch
                 ? 'FACE MISMATCH: Live face does not match the document photograph.'
+                : !isStampClean
+                ? 'IMMIGRATION STAMP FORGERY: The official immigration entry stamp on this document is counterfeit and does not match registered movement in Government of India records.'
                 : session.validationDetail?.errors?.length
                 ? `Document validation defect: ${session.validationDetail.errors[0]}`
                 : 'Document or format integrity tests failed during automated screening.'}
@@ -309,6 +317,20 @@ export default function Stage4Clearance() {
                   <span className={styles.checkStatus}>{isTamperClean ? 'Passed · No alteration detected' : 'Failed · Tampering suspected'}</span>
                 </div>
               </div>
+
+              {isStampApplicable && (
+                <div className={styles.checkItem}>
+                  <div className={`${styles.checkDot} ${isStampClean ? styles.dotGreen : styles.dotRed}`}>✓</div>
+                  <div className={styles.checkContent}>
+                    <span className={styles.checkName}>Official Immigration &amp; Consular Seal</span>
+                    <span className={styles.checkStatus}>
+                      {isStampClean
+                        ? 'Passed · Official Indian immigration seal verified'
+                        : 'Failed · Counterfeit or unregistered stamp'}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className={styles.checkItem}>
                 <div className={`${styles.checkDot} ${isRegistryCleared && !isBlacklisted ? styles.dotGreen : styles.dotRed}`}>✓</div>
