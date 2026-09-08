@@ -126,11 +126,16 @@ export function useOCRSubmit() {
         actions.setTraveler(travelerPayload);
       }
 
+      const skewAngle = ocrResult?.ocr?.skew_angle;
+      const skewNote = (skewAngle != null && Math.abs(skewAngle) >= 0.8)
+        ? ` · Straightened (${skewAngle > 0 ? '+' : ''}${skewAngle.toFixed(1)}°)`
+        : '';
+
       actions.setMilestone({
         step: 1,
         key: 'extraction',
         status: 'passed',
-        desc: 'Credentials and optical fields extracted',
+        desc: `Credentials and optical fields extracted${skewNote}`,
       });
 
       // Fast cinematic delay for responsive visual milestone progression

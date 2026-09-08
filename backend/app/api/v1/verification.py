@@ -475,6 +475,7 @@ async def ocr_document(
         overall_confidence=overall_conf,
         region_count=len(regions),
         has_low_confidence_regions=low_conf_count > 0,
+        skew_angle=round(preprocessed.skew_angle, 2) if abs(preprocessed.skew_angle) > 0.0 else None,
     )
 
     quality_report = DocumentQualityResponse(

@@ -101,6 +101,7 @@ class OCRMeta(BaseModel):
     region_count: int = 0
     # Low-confidence flag: true if any field is below 0.70
     has_low_confidence_regions: bool = False
+    skew_angle: Optional[float] = None
 
 
 class OCRRegionRaw(BaseModel):
