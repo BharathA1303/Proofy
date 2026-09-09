@@ -55,6 +55,18 @@ from app.services.documents.driving_license.dl_parser import parse_driving_licen
 from app.services.documents.driving_license.dl_validator import (
     validate_driving_license_document,
 )
+from app.services.documents.aadhaar.aadhaar_parser import parse_aadhaar
+from app.services.documents.aadhaar.aadhaar_validator import (
+    validate_aadhaar_document,
+)
+from app.services.documents.voter_id.voter_id_parser import parse_voter_id
+from app.services.documents.voter_id.voter_id_validator import (
+    validate_voter_id_document,
+)
+from app.services.documents.pan_card.pan_card_parser import parse_pan_card
+from app.services.documents.pan_card.pan_card_validator import (
+    validate_pan_card_document,
+)
 from app.services.documents.national_id.national_id_parser import parse_national_id
 from app.services.documents.national_id.national_id_validator import (
     validate_national_id_document,
@@ -267,6 +279,9 @@ async def ocr_document(
     parsed_passport = None
     parsed_visa = None
     parsed_dl = None
+    parsed_aadhaar = None
+    parsed_voter = None
+    parsed_pan = None
     parsed_nid = None
     parsed_bp = None
     mrz_combined: str | None = None
@@ -397,33 +412,90 @@ async def ocr_document(
         else:
             ocr_status = "partial"
 
-    elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-        parsed_nid = parse_national_id(regions)
+    elif profile.document_type in ("aadhaar", "aadhaarcard", "uid", "national_id", "nationalid", "nid"):
+        parsed_aadhaar = parse_aadhaar(regions)
+        parsed_nid = parsed_aadhaar
         mrz_combined = None
         traveler = TravelerFields(
-            name=parsed_nid.name.value,
-            docNumber=parsed_nid.identity_number.value,
-            dob=parsed_nid.dob.value,
-            yearOfBirth=parsed_nid.year_of_birth.value,
-            gender=parsed_nid.gender.value,
-            authority=parsed_nid.issuing_authority.value,
-            address=parsed_nid.address.value,
-            identityNumber=parsed_nid.identity_number.value,
-            maskedIdentityNumber=parsed_nid.masked_identity_number,
-            qrPayload=parsed_nid.qr_payload,
-            qrDecoded=parsed_nid.qr_decoded,
+            name=parsed_aadhaar.name.value,
+            docNumber=parsed_aadhaar.identity_number.value,
+            dob=parsed_aadhaar.dob.value,
+            yearOfBirth=parsed_aadhaar.year_of_birth.value,
+            gender=parsed_aadhaar.gender.value,
+            authority=parsed_aadhaar.issuing_authority.value,
+            address=parsed_aadhaar.address.value,
+            identityNumber=parsed_aadhaar.identity_number.value,
+            maskedIdentityNumber=parsed_aadhaar.masked_identity_number,
+            qrPayload=parsed_aadhaar.qr_payload,
+            qrDecoded=parsed_aadhaar.qr_decoded,
         )
         mrz_data = MRZData()
 
         primary_fields_found = sum(1 for v in [
-            parsed_nid.name.value,
-            parsed_nid.identity_number.value,
-            parsed_nid.dob.value or parsed_nid.year_of_birth.value,
+            parsed_aadhaar.name.value,
+            parsed_aadhaar.identity_number.value,
+            parsed_aadhaar.dob.value or parsed_aadhaar.year_of_birth.value,
         ] if v)
 
         if primary_fields_found >= 3:
             ocr_status = "completed"
-        elif primary_fields_found >= 1 or (parsed_nid.identity_number.value and parsed_nid.name.value):
+        elif primary_fields_found >= 1 or (parsed_aadhaar.identity_number.value and parsed_aadhaar.name.value):
+            ocr_status = "partial"
+        else:
+            ocr_status = "partial"
+
+    elif profile.document_type in ("voter_id", "voterid", "voterId", "voterID", "epic", "voter"):
+        parsed_voter = parse_voter_id(regions)
+        mrz_combined = None
+        traveler = TravelerFields(
+            name=parsed_voter.name.value,
+            docNumber=parsed_voter.epic_number.value,
+            epicNumber=parsed_voter.epic_number.value,
+            fatherName=parsed_voter.father_name.value,
+            dob=parsed_voter.dob.value,
+            age=parsed_voter.age.value,
+            gender=parsed_voter.gender.value,
+            constituency=parsed_voter.constituency.value,
+            authority=parsed_voter.issuing_authority.value,
+            issuingState=parsed_voter.issuing_state.value,
+            state=parsed_voter.issuing_state.value,
+        )
+        mrz_data = MRZData()
+
+        primary_fields_found = sum(1 for v in [
+            parsed_voter.name.value,
+            parsed_voter.epic_number.value,
+        ] if v)
+
+        if primary_fields_found >= 2:
+            ocr_status = "completed"
+        elif primary_fields_found >= 1:
+            ocr_status = "partial"
+        else:
+            ocr_status = "partial"
+
+    elif profile.document_type in ("pan_card", "pancard", "panCard", "pan"):
+        parsed_pan = parse_pan_card(regions)
+        mrz_combined = None
+        traveler = TravelerFields(
+            name=parsed_pan.name.value,
+            docNumber=parsed_pan.pan_number.value,
+            panNumber=parsed_pan.pan_number.value,
+            fatherName=parsed_pan.father_name.value,
+            dob=parsed_pan.dob.value,
+            taxpayerCategory=parsed_pan.taxpayer_category,
+            authority=parsed_pan.issuing_authority.value,
+        )
+        mrz_data = MRZData()
+
+        primary_fields_found = sum(1 for v in [
+            parsed_pan.name.value,
+            parsed_pan.pan_number.value,
+        ] if v)
+
+        if primary_fields_found >= 2:
+            ocr_status = "completed"
+        elif primary_fields_found >= 1:
             ocr_status = "partial"
         else:
             ocr_status = "partial"
@@ -567,10 +639,11 @@ async def ocr_document(
         logger.warning("Failed to update risk session M1: %s", _risk_exc)
 
     # ── Populate Registry Session Store for Module 5 ─────────────────────────
+    active_parsed = parsed_passport or parsed_visa or parsed_dl or parsed_aadhaar or parsed_voter or parsed_pan or parsed_nid or parsed_bp
     _populate_registry_session(
         verification_id=verification_id,
         document_type=profile.document_type,
-        parsed=parsed_passport or parsed_visa or parsed_dl or parsed_nid or parsed_bp,
+        parsed=active_parsed,
         traveler=response.traveler,
         mrz=response.mrz,
     )
@@ -578,7 +651,7 @@ async def ocr_document(
     set_cached_ocr(
         ingested.raw_bytes,
         profile.document_type,
-        (response, parsed_passport or parsed_visa or parsed_dl or parsed_nid or parsed_bp),
+        (response, active_parsed),
     )
 
     return response
@@ -674,33 +747,124 @@ async def get_sample_driving_license(variant: str = "official") -> FileResponse:
 
 
 @router.get(
+    "/sample/aadhaar",
+    summary="Serve synthetic Aadhaar card sample by variant",
+    tags=["Verification"],
+)
+@router.get(
+    "/sample/aadhaarCard",
+    summary="Serve synthetic Aadhaar sample (camelCase alias)",
+    tags=["Verification"],
+)
+@router.get(
     "/sample/national_id",
-    summary="Serve synthetic national id sample by variant",
+    summary="Serve synthetic national id sample (legacy alias)",
     tags=["Verification"],
 )
 @router.get(
     "/sample/nationalId",
-    summary="Serve synthetic national id sample (camelCase alias)",
+    summary="Serve synthetic national id sample (legacy camelCase alias)",
     tags=["Verification"],
 )
-async def get_sample_national_id(variant: str = "official") -> FileResponse:
-    """Serve synthetic test national id image (official, blacklist, or defective)."""
+async def get_sample_aadhaar(variant: str = "official") -> FileResponse:
+    """Serve synthetic test Aadhaar image (official, blacklist, or defective)."""
     assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
     var = variant.lower().strip() if variant else "official"
     variant_map = {
-        "official": ("national_id_official.jpg", "NationalID_Sneha_Patel_Official.jpg"),
-        "genuine": ("national_id_official.jpg", "NationalID_Sneha_Patel_Official.jpg"),
-        "blacklist": ("national_id_blacklist.jpg", "NationalID_Tariq_Ahmed_Blacklisted.jpg"),
-        "blacklisted": ("national_id_blacklist.jpg", "NationalID_Tariq_Ahmed_Blacklisted.jpg"),
-        "defective": ("national_id_defective.jpg", "NationalID_Devraj_Singh_Defective.jpg"),
-        "fake": ("national_id_defective.jpg", "NationalID_Devraj_Singh_Defective.jpg"),
+        "official": ("aadhaar_official.jpg", "Aadhaar_Sneha_Patel_Official.jpg"),
+        "genuine": ("aadhaar_official.jpg", "Aadhaar_Sneha_Patel_Official.jpg"),
+        "blacklist": ("aadhaar_blacklist.jpg", "Aadhaar_Tariq_Ahmed_Blacklisted.jpg"),
+        "blacklisted": ("aadhaar_blacklist.jpg", "Aadhaar_Tariq_Ahmed_Blacklisted.jpg"),
+        "defective": ("aadhaar_defective.jpg", "Aadhaar_Devraj_Singh_Defective.jpg"),
+        "fake": ("aadhaar_defective.jpg", "Aadhaar_Devraj_Singh_Defective.jpg"),
     }
-    asset_file, out_file = variant_map.get(var, ("national_id_official.jpg", "NationalID_Official.jpg"))
+    asset_file, out_file = variant_map.get(var, ("aadhaar_official.jpg", "Aadhaar_Official.jpg"))
     target = assets_dir / asset_file
+    if not target.exists():
+        fallback_file = asset_file.replace("aadhaar_", "national_id_")
+        target = assets_dir / fallback_file
     if not target.exists():
         target = assets_dir / "sample_national_id.jpg"
     if not target.exists():
-        return JSONResponse(status_code=404, content={"detail": f"National ID sample '{variant}' not found."})
+        return JSONResponse(status_code=404, content={"detail": f"Aadhaar sample '{variant}' not found."})
+
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
+
+
+@router.get(
+    "/sample/voter_id",
+    summary="Serve synthetic Voter ID / EPIC sample by variant",
+    tags=["Verification"],
+)
+@router.get(
+    "/sample/voterId",
+    summary="Serve synthetic Voter ID sample (camelCase alias)",
+    tags=["Verification"],
+)
+@router.get(
+    "/sample/epic",
+    summary="Serve synthetic EPIC card sample",
+    tags=["Verification"],
+)
+async def get_sample_voter_id(variant: str = "official") -> FileResponse:
+    """Serve synthetic test Voter ID image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("voter_id_official.jpg", "VoterID_Priya_Krishnamurthy_Official.jpg"),
+        "genuine": ("voter_id_official.jpg", "VoterID_Priya_Krishnamurthy_Official.jpg"),
+        "blacklist": ("voter_id_blacklist.jpg", "VoterID_Rahul_Devanand_Blacklisted.jpg"),
+        "blacklisted": ("voter_id_blacklist.jpg", "VoterID_Rahul_Devanand_Blacklisted.jpg"),
+        "defective": ("voter_id_defective.jpg", "VoterID_Invalid_Defective.jpg"),
+        "fake": ("voter_id_defective.jpg", "VoterID_Invalid_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("voter_id_official.jpg", "VoterID_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_voter_id.jpg"
+    if not target.exists():
+        target = assets_dir / "national_id_official.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"Voter ID sample '{variant}' not found."})
+
+    return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
+
+
+@router.get(
+    "/sample/pan_card",
+    summary="Serve synthetic PAN Card sample by variant",
+    tags=["Verification"],
+)
+@router.get(
+    "/sample/panCard",
+    summary="Serve synthetic PAN Card sample (camelCase alias)",
+    tags=["Verification"],
+)
+@router.get(
+    "/sample/pan",
+    summary="Serve synthetic PAN Card sample (short alias)",
+    tags=["Verification"],
+)
+async def get_sample_pan_card(variant: str = "official") -> FileResponse:
+    """Serve synthetic test PAN Card image (official, blacklist, or defective)."""
+    assets_dir = Path(__file__).parent.parent.parent.parent / "tests" / "assets"
+    var = variant.lower().strip() if variant else "official"
+    variant_map = {
+        "official": ("pan_card_official.jpg", "PAN_Kavitha_Prabhakar_Official.jpg"),
+        "genuine": ("pan_card_official.jpg", "PAN_Kavitha_Prabhakar_Official.jpg"),
+        "blacklist": ("pan_card_blacklist.jpg", "PAN_Suresh_Fraudwala_Blacklisted.jpg"),
+        "blacklisted": ("pan_card_blacklist.jpg", "PAN_Suresh_Fraudwala_Blacklisted.jpg"),
+        "defective": ("pan_card_defective.jpg", "PAN_Invalid_Defective.jpg"),
+        "fake": ("pan_card_defective.jpg", "PAN_Invalid_Defective.jpg"),
+    }
+    asset_file, out_file = variant_map.get(var, ("pan_card_official.jpg", "PAN_Official.jpg"))
+    target = assets_dir / asset_file
+    if not target.exists():
+        target = assets_dir / "sample_pan_card.jpg"
+    if not target.exists():
+        target = assets_dir / "national_id_official.jpg"
+    if not target.exists():
+        return JSONResponse(status_code=404, content={"detail": f"PAN Card sample '{variant}' not found."})
 
     return FileResponse(path=str(target), media_type="image/jpeg", filename=out_file, headers={"Cache-Control": "no-cache"})
 
@@ -843,33 +1007,93 @@ async def get_sample_options() -> JSONResponse:
         },
     ]
 
-    nid_samples = [
+    aadhaar_samples = [
         {
-            "id": "national_id_official",
-            "label": "Official National ID (Genuine)",
+            "id": "aadhaar_official",
+            "label": "Official Aadhaar Card (Genuine)",
             "badge": "OFFICIAL / ACTIVE",
             "variant": "official",
-            "filename": "NationalID_Sneha_Patel_Official.jpg",
-            "url": "/api/v1/verification/sample/national_id?variant=official",
-            "description": "Official 12-digit Indian National ID for Sneha Patel (8472 9103 8473). Valid Verhoeff check digit & registered.",
+            "filename": "Aadhaar_Sneha_Patel_Official.jpg",
+            "url": "/api/v1/verification/sample/aadhaar?variant=official",
+            "description": "Official 12-digit UIDAI Aadhaar Card for Sneha Patel (8472 9103 8473). Valid Verhoeff check digit & registered.",
         },
         {
-            "id": "national_id_blacklist",
-            "label": "Blacklisted National ID (Suspended)",
+            "id": "aadhaar_blacklist",
+            "label": "Blacklisted Aadhaar (Suspended)",
             "badge": "BLACKLISTED",
             "variant": "blacklist",
-            "filename": "NationalID_Tariq_Ahmed_Blacklisted.jpg",
-            "url": "/api/v1/verification/sample/national_id?variant=blacklist",
-            "description": "National ID for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate watchlist.",
+            "filename": "Aadhaar_Tariq_Ahmed_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/aadhaar?variant=blacklist",
+            "description": "Aadhaar Card for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate watchlist.",
         },
         {
-            "id": "national_id_defective",
-            "label": "Defective / Fake National ID",
+            "id": "aadhaar_defective",
+            "label": "Defective / Fake Aadhaar",
             "badge": "DEFECT / FAKE",
             "variant": "defective",
-            "filename": "NationalID_Devraj_Singh_Defective.jpg",
-            "url": "/api/v1/verification/sample/national_id?variant=defective",
-            "description": "Defective National ID (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.",
+            "filename": "Aadhaar_Devraj_Singh_Defective.jpg",
+            "url": "/api/v1/verification/sample/aadhaar?variant=defective",
+            "description": "Defective Aadhaar (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.",
+        },
+    ]
+
+    voter_id_samples = [
+        {
+            "id": "voter_id_official",
+            "label": "Official Voter ID / EPIC (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "VoterID_Priya_Krishnamurthy_Official.jpg",
+            "url": "/api/v1/verification/sample/voter_id?variant=official",
+            "description": "Official Electors Photo Identity Card: Priya Krishnamurthy (ABC1234567). Active in ECI electoral roll.",
+        },
+        {
+            "id": "voter_id_blacklist",
+            "label": "Blacklisted Voter ID (Revoked)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "VoterID_Rahul_Devanand_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/voter_id?variant=blacklist",
+            "description": "Voter ID for Rahul Devanand (XYZ7654321). Status: REVOKED for electoral roll duplicate registration.",
+        },
+        {
+            "id": "voter_id_defective",
+            "label": "Defective / Fake Voter ID",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "VoterID_Invalid_Defective.jpg",
+            "url": "/api/v1/verification/sample/voter_id?variant=defective",
+            "description": "Defective Voter ID (INVALID-EPIC-99): Malformed EPIC format and missing constituency metadata.",
+        },
+    ]
+
+    pan_card_samples = [
+        {
+            "id": "pan_card_official",
+            "label": "Official PAN Card (Genuine)",
+            "badge": "OFFICIAL / ACTIVE",
+            "variant": "official",
+            "filename": "PAN_Kavitha_Prabhakar_Official.jpg",
+            "url": "/api/v1/verification/sample/pan_card?variant=official",
+            "description": "Official Income Tax Dept PAN Card: Kavitha Prabhakar (AABCP1234C). Active taxpayer credential.",
+        },
+        {
+            "id": "pan_card_blacklist",
+            "label": "Blacklisted PAN Card (Revoked)",
+            "badge": "BLACKLISTED",
+            "variant": "blacklist",
+            "filename": "PAN_Suresh_Fraudwala_Blacklisted.jpg",
+            "url": "/api/v1/verification/sample/pan_card?variant=blacklist",
+            "description": "PAN Card for Suresh Fraudwala (AAAFT9999Z). Status: REVOKED for tax evasion fraud and impersonation.",
+        },
+        {
+            "id": "pan_card_defective",
+            "label": "Defective / Fake PAN Card",
+            "badge": "DEFECT / FAKE",
+            "variant": "defective",
+            "filename": "PAN_Invalid_Defective.jpg",
+            "url": "/api/v1/verification/sample/pan_card?variant=defective",
+            "description": "Defective PAN Card (PAN-123-INVALID): Non-standard alphanumeric structure and missing taxpayer category.",
         },
     ]
 
@@ -909,8 +1133,14 @@ async def get_sample_options() -> JSONResponse:
             "drivingLicense": dl_samples,
             "passport": passport_samples,
             "visa": visa_samples,
-            "national_id": nid_samples,
-            "nationalId": nid_samples,
+            "aadhaar": aadhaar_samples,
+            "aadhaarCard": aadhaar_samples,
+            "voter_id": voter_id_samples,
+            "voterId": voter_id_samples,
+            "pan_card": pan_card_samples,
+            "panCard": pan_card_samples,
+            "national_id": aadhaar_samples,
+            "nationalId": aadhaar_samples,
             "border_permit": bp_samples,
             "borderPermit": bp_samples,
             "work_permit": bp_samples,
@@ -968,8 +1198,18 @@ async def validate_document(payload: DocumentValidationRequest) -> DocumentValid
             traveler=payload.traveler,
         )
         validation_summary = DocumentValidationSummary(**summary_dict)
-    elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-        summary_dict = validate_national_id_document(
+    elif profile.document_type in ("aadhaar", "aadhaarcard", "uid", "national_id", "nationalid", "nid"):
+        summary_dict = validate_aadhaar_document(
+            traveler=payload.traveler,
+        )
+        validation_summary = DocumentValidationSummary(**summary_dict)
+    elif profile.document_type in ("voter_id", "voterid", "voterId", "voterID", "epic", "voter"):
+        summary_dict = validate_voter_id_document(
+            traveler=payload.traveler,
+        )
+        validation_summary = DocumentValidationSummary(**summary_dict)
+    elif profile.document_type in ("pan_card", "pancard", "panCard", "pan"):
+        summary_dict = validate_pan_card_document(
             traveler=payload.traveler,
         )
         validation_summary = DocumentValidationSummary(**summary_dict)
@@ -1522,21 +1762,57 @@ def _populate_registry_session(
             _set_field(session_data, "mrz_line1", mrz.line1)
             _set_field(session_data, "mrz_line2", mrz.line2)
 
-    elif document_type in ("national_id", "nationalid", "nid", "aadhaar") and parsed is not None:
-        # National ID fields
-        _set_field(session_data, "document_number", getattr(parsed.identity_number, "value", None), "viz")
+    elif document_type in ("aadhaar", "aadhaarcard", "uid", "national_id", "nationalid", "nid") and parsed is not None:
+        # Aadhaar fields
+        doc_num = getattr(getattr(parsed, "identity_number", None), "value", None) or getattr(getattr(parsed, "docNumber", None), "value", None)
+        _set_field(session_data, "document_number", doc_num, "viz")
         _set_field(session_data, "document_number_source", "viz")
-        _set_field(session_data, "identity_number", getattr(parsed.identity_number, "value", None), "viz")
+        _set_field(session_data, "identity_number", doc_num, "viz")
         _set_field(session_data, "identity_number_source", "viz")
-        _set_field(session_data, "name", getattr(parsed.name, "value", None), "viz")
+        _set_field(session_data, "name", getattr(getattr(parsed, "name", None), "value", None), "viz")
         _set_field(session_data, "name_source", "viz")
-        _set_field(session_data, "date_of_birth", getattr(parsed.dob, "value", None) or getattr(parsed.year_of_birth, "value", None), "viz")
+        _set_field(session_data, "date_of_birth", getattr(getattr(parsed, "dob", None), "value", None) or getattr(getattr(parsed, "year_of_birth", None), "value", None), "viz")
         _set_field(session_data, "dob_source", "viz")
-        _set_field(session_data, "year_of_birth", getattr(parsed.year_of_birth, "value", None), "viz")
-        _set_field(session_data, "gender", getattr(parsed.gender, "value", None), "viz")
-        _set_field(session_data, "issuing_authority", getattr(parsed.issuing_authority, "value", None), "viz")
+        _set_field(session_data, "year_of_birth", getattr(getattr(parsed, "year_of_birth", None), "value", None), "viz")
+        _set_field(session_data, "gender", getattr(getattr(parsed, "gender", None), "value", None), "viz")
+        _set_field(session_data, "issuing_authority", getattr(getattr(parsed, "issuing_authority", None), "value", None), "viz")
         _set_field(session_data, "authority_source", "viz")
-        _set_field(session_data, "address", getattr(parsed.address, "value", None), "viz")
+        _set_field(session_data, "address", getattr(getattr(parsed, "address", None), "value", None), "viz")
+
+    elif document_type in ("voter_id", "voterid", "voterId", "voterID", "epic", "voter") and parsed is not None:
+        # Voter ID / EPIC fields
+        epic_num = getattr(getattr(parsed, "epic_number", None), "value", None) or getattr(getattr(parsed, "docNumber", None), "value", None)
+        _set_field(session_data, "document_number", epic_num, "viz")
+        _set_field(session_data, "document_number_source", "viz")
+        _set_field(session_data, "epic_number", epic_num, "viz")
+        _set_field(session_data, "epic_number_source", "viz")
+        _set_field(session_data, "name", getattr(getattr(parsed, "name", None), "value", None), "viz")
+        _set_field(session_data, "name_source", "viz")
+        _set_field(session_data, "father_name", getattr(getattr(parsed, "father_name", None), "value", None), "viz")
+        _set_field(session_data, "date_of_birth", getattr(getattr(parsed, "dob", None), "value", None), "viz")
+        _set_field(session_data, "dob_source", "viz")
+        _set_field(session_data, "age", getattr(getattr(parsed, "age", None), "value", None), "viz")
+        _set_field(session_data, "gender", getattr(getattr(parsed, "gender", None), "value", None), "viz")
+        _set_field(session_data, "constituency", getattr(getattr(parsed, "constituency", None), "value", None), "viz")
+        _set_field(session_data, "issuing_authority", getattr(getattr(parsed, "issuing_authority", None), "value", None), "viz")
+        _set_field(session_data, "authority_source", "viz")
+        _set_field(session_data, "state", getattr(getattr(parsed, "issuing_state", None), "value", None), "viz")
+
+    elif document_type in ("pan_card", "pancard", "panCard", "pan") and parsed is not None:
+        # PAN Card fields
+        pan_num = getattr(getattr(parsed, "pan_number", None), "value", None) or getattr(getattr(parsed, "docNumber", None), "value", None)
+        _set_field(session_data, "document_number", pan_num, "viz")
+        _set_field(session_data, "document_number_source", "viz")
+        _set_field(session_data, "pan_number", pan_num, "viz")
+        _set_field(session_data, "pan_number_source", "viz")
+        _set_field(session_data, "name", getattr(getattr(parsed, "name", None), "value", None), "viz")
+        _set_field(session_data, "name_source", "viz")
+        _set_field(session_data, "father_name", getattr(getattr(parsed, "father_name", None), "value", None), "viz")
+        _set_field(session_data, "date_of_birth", getattr(getattr(parsed, "dob", None), "value", None), "viz")
+        _set_field(session_data, "dob_source", "viz")
+        _set_field(session_data, "taxpayer_category", getattr(parsed, "taxpayer_category", None), "viz")
+        _set_field(session_data, "issuing_authority", getattr(getattr(parsed, "issuing_authority", None), "value", None), "viz")
+        _set_field(session_data, "authority_source", "viz")
 
     elif document_type in ("border_permit", "borderpermit") and parsed is not None:
         # Border permit fields

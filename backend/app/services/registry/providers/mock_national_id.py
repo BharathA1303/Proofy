@@ -41,7 +41,7 @@ _MOCK_LATENCY_MS = 50.0
 class _NIDRecordProxy(dict):
     """Proxy providing backward compatibility by decrypting SQLite records on demand."""
     def __getitem__(self, key: str):
-        res = government_registry_db.lookup_document("national_id", key)
+        res = government_registry_db.lookup_document("national_id", key) or government_registry_db.lookup_document("aadhaar", key)
         if not res:
             raise KeyError(key)
         return res
@@ -49,20 +49,32 @@ class _NIDRecordProxy(dict):
     def __contains__(self, key: object):
         if not isinstance(key, str):
             return False
-        return government_registry_db.lookup_document("national_id", key) is not None
+        return (
+            government_registry_db.lookup_document("national_id", key) is not None
+            or government_registry_db.lookup_document("aadhaar", key) is not None
+        )
 
     def get(self, key: str, default=None):
-        res = government_registry_db.lookup_document("national_id", key)
+        res = government_registry_db.lookup_document("national_id", key) or government_registry_db.lookup_document("aadhaar", key)
         return res if res is not None else default
 
     def keys(self):
-        return government_registry_db.get_all_records_for_type("national_id").keys()
+        keys = list(government_registry_db.get_all_records_for_type("national_id").keys())
+        if not keys:
+            keys = list(government_registry_db.get_all_records_for_type("aadhaar").keys())
+        return keys
 
     def values(self):
-        return government_registry_db.get_all_records_for_type("national_id").values()
+        vals = list(government_registry_db.get_all_records_for_type("national_id").values())
+        if not vals:
+            vals = list(government_registry_db.get_all_records_for_type("aadhaar").values())
+        return vals
 
     def items(self):
-        return government_registry_db.get_all_records_for_type("national_id").items()
+        items = list(government_registry_db.get_all_records_for_type("national_id").items())
+        if not items:
+            items = list(government_registry_db.get_all_records_for_type("aadhaar").items())
+        return items
 
 _MOCK_NID_RECORDS = _NIDRecordProxy()
 

@@ -62,13 +62,24 @@ class TravelerFields(BaseModel):
     validTo: Optional[str] = None
     state: Optional[str] = None
 
-    # National ID fields
+    # National ID / Aadhaar fields
     identityNumber: Optional[str] = None
     maskedIdentityNumber: Optional[str] = None
     yearOfBirth: Optional[str] = None
     address: Optional[str] = None
     qrPayload: Optional[str] = None
     qrDecoded: Optional[bool] = None
+
+    # Voter ID / EPIC fields
+    epicNumber: Optional[str] = None
+    fatherName: Optional[str] = None
+    age: Optional[str] = None
+    constituency: Optional[str] = None
+    issuingState: Optional[str] = None
+
+    # PAN Card fields
+    panNumber: Optional[str] = None
+    taxpayerCategory: Optional[str] = None
 
     # Border Permit fields
     permitNumber: Optional[str] = None

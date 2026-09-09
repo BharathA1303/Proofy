@@ -104,7 +104,7 @@ class TestNationalIdCaseScenarios:
         assert doc_p.document_type == "passport"
         assert doc_v.document_type == "visa"
         assert doc_dl.document_type == "driving_license"
-        assert doc_nid.document_type == "national_id"
+        assert doc_nid.document_type in ("aadhaar", "national_id")
 
         # Cross-document relationships evaluated across peers
         assert len(case_final.relationships) >= 6

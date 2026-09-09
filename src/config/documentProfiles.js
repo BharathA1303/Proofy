@@ -26,8 +26,12 @@ export const DOCUMENT_TYPES = {
   PASSPORT:       'passport',
   VISA:           'visa',
   DRIVING_LICENSE:'drivingLicense',
-  NATIONAL_ID:    'nationalId',
+  AADHAAR:        'aadhaar',
+  VOTER_ID:       'voterId',
+  PAN_CARD:       'panCard',
   BORDER_PERMIT:  'borderPermit',
+  // Backward compatibility alias
+  NATIONAL_ID:    'aadhaar',
 };
 
 /** Ordered list — drives tab rendering */
@@ -35,7 +39,9 @@ export const DOCUMENT_TYPE_ORDER = [
   DOCUMENT_TYPES.PASSPORT,
   DOCUMENT_TYPES.VISA,
   DOCUMENT_TYPES.DRIVING_LICENSE,
-  DOCUMENT_TYPES.NATIONAL_ID,
+  DOCUMENT_TYPES.AADHAAR,
+  DOCUMENT_TYPES.VOTER_ID,
+  DOCUMENT_TYPES.PAN_CARD,
   DOCUMENT_TYPES.BORDER_PERMIT,
 ];
 
@@ -71,11 +77,17 @@ const COMMON_FIELDS = {
   validTo:        { key: 'validTo',        label: 'Valid Till',       placeholder: '—' },
   licenseNumber:  { key: 'licenseNumber',  label: 'License Number',   placeholder: '—' },
   state:          { key: 'state',          label: 'Issuing State',    placeholder: '—' },
-  identityNumber: { key: 'identityNumber', label: 'Identity Number',  placeholder: '—' },
-  maskedIdentityNumber: { key: 'maskedIdentityNumber', label: 'National ID #', placeholder: '—' },
+  identityNumber: { key: 'identityNumber', label: 'Aadhaar Number',   placeholder: '—' },
+  maskedIdentityNumber: { key: 'maskedIdentityNumber', label: 'Aadhaar ID #', placeholder: '—' },
   yearOfBirth:    { key: 'yearOfBirth',    label: 'Year of Birth',    placeholder: '—' },
   address:        { key: 'address',        label: 'Address',          placeholder: '—' },
   qrPayload:      { key: 'qrPayload',      label: 'QR Code Data',     placeholder: '—' },
+  epicNumber:     { key: 'epicNumber',     label: 'EPIC Number',      placeholder: '—' },
+  panNumber:      { key: 'panNumber',      label: 'PAN Number',       placeholder: '—' },
+  fatherName:     { key: 'fatherName',     label: "Father's Name",    placeholder: '—' },
+  constituency:   { key: 'constituency',   label: 'Assembly Constituency', placeholder: '—' },
+  taxpayerCategory:{ key: 'taxpayerCategory', label: 'Taxpayer Category', placeholder: '—' },
+  age:            { key: 'age',            label: 'Age',              placeholder: '—' },
 };
 
 /**
@@ -89,6 +101,13 @@ const COMMON_CHECKS = [
   { key: 'documentValidation',  label: 'Document Validation'  },
   { key: 'tamperingDetection',  label: 'Tampering Detection'  },
   { key: 'faceVerification',    label: 'Face Verification'    },
+  { key: 'registryVerification',label: 'Registry Verification'},
+  { key: 'riskAssessment',      label: 'Risk Assessment'      },
+];
+
+const NON_PHOTO_CHECKS = [
+  { key: 'documentValidation',  label: 'Document Validation'  },
+  { key: 'tamperingDetection',  label: 'Tampering Detection'  },
   { key: 'registryVerification',label: 'Registry Verification'},
   { key: 'riskAssessment',      label: 'Risk Assessment'      },
 ];
@@ -156,9 +175,9 @@ export const DOCUMENT_PROFILES = {
     maxFileSizeMB: 8,
   },
 
-  [DOCUMENT_TYPES.NATIONAL_ID]: {
-    label:      'National ID',
-    shortLabel: 'NID',
+  [DOCUMENT_TYPES.AADHAAR]: {
+    label:      'Aadhaar Card',
+    shortLabel: 'Aadhaar',
     status:     'available',
     travelerFields: [
       COMMON_FIELDS.name,
@@ -171,6 +190,44 @@ export const DOCUMENT_PROFILES = {
       COMMON_FIELDS.address,
     ],
     verificationChecks: COMMON_CHECKS,
+    acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 8,
+  },
+
+  [DOCUMENT_TYPES.VOTER_ID]: {
+    label:      'Voter ID / EPIC',
+    shortLabel: 'Voter ID',
+    status:     'available',
+    travelerFields: [
+      COMMON_FIELDS.name,
+      COMMON_FIELDS.docNumber,
+      COMMON_FIELDS.epicNumber,
+      COMMON_FIELDS.fatherName,
+      COMMON_FIELDS.dob,
+      COMMON_FIELDS.age,
+      COMMON_FIELDS.gender,
+      COMMON_FIELDS.constituency,
+      COMMON_FIELDS.authority,
+    ],
+    verificationChecks: COMMON_CHECKS,
+    acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 8,
+  },
+
+  [DOCUMENT_TYPES.PAN_CARD]: {
+    label:      'PAN Card',
+    shortLabel: 'PAN',
+    status:     'available',
+    travelerFields: [
+      COMMON_FIELDS.name,
+      COMMON_FIELDS.docNumber,
+      COMMON_FIELDS.panNumber,
+      COMMON_FIELDS.fatherName,
+      COMMON_FIELDS.dob,
+      COMMON_FIELDS.taxpayerCategory,
+      COMMON_FIELDS.authority,
+    ],
+    verificationChecks: NON_PHOTO_CHECKS,
     acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxFileSizeMB: 8,
   },

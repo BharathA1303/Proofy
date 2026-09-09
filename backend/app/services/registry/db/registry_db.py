@@ -367,6 +367,25 @@ class GovernmentRegistryDB:
 
         return out
 
+    def delete_all_records_for_type(self, doc_type: str) -> int:
+        """
+        Delete ALL records (official + blacklisted) for a given document type.
+        Used during DB migration to purge legacy or renamed type records.
+        Returns total rows deleted.
+        """
+        canonical_type = doc_type.lower().strip()
+        total_deleted = 0
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM official_citizens WHERE doc_type = ?", (canonical_type,))
+            total_deleted += cursor.rowcount
+            cursor.execute("DELETE FROM blacklisted_watchlist WHERE doc_type = ?", (canonical_type,))
+            total_deleted += cursor.rowcount
+            conn.commit()
+        if total_deleted > 0:
+            logger.info("Purged %d legacy records for doc_type='%s'", total_deleted, canonical_type)
+        return total_deleted
+
     def seed_initial_records(self) -> None:
         """
         Populates official citizens and blacklisted entities under full encryption.
@@ -609,10 +628,13 @@ class GovernmentRegistryDB:
             watchlist_reason="Judicial suspension.",
         )
 
-        # ── 3. NATIONAL ID (AADHAAR) ──────────────────────────────────────────
-        # Official Genuine (Sneha Patel)
+        # ── 3. AADHAAR (UIDAI) ───────────────────────────────────────────────
+        # Purge any old 'national_id' rows from previous schema
+        self.delete_all_records_for_type("national_id")
+
+        # Official Genuine — Sneha Patel (migrated + kept same Aadhaar number)
         self.insert_official_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="847291038473",
             full_name="SNEHA PATEL",
             dob="1992-09-18",
@@ -622,7 +644,7 @@ class GovernmentRegistryDB:
             metadata={"gender": "FEMALE", "address": "42 BAKER STREET, NEW DELHI 110001"},
         )
         self.insert_official_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="8472 9103 8473",
             full_name="SNEHA PATEL",
             dob="1992-09-18",
@@ -632,7 +654,7 @@ class GovernmentRegistryDB:
             metadata={"gender": "FEMALE", "address": "42 BAKER STREET, NEW DELHI 110001"},
         )
         self.insert_official_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="XXXX XXXX 8473",
             full_name="SNEHA PATEL",
             dob="1992-09-18",
@@ -641,8 +663,72 @@ class GovernmentRegistryDB:
             expiry="2099-12-31",
             metadata={"gender": "FEMALE", "address": "42 BAKER STREET, NEW DELHI 110001"},
         )
+
+        # Official Genuine — Bharath A (Real Test Identity)
         self.insert_official_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
+            doc_number="769766721283",
+            full_name="BHARATH A",
+            dob="2007-03-13",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="7697 6672 1283",
+            full_name="BHARATH A",
+            dob="2007-03-13",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="XXXX XXXX 1283",
+            full_name="BHARATH A",
+            dob="2007-03-13",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE"},
+        )
+
+        # Official Genuine — Sudha A (Real Test Identity)
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="366347670846",
+            full_name="SUDHA A",
+            dob="1985-01-01",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "FEMALE", "address": "18/12 Shirdi Ananda Flat, Mukunta Ramanujam St, Perambur, Chennai 600011"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="3663 4767 0846",
+            full_name="SUDHA A",
+            dob="1985-01-01",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "FEMALE", "address": "18/12 Shirdi Ananda Flat, Mukunta Ramanujam St, Perambur, Chennai 600011"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="XXXX XXXX 0846",
+            full_name="SUDHA A",
+            dob="1985-01-01",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "FEMALE", "address": "18/12 Shirdi Ananda Flat, Mukunta Ramanujam St, Perambur, Chennai 600011"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
             doc_number="987654321098",
             full_name="RAHUL SHARMA",
             dob="1992-05-15",
@@ -652,8 +738,8 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE"},
         )
         self.insert_official_record(
-            doc_type="national_id",
-            doc_number="TESTNID001",
+            doc_type="aadhaar",
+            doc_number="TESTAADHAAR001",
             full_name="RAHUL SHARMA",
             dob="1992-05-15",
             status="ACTIVE",
@@ -662,8 +748,8 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE"},
         )
         self.insert_official_record(
-            doc_type="national_id",
-            doc_number="TESTNIDEXPIRED001",
+            doc_type="aadhaar",
+            doc_number="TESTAADHAAREXPIRED001",
             full_name="TEST EXPIRED",
             dob="1980-01-01",
             status="EXPIRED",
@@ -672,8 +758,8 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE"},
         )
         self.insert_official_record(
-            doc_type="national_id",
-            doc_number="TESTNIDMISMATCH001",
+            doc_type="aadhaar",
+            doc_number="TESTAADHAARMISMATCH001",
             full_name="VIKRAM SINGH",
             dob="1965-03-12",
             status="ACTIVE",
@@ -682,9 +768,9 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE"},
         )
 
-        # Blacklisted Watchlist National ID (Tariq Ahmed)
+        # Blacklisted — Tariq Ahmed (migrated)
         self.insert_blacklisted_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="654123987101",
             full_name="TARIQ AHMED",
             dob="1980-04-05",
@@ -695,7 +781,7 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE", "address": "15 MARINE DRIVE, MUMBAI 400020"},
         )
         self.insert_blacklisted_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="6541 2398 7101",
             full_name="TARIQ AHMED",
             dob="1980-04-05",
@@ -706,7 +792,7 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE", "address": "15 MARINE DRIVE, MUMBAI 400020"},
         )
         self.insert_blacklisted_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="XXXX XXXX 7101",
             full_name="TARIQ AHMED",
             dob="1980-04-05",
@@ -717,27 +803,247 @@ class GovernmentRegistryDB:
             metadata={"gender": "MALE", "address": "15 MARINE DRIVE, MUMBAI 400020"},
         )
         self.insert_blacklisted_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
+            doc_number="TESTAADHAARREVOKED001",
+            full_name="TEST REVOKED",
+            dob="1975-06-15",
+            status="REVOKED",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            watchlist_reason="National security flag: Aadhaar revoked.",
+        )
+        self.insert_blacklisted_record(
+            doc_type="aadhaar",
+            doc_number="TESTAADHAARSUSPENDED001",
+            full_name="TEST SUSPENDED",
+            dob="1988-10-20",
+            status="SUSPENDED",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            watchlist_reason="Identity theft investigation: Aadhaar suspended.",
+        )
+
+        # Legacy TESTNID aliases for backward compatibility
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="TESTNID001",
+            full_name="RAHUL SHARMA",
+            dob="1992-05-15",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="TESTNIDEXPIRED001",
+            full_name="TEST EXPIRED",
+            dob="1980-01-01",
+            status="EXPIRED",
+            authority="Unique Identification Authority of India",
+            expiry="2010-01-01",
+            metadata={"gender": "MALE"},
+        )
+        self.insert_official_record(
+            doc_type="aadhaar",
+            doc_number="TESTNIDMISMATCH001",
+            full_name="VIKRAM SINGH",
+            dob="1965-03-12",
+            status="ACTIVE",
+            authority="Unique Identification Authority of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE"},
+        )
+        self.insert_blacklisted_record(
+            doc_type="aadhaar",
             doc_number="TESTNIDREVOKED001",
             full_name="TEST REVOKED",
             dob="1975-06-15",
             status="REVOKED",
             authority="Unique Identification Authority of India",
             expiry="2099-12-31",
-            watchlist_reason="National security flag: document revoked.",
+            watchlist_reason="National security flag: Aadhaar revoked.",
         )
         self.insert_blacklisted_record(
-            doc_type="national_id",
+            doc_type="aadhaar",
             doc_number="TESTNIDSUSPENDED001",
             full_name="TEST SUSPENDED",
             dob="1988-10-20",
             status="SUSPENDED",
             authority="Unique Identification Authority of India",
             expiry="2099-12-31",
-            watchlist_reason="Identity theft investigation: credential suspended.",
+            watchlist_reason="Identity theft investigation: Aadhaar suspended.",
         )
 
-        # ── 4. ENTRY VISAS ────────────────────────────────────────────────────
+        # ── 4. VOTER ID / EPIC (Election Commission of India) ─────────────────
+        # Official Genuine
+        self.insert_official_record(
+            doc_type="voter_id",
+            doc_number="ABC1234567",
+            full_name="PRIYA KRISHNAMURTHY",
+            dob="1988-07-22",
+            status="ACTIVE",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            metadata={"gender": "FEMALE", "constituency": "CHENNAI NORTH", "state": "Tamil Nadu"},
+        )
+        self.insert_official_record(
+            doc_type="voter_id",
+            doc_number="MNP9876543",
+            full_name="ARJUN VENKATESH",
+            dob="1985-03-14",
+            status="ACTIVE",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            metadata={"gender": "MALE", "constituency": "DELHI SOUTH", "state": "Delhi"},
+        )
+        self.insert_official_record(
+            doc_type="voter_id",
+            doc_number="TESTVOTERID001",
+            full_name="MEERA PILLAI",
+            dob="1990-11-30",
+            status="ACTIVE",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            metadata={"gender": "FEMALE", "constituency": "ERNAKULAM", "state": "Kerala"},
+        )
+        self.insert_official_record(
+            doc_type="voter_id",
+            doc_number="TESTVOTEREXPIRED001",
+            full_name="TEST EXPIRED VOTER",
+            dob="1965-01-01",
+            status="EXPIRED",
+            authority="Election Commission of India",
+            expiry="2015-01-01",
+        )
+        self.insert_official_record(
+            doc_type="voter_id",
+            doc_number="TESTVOTEMISMATCH001",
+            full_name="DIFFERENT VOTER NAME",
+            dob="1975-06-15",
+            status="ACTIVE",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+        )
+
+        # Blacklisted Voter ID
+        self.insert_blacklisted_record(
+            doc_type="voter_id",
+            doc_number="XYZ7654321",
+            full_name="RAHUL DEVANAND",
+            dob="1977-09-05",
+            status="REVOKED",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            watchlist_reason="Voter ID revoked: electoral fraud and duplicate registration detected by ECI.",
+            metadata={"gender": "MALE", "constituency": "VARANASI WEST", "state": "Uttar Pradesh"},
+        )
+        self.insert_blacklisted_record(
+            doc_type="voter_id",
+            doc_number="TESTVOTERREVOKED001",
+            full_name="TEST REVOKED VOTER",
+            dob="1975-06-15",
+            status="REVOKED",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            watchlist_reason="Voter ID revoked by election authorities.",
+        )
+        self.insert_blacklisted_record(
+            doc_type="voter_id",
+            doc_number="TESTVOTERSUSPENDED001",
+            full_name="TEST SUSPENDED VOTER",
+            dob="1980-10-20",
+            status="SUSPENDED",
+            authority="Election Commission of India",
+            expiry="2099-12-31",
+            watchlist_reason="Voter ID suspended pending constituency verification.",
+        )
+
+        # ── 5. PAN CARD (Income Tax Department of India) ──────────────────────
+        # Official Genuine
+        self.insert_official_record(
+            doc_type="pan_card",
+            doc_number="AABCP1234C",
+            full_name="KAVITHA PRABHAKAR",
+            dob="1983-04-12",
+            status="ACTIVE",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            metadata={"taxpayer_category": "Individual"},
+        )
+        self.insert_official_record(
+            doc_type="pan_card",
+            doc_number="BBBPK5678D",
+            full_name="SUNDAR KRISHNAN",
+            dob="1979-08-25",
+            status="ACTIVE",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            metadata={"taxpayer_category": "Individual"},
+        )
+        self.insert_official_record(
+            doc_type="pan_card",
+            doc_number="TESTPAN0001A",
+            full_name="RAMESH BABU",
+            dob="1975-12-01",
+            status="ACTIVE",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            metadata={"taxpayer_category": "Individual"},
+        )
+        self.insert_official_record(
+            doc_type="pan_card",
+            doc_number="TESTPANEXPIRED001",
+            full_name="TEST EXPIRED PAN",
+            dob="1960-01-01",
+            status="EXPIRED",
+            authority="Income Tax Department, Government of India",
+            expiry="2010-01-01",
+        )
+        self.insert_official_record(
+            doc_type="pan_card",
+            doc_number="TESTPANMISMATCH001",
+            full_name="DIFFERENT PAN HOLDER",
+            dob="1970-03-15",
+            status="ACTIVE",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+        )
+
+        # Blacklisted PAN Card
+        self.insert_blacklisted_record(
+            doc_type="pan_card",
+            doc_number="AAAFT9999Z",
+            full_name="SURESH FRAUDWALA",
+            dob="1972-06-10",
+            status="REVOKED",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            watchlist_reason="PAN Card revoked: tax evasion fraud & identity impersonation flagged by Income Tax Department.",
+            metadata={"taxpayer_category": "Individual"},
+        )
+        self.insert_blacklisted_record(
+            doc_type="pan_card",
+            doc_number="TESTPANREVOKED001",
+            full_name="TEST REVOKED PAN",
+            dob="1975-06-15",
+            status="REVOKED",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            watchlist_reason="PAN Card revoked by Income Tax Department.",
+        )
+        self.insert_blacklisted_record(
+            doc_type="pan_card",
+            doc_number="TESTPANSUSPENDED001",
+            full_name="TEST SUSPENDED PAN",
+            dob="1982-09-12",
+            status="SUSPENDED",
+            authority="Income Tax Department, Government of India",
+            expiry="2099-12-31",
+            watchlist_reason="PAN Card suspended pending tax fraud investigation.",
+        )
+
+        # ── 6. ENTRY VISAS ────────────────────────────────────────────────────
         # Official Genuine (Aarav Sharma / Elena Rostova)
         self.insert_official_record(
             doc_type="visa",

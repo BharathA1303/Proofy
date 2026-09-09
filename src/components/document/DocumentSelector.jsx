@@ -36,14 +36,29 @@ function getDocIcon(docType) {
           <line x1="14" y1="14" x2="18" y2="14" />
         </svg>
       );
-    case DOCUMENT_TYPES.NATIONAL_ID:
+    case DOCUMENT_TYPES.AADHAAR:
       return (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="4" width="18" height="16" rx="2" />
-          <rect x="6" y="8" width="5" height="5" rx="1" />
-          <line x1="14" y1="9" x2="18" y2="9" />
-          <line x1="14" y1="13" x2="17" y2="13" />
-          <line x1="7" y1="16" x2="17" y2="16" />
+          <circle cx="8" cy="11" r="2.5" />
+          <line x1="13" y1="9" x2="18" y2="9" />
+          <line x1="13" y1="13" x2="17" y2="13" />
+          <line x1="6" y1="16" x2="18" y2="16" />
+        </svg>
+      );
+    case DOCUMENT_TYPES.VOTER_ID:
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      );
+    case DOCUMENT_TYPES.PAN_CARD:
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <line x1="2" y1="9" x2="22" y2="9" />
+          <line x1="6" y1="14" x2="12" y2="14" />
         </svg>
       );
     case DOCUMENT_TYPES.BORDER_PERMIT:
@@ -67,7 +82,9 @@ function getStandardTag(docType) {
     case DOCUMENT_TYPES.PASSPORT:       return 'TD3';
     case DOCUMENT_TYPES.VISA:           return 'MRV';
     case DOCUMENT_TYPES.DRIVING_LICENSE:return 'DL';
-    case DOCUMENT_TYPES.NATIONAL_ID:    return 'TD1';
+    case DOCUMENT_TYPES.AADHAAR:        return 'UIDAI';
+    case DOCUMENT_TYPES.VOTER_ID:       return 'EPIC';
+    case DOCUMENT_TYPES.PAN_CARD:       return 'PAN';
     case DOCUMENT_TYPES.BORDER_PERMIT:  return 'BPT';
     default: return '';
   }

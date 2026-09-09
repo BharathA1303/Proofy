@@ -19,16 +19,24 @@ logger = logging.getLogger(__name__)
 
 # Human-readable labels for document types
 DOCUMENT_TYPE_LABELS = {
-    "passport": "Passport",
-    "visa": "Visa",
+    "passport":        "Passport",
+    "visa":            "Visa",
     "driving_license": "Driving License",
-    "drivingLicense": "Driving License",
-    "national_id": "National ID (Aadhaar)",
-    "nationalId": "National ID (Aadhaar)",
-    "border_permit": "Border / Work Permit",
-    "borderPermit": "Border / Work Permit",
-    "work_permit": "Work Permit",
-    "workpermit": "Work Permit",
+    "drivingLicense":  "Driving License",
+    # Indian identity documents
+    "aadhaar":         "Aadhaar Card",
+    "aadhaarCard":     "Aadhaar Card",
+    "voter_id":        "Voter ID / EPIC",
+    "voterId":         "Voter ID / EPIC",
+    "voterID":         "Voter ID / EPIC",
+    "epic":            "Voter ID / EPIC",
+    "pan_card":        "PAN Card",
+    "panCard":         "PAN Card",
+    # Legacy compat
+    "national_id":     "Aadhaar Card (legacy)",
+    "nationalId":      "Aadhaar Card (legacy)",
+    "border_permit":   "Border / Work Permit",
+    "borderPermit":    "Border / Work Permit",
 }
 
 
@@ -96,13 +104,31 @@ def detect_document_type_from_text(raw_text: str) -> Optional[str]:
     if has_dl_header:
         return "driving_license"
 
-    # 5. National ID / Aadhaar Markers
-    has_nid_header = any(k in upper for k in [
-        "AADHAAR", "UNIQUE IDENTIFICATION", "MERA AADHAAR", "GOVERNMENT OF INDIA", "ENROLMENT NO"
+    # 5a. Aadhaar Card (UIDAI) — highest-specificity markers
+    has_aadhaar_header = any(k in upper for k in [
+        "AADHAAR", "UNIQUE IDENTIFICATION AUTHORITY OF INDIA", "MERA AADHAAR",
+        "UIDAI", "ENROLMENT NO", "MERI PEHCHAN",
     ]) or bool(re.search(r"\b\d{4}\s\d{4}\s\d{4}\b", upper))
 
-    if has_nid_header and not has_passport_header and not has_dl_header:
-        return "national_id"
+    if has_aadhaar_header and not has_passport_header and not has_dl_header:
+        return "aadhaar"
+
+    # 5b. Voter ID / EPIC — Election Commission markers
+    has_voter_header = any(k in upper for k in [
+        "ELECTION COMMISSION", "ELECTORS PHOTO IDENTITY", "EPIC", "ELECTORAL ROLL", "VOTER ID",
+    ]) or bool(re.search(r"\b[A-Z]{3}\d{7}\b", upper))
+
+    if has_voter_header and not has_passport_header and not has_dl_header:
+        return "voter_id"
+
+    # 5c. PAN Card — Income Tax Department markers
+    has_pan_header = any(k in upper for k in [
+        "INCOME TAX DEPARTMENT", "PERMANENT ACCOUNT NUMBER", "INCOME TAX INDIA",
+        "NSDL", "UTIITSL",
+    ]) or bool(re.search(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", upper))
+
+    if has_pan_header and not has_passport_header and not has_dl_header:
+        return "pan_card"
 
     return None
 
@@ -119,11 +145,18 @@ def classify_and_guard_document_type(
     flags a critical mismatch.
     """
     canonical_declared = declared_type.lower().strip()
-    # Normalize aliases
-    if canonical_declared in ("drivinglicense", "driving_license"):
+    # Normalize aliases to canonical snake_case types
+    if canonical_declared in ("drivinglicense", "driving_license", "dl"):
         canonical_declared = "driving_license"
-    elif canonical_declared in ("nationalid", "national_id", "aadhaar", "nid"):
-        canonical_declared = "national_id"
+    elif canonical_declared in ("aadhaarcard", "aadhaar", "uid"):
+        canonical_declared = "aadhaar"
+    elif canonical_declared in ("voterid", "voterid", "voter_id", "epic", "voter"):
+        canonical_declared = "voter_id"
+    elif canonical_declared in ("pancard", "pan_card", "pan"):
+        canonical_declared = "pan_card"
+    elif canonical_declared in ("nationalid", "national_id", "nid"):
+        # Legacy fallback — route to aadhaar for detection purposes
+        canonical_declared = "aadhaar"
     elif canonical_declared in ("borderpermit", "border_permit", "work_permit", "workpermit"):
         canonical_declared = "border_permit"
 

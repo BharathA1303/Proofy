@@ -58,19 +58,29 @@ logger = logging.getLogger(__name__)
 # ── Critical field definitions per document type ────────────────────────────
 
 CRITICAL_FIELDS: dict[str, list[str]] = {
-    "passport": ["document_number", "date_of_birth", "name", "nationality"],
-    "visa": ["document_number", "name", "nationality"],
+    "passport":        ["document_number", "date_of_birth", "name", "nationality"],
+    "visa":            ["document_number", "name", "nationality"],
     "driving_license": ["document_number", "date_of_birth", "name"],
-    "national_id": ["document_number", "date_of_birth", "name"],
-    "border_permit": ["document_number", "name"],
+    # Indian identity documents
+    "aadhaar":         ["document_number", "date_of_birth", "name"],
+    "voter_id":        ["document_number", "name"],
+    "pan_card":        ["document_number", "name"],
+    # Legacy compat
+    "national_id":     ["document_number", "date_of_birth", "name"],
+    "border_permit":   ["document_number", "name"],
 }
 
 SECONDARY_FIELDS: dict[str, list[str]] = {
-    "passport": ["expiry_date", "issuing_authority"],
-    "visa": ["expiry_date", "issuing_authority"],
+    "passport":        ["expiry_date", "issuing_authority"],
+    "visa":            ["expiry_date", "issuing_authority"],
     "driving_license": ["expiry_date", "issuing_authority"],
-    "national_id": ["issuing_authority"],
-    "border_permit": ["expiry_date", "issuing_authority"],
+    # Indian identity documents
+    "aadhaar":         ["issuing_authority"],
+    "voter_id":        ["date_of_birth", "issuing_authority"],  # DOB optional on Voter ID
+    "pan_card":        ["date_of_birth", "issuing_authority"],  # DOB optional on PAN Card
+    # Legacy compat
+    "national_id":     ["issuing_authority"],
+    "border_permit":   ["expiry_date", "issuing_authority"],
 }
 
 # Registry document status values that override field comparison

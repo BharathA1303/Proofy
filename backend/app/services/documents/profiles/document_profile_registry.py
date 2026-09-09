@@ -27,8 +27,10 @@ from app.services.documents.profiles.driving_license_profile import (
 )
 from app.services.documents.profiles.other_profiles import (
     BORDER_PERMIT_PROFILE,
-    NATIONAL_ID_PROFILE,
 )
+from app.services.documents.profiles.aadhaar_profile import AADHAAR_PROFILE
+from app.services.documents.profiles.voter_id_profile import VOTER_ID_PROFILE
+from app.services.documents.profiles.pan_card_profile import PAN_CARD_PROFILE
 from app.services.documents.profiles.passport_profile import PASSPORT_PROFILE
 from app.services.documents.profiles.visa_profile import VISA_PROFILE
 
@@ -41,14 +43,32 @@ _DOC_TYPE_ALIASES: Dict[str, str] = {
     "drivinglicense": "driving_license",
     "drivingLicense": "driving_license",
     "driving_license": "driving_license",
-    "nationalid": "national_id",
-    "nationalId": "national_id",
-    "national_id": "national_id",
-    "nid": "national_id",
-    "aadhaar": "national_id",
+    # Aadhaar — UIDAI 12-digit identity
+    "aadhaar": "aadhaar",
+    "aadhaarcard": "aadhaar",
+    "aadhaarCard": "aadhaar",
+    "uid": "aadhaar",
+    # Voter ID / EPIC — Election Commission of India
+    "voter_id": "voter_id",
+    "voterid": "voter_id",
+    "voterId": "voter_id",
+    "voterID": "voter_id",
+    "epic": "voter_id",
+    "voter": "voter_id",
+    # PAN Card — Income Tax Department
+    "pan_card": "pan_card",
+    "pancard": "pan_card",
+    "panCard": "pan_card",
+    "pan": "pan_card",
+    # Border Permit
     "borderpermit": "border_permit",
     "borderPermit": "border_permit",
     "border_permit": "border_permit",
+    # Legacy compatibility aliases — map old generic national_id to aadhaar
+    "national_id": "aadhaar",
+    "nationalid": "aadhaar",
+    "nationalId": "aadhaar",
+    "nid": "aadhaar",
 }
 
 
@@ -66,7 +86,10 @@ class DocumentProfileRegistry:
         self.register(PASSPORT_PROFILE)
         self.register(VISA_PROFILE)
         self.register(DRIVING_LICENSE_PROFILE)
-        self.register(NATIONAL_ID_PROFILE)
+        # Indian identity documents — three separate profiles
+        self.register(AADHAAR_PROFILE)
+        self.register(VOTER_ID_PROFILE)
+        self.register(PAN_CARD_PROFILE)
         self.register(BORDER_PERMIT_PROFILE)
         self.validate_registry()
 

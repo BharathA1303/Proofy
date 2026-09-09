@@ -31,6 +31,8 @@ def mock_ocr_engine_init(monkeypatch):
     Prevent PaddleOCR from actually loading models during tests.
     Marks the engine as initialized and replaces run_ocr with a controllable mock.
     """
+    from app.services.ocr.ocr_cache import clear_ocr_cache
+    clear_ocr_cache()
     # Prevent init from loading any models
     monkeypatch.setattr(ocr_engine_module, "init_engine", lambda **kw: None)
     # Mark engine as ready

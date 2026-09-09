@@ -113,7 +113,7 @@ class TestBorderPermitCaseScenarios:
         assert doc_p.document_type == "passport"
         assert doc_v.document_type == "visa"
         assert doc_dl.document_type == "driving_license"
-        assert doc_nid.document_type == "national_id"
+        assert doc_nid.document_type in ("aadhaar", "national_id")
         assert doc_bp.document_type == "border_permit"
 
         # Relationships evaluated across pairs

@@ -33,6 +33,18 @@ from app.services.documents.driving_license.dl_parser import parse_driving_licen
 from app.services.documents.driving_license.dl_validator import (
     validate_driving_license_document,
 )
+from app.services.documents.aadhaar.aadhaar_parser import parse_aadhaar
+from app.services.documents.aadhaar.aadhaar_validator import (
+    validate_aadhaar_document,
+)
+from app.services.documents.voter_id.voter_id_parser import parse_voter_id
+from app.services.documents.voter_id.voter_id_validator import (
+    validate_voter_id_document,
+)
+from app.services.documents.pan_card.pan_card_parser import parse_pan_card
+from app.services.documents.pan_card.pan_card_validator import (
+    validate_pan_card_document,
+)
 from app.services.documents.national_id.national_id_parser import parse_national_id
 from app.services.documents.national_id.national_id_validator import (
     validate_national_id_document,
@@ -184,25 +196,15 @@ class CaseManager:
                 "bloodGroup": getattr(parsed_dl.blood_group, "value", None),
                 "state": getattr(parsed_dl.state, "value", None),
             }
-        elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-            parsed_nid = parse_national_id(ocr_regions)
-            traveler_dict = {
-                "name": getattr(parsed_nid.name, "value", None),
-                "docNumber": getattr(parsed_nid.identity_number, "value", None),
-                "document_number": getattr(parsed_nid.identity_number, "value", None),
-                "identityNumber": getattr(parsed_nid.identity_number, "value", None),
-                "maskedIdentityNumber": parsed_nid.masked_identity_number,
-                "dob": getattr(parsed_nid.dob, "value", None),
-                "date_of_birth": getattr(parsed_nid.dob, "value", None),
-                "yearOfBirth": getattr(parsed_nid.year_of_birth, "value", None),
-                "year_of_birth": getattr(parsed_nid.year_of_birth, "value", None),
-                "gender": getattr(parsed_nid.gender, "value", None),
-                "authority": getattr(parsed_nid.issuing_authority, "value", None),
-                "issuing_authority": getattr(parsed_nid.issuing_authority, "value", None),
-                "address": getattr(parsed_nid.address, "value", None),
-                "qrPayload": parsed_nid.qr_payload,
-                "qrDecoded": parsed_nid.qr_decoded,
-            }
+        elif profile.document_type in ("aadhaar", "aadhaarcard", "uid", "national_id", "nationalid", "nid"):
+            parsed_aadhaar = parse_aadhaar(ocr_regions)
+            traveler_dict = parsed_aadhaar.to_dict()
+        elif profile.document_type in ("voter_id", "voterid", "voterId", "voterID", "epic", "voter"):
+            parsed_voter = parse_voter_id(ocr_regions)
+            traveler_dict = parsed_voter.to_dict()
+        elif profile.document_type in ("pan_card", "pancard", "panCard", "pan"):
+            parsed_pan = parse_pan_card(ocr_regions)
+            traveler_dict = parsed_pan.to_dict()
         elif profile.document_type in ("border_permit", "borderpermit"):
             parsed_bp = parse_border_permit(ocr_regions)
             traveler_dict = {
@@ -295,8 +297,12 @@ class CaseManager:
                 val_res = validate_visa_document(traveler_fields, None)
             elif profile.document_type == "driving_license":
                 val_res = validate_driving_license_document(traveler_fields, None)
-            elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-                val_res = validate_national_id_document(traveler_fields, None)
+            elif profile.document_type in ("aadhaar", "aadhaarcard", "uid", "national_id", "nationalid", "nid"):
+                val_res = validate_aadhaar_document(traveler_fields, None)
+            elif profile.document_type in ("voter_id", "voterid", "voterId", "voterID", "epic", "voter"):
+                val_res = validate_voter_id_document(traveler_fields, None)
+            elif profile.document_type in ("pan_card", "pancard", "panCard", "pan"):
+                val_res = validate_pan_card_document(traveler_fields, None)
             elif profile.document_type in ("border_permit", "borderpermit"):
                 val_res = validate_border_permit_document(traveler_fields, None)
             else:

@@ -52,6 +52,23 @@ class ParsedDrivingLicenseData:
     address: DLField = field(default_factory=DLField)
     unsupported_layout: bool = False
 
+    def to_dict(self) -> dict:
+        return {
+            "docNumber": self.docNumber.value or self.license_number.value,
+            "license_number": self.license_number.value,
+            "name": self.name.value,
+            "dob": self.dob.value,
+            "valid_from": self.valid_from.value,
+            "valid_to": self.valid_to.value,
+            "issuedDate": self.issuedDate.value or self.valid_from.value,
+            "expiry": self.expiry.value or self.valid_to.value,
+            "blood_group": self.blood_group.value,
+            "vehicle_classes": self.vehicle_classes.value,
+            "issuing_authority": self.issuing_authority.value,
+            "state": self.state.value,
+            "address": self.address.value,
+        }
+
 
 def parse_driving_license(
     regions: List[OCRRegionRaw],

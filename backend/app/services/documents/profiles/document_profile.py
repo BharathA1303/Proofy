@@ -19,7 +19,10 @@ class DocumentType(str, Enum):
     PASSPORT = "passport"
     VISA = "visa"
     DRIVING_LICENSE = "driving_license"
-    NATIONAL_ID = "national_id"
+    # Indian identity documents — separate profiles per issuing authority
+    AADHAAR = "aadhaar"
+    VOTER_ID = "voter_id"
+    PAN_CARD = "pan_card"
     BORDER_PERMIT = "border_permit"
 
 

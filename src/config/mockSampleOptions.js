@@ -86,36 +86,135 @@ export const DEFAULT_SAMPLE_OPTIONS = {
     },
   ],
 
+  aadhaar: [
+    {
+      id: 'aadhaar_official',
+      label: 'Official Aadhaar Card (Genuine)',
+      badge: 'OFFICIAL / ACTIVE',
+      variant: 'official',
+      filename: 'Aadhaar_Sneha_Patel_Official.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=official',
+      fallbackUrl: '/samples/aadhaar/aadhaar_official.jpg',
+      description: 'Official 12-digit UIDAI Aadhaar Card for Sneha Patel (8472 9103 8473). Valid Verhoeff checksum & active status.',
+    },
+    {
+      id: 'aadhaar_blacklist',
+      label: 'Blacklisted Aadhaar (Suspended)',
+      badge: 'BLACKLISTED',
+      variant: 'blacklist',
+      filename: 'Aadhaar_Tariq_Ahmed_Blacklisted.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=blacklist',
+      fallbackUrl: '/samples/aadhaar/aadhaar_blacklist.jpg',
+      description: 'Aadhaar Card for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate watchlist.',
+    },
+    {
+      id: 'aadhaar_defective',
+      label: 'Defective / Fake Aadhaar',
+      badge: 'DEFECT / FAKE',
+      variant: 'defective',
+      filename: 'Aadhaar_Devraj_Singh_Defective.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=defective',
+      fallbackUrl: '/samples/aadhaar/aadhaar_defective.jpg',
+      description: 'Defective Aadhaar (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.',
+    },
+  ],
+
+  voter_id: [
+    {
+      id: 'voter_id_official',
+      label: 'Official Voter ID / EPIC (Genuine)',
+      badge: 'OFFICIAL / ACTIVE',
+      variant: 'official',
+      filename: 'VoterID_Priya_Krishnamurthy_Official.jpg',
+      url: '/api/v1/verification/sample/voter_id?variant=official',
+      fallbackUrl: '/samples/voter_id/voter_id_official.jpg',
+      description: 'Official Electors Photo Identity Card: Priya Krishnamurthy (ABC1234567). Active in ECI electoral roll.',
+    },
+    {
+      id: 'voter_id_blacklist',
+      label: 'Blacklisted Voter ID (Revoked)',
+      badge: 'BLACKLISTED',
+      variant: 'blacklist',
+      filename: 'VoterID_Rahul_Devanand_Blacklisted.jpg',
+      url: '/api/v1/verification/sample/voter_id?variant=blacklist',
+      fallbackUrl: '/samples/voter_id/voter_id_blacklist.jpg',
+      description: 'Voter ID for Rahul Devanand (XYZ7654321). Status: REVOKED for electoral roll duplicate registration.',
+    },
+    {
+      id: 'voter_id_defective',
+      label: 'Defective / Fake Voter ID',
+      badge: 'DEFECT / FAKE',
+      variant: 'defective',
+      filename: 'VoterID_Invalid_Defective.jpg',
+      url: '/api/v1/verification/sample/voter_id?variant=defective',
+      fallbackUrl: '/samples/voter_id/voter_id_defective.jpg',
+      description: 'Defective Voter ID (INVALID-EPIC-99): Malformed EPIC format and missing constituency metadata.',
+    },
+  ],
+
+  pan_card: [
+    {
+      id: 'pan_card_official',
+      label: 'Official PAN Card (Genuine)',
+      badge: 'OFFICIAL / ACTIVE',
+      variant: 'official',
+      filename: 'PAN_Kavitha_Prabhakar_Official.jpg',
+      url: '/api/v1/verification/sample/pan_card?variant=official',
+      fallbackUrl: '/samples/pan_card/pan_card_official.jpg',
+      description: 'Official Income Tax Dept PAN Card: Kavitha Prabhakar (AABCP1234C). Active taxpayer credential.',
+    },
+    {
+      id: 'pan_card_blacklist',
+      label: 'Blacklisted PAN Card (Revoked)',
+      badge: 'BLACKLISTED',
+      variant: 'blacklist',
+      filename: 'PAN_Suresh_Fraudwala_Blacklisted.jpg',
+      url: '/api/v1/verification/sample/pan_card?variant=blacklist',
+      fallbackUrl: '/samples/pan_card/pan_card_blacklist.jpg',
+      description: 'PAN Card for Suresh Fraudwala (AAAFT9999Z). Status: REVOKED for tax evasion fraud and impersonation.',
+    },
+    {
+      id: 'pan_card_defective',
+      label: 'Defective / Fake PAN Card',
+      badge: 'DEFECT / FAKE',
+      variant: 'defective',
+      filename: 'PAN_Invalid_Defective.jpg',
+      url: '/api/v1/verification/sample/pan_card?variant=defective',
+      fallbackUrl: '/samples/pan_card/pan_card_defective.jpg',
+      description: 'Defective PAN Card (PAN-123-INVALID): Non-standard alphanumeric structure and missing taxpayer category.',
+    },
+  ],
+
   national_id: [
     {
       id: 'national_id_official',
-      label: 'Official National ID (Genuine)',
+      label: 'Official Aadhaar Card (Genuine)',
       badge: 'OFFICIAL / ACTIVE',
       variant: 'official',
-      filename: 'NationalID_Sneha_Patel_Official.jpg',
-      url: '/api/v1/verification/sample/national_id?variant=official',
-      fallbackUrl: '/samples/national_id/national_id_official.jpg',
-      description: 'Official 12-digit National ID for Sneha Patel (8472 9103 8473). Valid and registered in official records.',
+      filename: 'Aadhaar_Sneha_Patel_Official.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=official',
+      fallbackUrl: '/samples/aadhaar/aadhaar_official.jpg',
+      description: 'Official 12-digit UIDAI Aadhaar Card for Sneha Patel (8472 9103 8473). Valid and registered in official records.',
     },
     {
       id: 'national_id_blacklist',
-      label: 'Blacklisted National ID (Suspended)',
+      label: 'Blacklisted Aadhaar (Suspended)',
       badge: 'BLACKLISTED',
       variant: 'blacklist',
-      filename: 'NationalID_Tariq_Ahmed_Blacklisted.jpg',
-      url: '/api/v1/verification/sample/national_id?variant=blacklist',
-      fallbackUrl: '/samples/national_id/national_id_blacklist.jpg',
-      description: 'National ID for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate records.',
+      filename: 'Aadhaar_Tariq_Ahmed_Blacklisted.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=blacklist',
+      fallbackUrl: '/samples/aadhaar/aadhaar_blacklist.jpg',
+      description: 'Aadhaar Card for Tariq Ahmed (6541 2398 7101). Status: SUSPENDED / REVOKED on duplicate records.',
     },
     {
       id: 'national_id_defective',
-      label: 'Defective / Fake National ID',
+      label: 'Defective / Fake Aadhaar',
       badge: 'DEFECT / FAKE',
       variant: 'defective',
-      filename: 'NationalID_Devraj_Singh_Defective.jpg',
-      url: '/api/v1/verification/sample/national_id?variant=defective',
-      fallbackUrl: '/samples/national_id/national_id_defective.jpg',
-      description: 'Defective National ID (1234 5678 9999): Invalid number format with missing personal details.',
+      filename: 'Aadhaar_Devraj_Singh_Defective.jpg',
+      url: '/api/v1/verification/sample/aadhaar?variant=defective',
+      fallbackUrl: '/samples/aadhaar/aadhaar_defective.jpg',
+      description: 'Defective Aadhaar (1234 5678 9999): Invalid number format with missing personal details.',
     },
   ],
 
@@ -186,7 +285,11 @@ export const DEFAULT_SAMPLE_OPTIONS = {
   ],
 };
 
-// Aliases for camelCase document type keys
+// Aliases for camelCase and legacy document type keys
 DEFAULT_SAMPLE_OPTIONS.drivingLicense = DEFAULT_SAMPLE_OPTIONS.driving_license;
-DEFAULT_SAMPLE_OPTIONS.nationalId = DEFAULT_SAMPLE_OPTIONS.national_id;
+DEFAULT_SAMPLE_OPTIONS.aadhaarCard = DEFAULT_SAMPLE_OPTIONS.aadhaar;
+DEFAULT_SAMPLE_OPTIONS.voterId = DEFAULT_SAMPLE_OPTIONS.voter_id;
+DEFAULT_SAMPLE_OPTIONS.panCard = DEFAULT_SAMPLE_OPTIONS.pan_card;
+DEFAULT_SAMPLE_OPTIONS.nationalId = DEFAULT_SAMPLE_OPTIONS.aadhaar;
 DEFAULT_SAMPLE_OPTIONS.borderPermit = DEFAULT_SAMPLE_OPTIONS.border_permit;
+

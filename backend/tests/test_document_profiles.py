@@ -26,14 +26,17 @@ client = TestClient(app)
 
 class TestDocumentProfileRegistry:
     def test_registry_contains_standard_profiles(self):
-        """Registry must contain profiles for passport, visa, and future placeholders."""
+        """Registry must contain profiles for passport, visa, driving_license, aadhaar, voter_id, pan_card, border_permit."""
         profiles = document_profile_registry.get_all_profiles()
         types = {p.document_type for p in profiles}
         assert "passport" in types
         assert "visa" in types
         assert "driving_license" in types
-        assert "national_id" in types
+        assert "aadhaar" in types
+        assert "voter_id" in types
+        assert "pan_card" in types
         assert "border_permit" in types
+
 
     def test_resolve_passport_profile(self):
         profile = document_profile_registry.resolve("passport")
@@ -63,7 +66,13 @@ class TestDocumentProfileRegistry:
         assert profile_dl.document_type == "driving_license"
 
         profile_nid = document_profile_registry.resolve("nationalId")
-        assert profile_nid.document_type == "national_id"
+        assert profile_nid.document_type in ("aadhaar", "national_id")
+
+        profile_voter = document_profile_registry.resolve("voterId")
+        assert profile_voter.document_type == "voter_id"
+
+        profile_pan = document_profile_registry.resolve("panCard")
+        assert profile_pan.document_type == "pan_card"
 
         profile_bp = document_profile_registry.resolve("borderPermit")
         assert profile_bp.document_type == "border_permit"
@@ -83,6 +92,15 @@ class TestDocumentProfileRegistry:
         p_dl = document_profile_registry.resolve_operational("driving_license")
         assert p_dl.status == ProfileStatus.AVAILABLE
 
+        p_aadhaar = document_profile_registry.resolve_operational("aadhaar")
+        assert p_aadhaar.status == ProfileStatus.AVAILABLE
+
+        p_voter = document_profile_registry.resolve_operational("voter_id")
+        assert p_voter.status == ProfileStatus.AVAILABLE
+
+        p_pan = document_profile_registry.resolve_operational("pan_card")
+        assert p_pan.status == ProfileStatus.AVAILABLE
+
         p_nid = document_profile_registry.resolve_operational("national_id")
         assert p_nid.status == ProfileStatus.AVAILABLE
 
@@ -97,7 +115,7 @@ class TestDocumentProfileRegistry:
 
     def test_metadata_exposure(self):
         meta = document_profile_registry.get_all_profiles_metadata()
-        assert len(meta) >= 5
+        assert len(meta) >= 7
         passport_meta = next(m for m in meta if m["type"] == "passport")
         assert passport_meta["status"] == "available"
         assert passport_meta["display_name"] == "Passport"
@@ -110,9 +128,17 @@ class TestDocumentProfileRegistry:
         assert dl_meta["status"] == "available"
         assert dl_meta["display_name"] == "Driving License"
 
-        nid_meta = next(m for m in meta if m["type"] == "national_id")
-        assert nid_meta["status"] == "available"
-        assert nid_meta["display_name"] == "National ID"
+        aadhaar_meta = next(m for m in meta if m["type"] == "aadhaar")
+        assert aadhaar_meta["status"] == "available"
+        assert aadhaar_meta["display_name"] == "Aadhaar Card"
+
+        voter_meta = next(m for m in meta if m["type"] == "voter_id")
+        assert voter_meta["status"] == "available"
+        assert voter_meta["display_name"] == "Voter ID / EPIC"
+
+        pan_meta = next(m for m in meta if m["type"] == "pan_card")
+        assert pan_meta["status"] == "available"
+        assert pan_meta["display_name"] == "PAN Card"
 
         bp_meta = next(m for m in meta if m["type"] == "border_permit")
         assert bp_meta["status"] == "available"
@@ -128,5 +154,8 @@ class TestDocumentProfileRegistry:
         assert any(d["type"] == "passport" and d["status"] == "available" for d in docs)
         assert any(d["type"] == "visa" and d["status"] == "available" for d in docs)
         assert any(d["type"] == "driving_license" and d["status"] == "available" for d in docs)
-        assert any(d["type"] == "national_id" and d["status"] == "available" for d in docs)
+        assert any(d["type"] == "aadhaar" and d["status"] == "available" for d in docs)
+        assert any(d["type"] == "voter_id" and d["status"] == "available" for d in docs)
+        assert any(d["type"] == "pan_card" and d["status"] == "available" for d in docs)
         assert any(d["type"] == "border_permit" and d["status"] == "available" for d in docs)
+

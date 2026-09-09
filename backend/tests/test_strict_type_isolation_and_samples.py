@@ -38,9 +38,18 @@ class TestStrictDocumentTypeIsolation:
         text = "UNION OF INDIA - DRIVING LICENCE DL NO DL-0420230012345 COV: MCWG, LMV"
         assert detect_document_type_from_text(text) == "driving_license"
 
-    def test_classifier_detects_national_id(self):
+    def test_classifier_detects_aadhaar(self):
         text = "GOVERNMENT OF INDIA UNIQUE IDENTIFICATION AUTHORITY OF INDIA AADHAAR 8472 9103 8473"
-        assert detect_document_type_from_text(text) == "national_id"
+        assert detect_document_type_from_text(text) == "aadhaar"
+
+    def test_classifier_detects_voter_id(self):
+        text = "ELECTION COMMISSION OF INDIA ELECTORS PHOTO IDENTITY CARD EPIC NO ABC1234567"
+        assert detect_document_type_from_text(text) == "voter_id"
+
+    def test_classifier_detects_pan_card(self):
+        text = "INCOME TAX DEPARTMENT GOVT. OF INDIA PERMANENT ACCOUNT NUMBER ABCDE1234F"
+        assert detect_document_type_from_text(text) == "pan_card"
+
 
     def test_classifier_detects_border_permit(self):
         text = "OFFICIAL ENTRY & WORK PERMIT REGIONAL BORDER CONTROL BP-2026-880011"

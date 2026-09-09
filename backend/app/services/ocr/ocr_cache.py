@@ -30,3 +30,9 @@ def set_cached_ocr(raw_bytes: bytes, doc_type: str, result_dict: Any) -> None:
     digest = compute_image_hash(raw_bytes)
     key = f"{doc_type.lower().strip()}:{digest}"
     _OCR_CACHE[key] = result_dict
+
+
+def clear_ocr_cache() -> None:
+    """Clear all entries in the OCR extraction cache."""
+    _OCR_CACHE.clear()
+

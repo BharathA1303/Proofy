@@ -140,7 +140,9 @@ export default function UploadPanel() {
   const docType = session.documentType;
   const canonicalDocType = (
     docType === 'drivingLicense' ? 'driving_license' :
-    docType === 'nationalId' ? 'national_id' :
+    docType === 'voterId' ? 'voter_id' :
+    docType === 'panCard' ? 'pan_card' :
+    docType === 'nationalId' ? 'aadhaar' :
     docType === 'borderPermit' ? 'border_permit' : docType
   );
 

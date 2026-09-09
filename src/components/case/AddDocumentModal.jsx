@@ -13,7 +13,9 @@ const DOCUMENT_TYPES = [
   { type: 'passport', label: 'Passport', available: true, standard: 'ICAO Doc 9303 TD3' },
   { type: 'visa', label: 'Visa', available: true, standard: 'MRV-A / MRV-B' },
   { type: 'driving_license', label: 'Driving License', available: true, standard: 'MoRTH / ISO 18013' },
-  { type: 'national_id', label: 'National ID', available: true, standard: 'UIDAI Reference / 12-Digit' },
+  { type: 'aadhaar', label: 'Aadhaar Card', available: true, standard: 'UIDAI Reference / 12-Digit' },
+  { type: 'voter_id', label: 'Voter ID / EPIC', available: true, standard: 'ECI Electoral Credential' },
+  { type: 'pan_card', label: 'PAN Card', available: true, standard: 'ITD Taxpayer Identification' },
   { type: 'border_permit', label: 'Border Permit', available: true, standard: 'Regional Entry Reference' },
 ];
 

@@ -71,7 +71,20 @@ def _get_adapter(document_type: str):
             DrivingLicenseRegistryAdapter,
         )
         return DrivingLicenseRegistryAdapter()
-    if norm in ("national_id", "nationalid", "nid", "aadhaar"):
+    if norm in ("national_id", "nationalid", "nid", "aadhaar", "aadhaarcard", "uid"):
+        # Use Aadhaar adapter (renamed from national_id_adapter; same shape)
+        from app.services.registry.adapters.national_id_adapter import (
+            NationalIdRegistryAdapter,
+        )
+        return NationalIdRegistryAdapter()
+    if norm in ("voter_id", "voterid", "epic", "voter"):
+        # Voter ID uses the same adapter shape as Aadhaar (generic field set)
+        from app.services.registry.adapters.national_id_adapter import (
+            NationalIdRegistryAdapter,
+        )
+        return NationalIdRegistryAdapter()
+    if norm in ("pan_card", "pancard", "pan"):
+        # PAN Card uses the same adapter shape (no DOB mandatory)
         from app.services.registry.adapters.national_id_adapter import (
             NationalIdRegistryAdapter,
         )

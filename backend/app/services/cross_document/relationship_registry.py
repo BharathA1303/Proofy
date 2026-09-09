@@ -56,6 +56,24 @@ class DocumentRelationshipRegistry:
         nidbp_profile = build_national_id_border_permit_profile()
         self.register_profile(nidbp_profile)
 
+        # Indian Identity Document Relationships (Aadhaar, Voter ID, PAN Card)
+        for doc_type in ("aadhaar", "voter_id", "pan_card"):
+            self.register_profile(RelationshipProfile(
+                source_document_type=doc_type,
+                target_document_type="passport",
+                definitions=pnid_profile.definitions,
+            ))
+            self.register_profile(RelationshipProfile(
+                source_document_type=doc_type,
+                target_document_type="driving_license",
+                definitions=dlnid_profile.definitions,
+            ))
+        self.register_profile(RelationshipProfile(
+            source_document_type="aadhaar",
+            target_document_type="border_permit",
+            definitions=nidbp_profile.definitions,
+        ))
+
     def register_profile(self, profile: RelationshipProfile) -> None:
         key = (profile.source_document_type.lower(), profile.target_document_type.lower())
         self._profiles[key] = profile

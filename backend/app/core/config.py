@@ -95,7 +95,10 @@ class Settings(BaseSettings):
     REGISTRY_PROVIDER_PASSPORT: str = "mock"
     REGISTRY_PROVIDER_VISA: str = "mock"
     REGISTRY_PROVIDER_DL: str = "mock"
-    REGISTRY_PROVIDER_NATIONAL_ID: str = "mock"
+    # Indian identity documents — three separate providers
+    REGISTRY_PROVIDER_AADHAAR: str = "mock"
+    REGISTRY_PROVIDER_VOTER_ID: str = "mock"
+    REGISTRY_PROVIDER_PAN_CARD: str = "mock"
     REGISTRY_PROVIDER_BORDER_PERMIT: str = "mock"
 
     # Registry provider timeout settings (seconds).

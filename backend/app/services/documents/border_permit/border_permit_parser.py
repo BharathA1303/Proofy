@@ -65,6 +65,37 @@ class ParsedBorderPermitData:
     unsupported_layout: bool = False
     unsupported_reasons: List[str] = field(default_factory=list)
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "docNumber": self.docNumber.value or self.permit_number.value,
+            "document_number": self.docNumber.value or self.permit_number.value,
+            "permit_number": self.permit_number.value,
+            "permitNumber": self.permit_number.value,
+            "name": self.name.value,
+            "dob": self.dob.value,
+            "date_of_birth": self.dob.value,
+            "nationality": self.nationality.value,
+            "passport_number": self.passport_number.value,
+            "passportNumber": self.passport_number.value,
+            "valid_from": self.valid_from.value,
+            "validFrom": self.valid_from.value,
+            "valid_to": self.valid_to.value,
+            "validTo": self.valid_to.value,
+            "expiry": self.expiry.value or self.valid_to.value,
+            "permit_type": self.permit_type.value,
+            "permitType": self.permit_type.value,
+            "border_zone": self.border_zone.value,
+            "borderZone": self.border_zone.value,
+            "port_of_entry": self.port_of_entry.value,
+            "portOfEntry": self.port_of_entry.value,
+            "issuing_authority": self.issuing_authority.value,
+            "authority": self.issuing_authority.value,
+            "qr_payload": self.qr_payload,
+            "qrPayload": self.qr_payload,
+            "qr_decoded": self.qr_decoded,
+            "qrDecoded": self.qr_decoded,
+        }
+
 
 class BorderPermitParser:
     """

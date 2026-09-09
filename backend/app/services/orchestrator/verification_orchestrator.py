@@ -167,9 +167,17 @@ class VerificationOrchestrator:
                 from app.services.documents.driving_license.dl_parser import parse_driving_license
                 parsed = parse_driving_license(ocr_regions)
                 traveler_dict = parsed.to_dict()
-            elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-                from app.services.documents.national_id.national_id_parser import parse_national_id
-                parsed = parse_national_id(ocr_regions)
+            elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar", "aadhaarcard", "uid"):
+                from app.services.documents.aadhaar.aadhaar_parser import parse_aadhaar
+                parsed = parse_aadhaar(ocr_regions)
+                traveler_dict = parsed.to_dict()
+            elif profile.document_type in ("voter_id", "voterid", "epic", "voter"):
+                from app.services.documents.voter_id.voter_id_parser import parse_voter_id
+                parsed = parse_voter_id(ocr_regions)
+                traveler_dict = parsed.to_dict()
+            elif profile.document_type in ("pan_card", "pancard", "pan"):
+                from app.services.documents.pan_card.pan_card_parser import parse_pan_card
+                parsed = parse_pan_card(ocr_regions)
                 traveler_dict = parsed.to_dict()
             elif profile.document_type in ("border_permit", "borderpermit"):
                 from app.services.documents.border_permit.border_permit_parser import parse_border_permit
@@ -210,9 +218,15 @@ class VerificationOrchestrator:
             elif profile.document_type == "driving_license":
                 from app.services.documents.driving_license.dl_validator import validate_driving_license_document
                 val_res = validate_driving_license_document(t_fields, None)
-            elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar"):
-                from app.services.documents.national_id.national_id_validator import validate_national_id_document
-                val_res = validate_national_id_document(t_fields, None)
+            elif profile.document_type in ("national_id", "nationalid", "nid", "aadhaar", "aadhaarcard", "uid"):
+                from app.services.documents.aadhaar.aadhaar_validator import validate_aadhaar_document
+                val_res = validate_aadhaar_document(t_fields, None)
+            elif profile.document_type in ("voter_id", "voterid", "epic", "voter"):
+                from app.services.documents.voter_id.voter_id_validator import validate_voter_id_document
+                val_res = validate_voter_id_document(t_fields, None)
+            elif profile.document_type in ("pan_card", "pancard", "pan"):
+                from app.services.documents.pan_card.pan_card_validator import validate_pan_card_document
+                val_res = validate_pan_card_document(t_fields, None)
             elif profile.document_type in ("border_permit", "borderpermit"):
                 from app.services.documents.border_permit.border_permit_validator import validate_border_permit_document
                 val_res = validate_border_permit_document(t_fields, None)

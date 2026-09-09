@@ -43,11 +43,23 @@ _TYPE_TO_SETTING: Dict[str, str] = {
     "passport":       settings.REGISTRY_PROVIDER_PASSPORT,
     "visa":           settings.REGISTRY_PROVIDER_VISA,
     "driving_license": settings.REGISTRY_PROVIDER_DL,
-    "drivingLicense": settings.REGISTRY_PROVIDER_DL,  # frontend key alias
-    "national_id":    settings.REGISTRY_PROVIDER_NATIONAL_ID,
-    "nationalId":     settings.REGISTRY_PROVIDER_NATIONAL_ID,  # frontend key alias
+    "drivingLicense": settings.REGISTRY_PROVIDER_DL,
+    # Indian identity documents
+    "aadhaar":        settings.REGISTRY_PROVIDER_AADHAAR,
+    "aadhaarCard":    settings.REGISTRY_PROVIDER_AADHAAR,
+    "voter_id":       settings.REGISTRY_PROVIDER_VOTER_ID,
+    "voterId":        settings.REGISTRY_PROVIDER_VOTER_ID,
+    "voterID":        settings.REGISTRY_PROVIDER_VOTER_ID,
+    "epic":           settings.REGISTRY_PROVIDER_VOTER_ID,
+    "pan_card":       settings.REGISTRY_PROVIDER_PAN_CARD,
+    "panCard":        settings.REGISTRY_PROVIDER_PAN_CARD,
+    "pan":            settings.REGISTRY_PROVIDER_PAN_CARD,
     "border_permit":  settings.REGISTRY_PROVIDER_BORDER_PERMIT,
-    "borderPermit":   settings.REGISTRY_PROVIDER_BORDER_PERMIT,  # frontend key alias
+    "borderPermit":   settings.REGISTRY_PROVIDER_BORDER_PERMIT,
+    # Legacy compatibility aliases — map old generic national_id to Aadhaar setting
+    "national_id":    settings.REGISTRY_PROVIDER_AADHAAR,
+    "nationalId":     settings.REGISTRY_PROVIDER_AADHAAR,
+    "nid":            settings.REGISTRY_PROVIDER_AADHAAR,
 }
 
 
@@ -145,11 +157,18 @@ class ProviderResolver:
                 MockDrivingLicenseRegistryProvider,
             )
             return MockDrivingLicenseRegistryProvider()
-        elif norm_type in ("national_id", "nationalid", "nid", "aadhaar"):
-            from app.services.registry.providers.mock_national_id import (
-                MockNationalIdRegistryProvider,
-            )
+        elif norm_type in ("national_id", "nationalid", "nid"):
+            from app.services.registry.providers.mock_national_id import MockNationalIdRegistryProvider
             return MockNationalIdRegistryProvider()
+        elif norm_type in ("aadhaar", "aadhaarcard", "uid"):
+            from app.services.registry.providers.mock_aadhaar import MockAadhaarRegistryProvider
+            return MockAadhaarRegistryProvider()
+        elif norm_type in ("voter_id", "voterid", "epic", "voter"):
+            from app.services.registry.providers.mock_voter_id import MockVoterIdRegistryProvider
+            return MockVoterIdRegistryProvider()
+        elif norm_type in ("pan_card", "pancard", "pan"):
+            from app.services.registry.providers.mock_pan_card import MockPanCardRegistryProvider
+            return MockPanCardRegistryProvider()
         elif norm_type in ("border_permit", "borderpermit"):
             from app.services.registry.providers.mock_border_permit import (
                 MockBorderPermitRegistryProvider,
@@ -183,9 +202,13 @@ class ProviderResolver:
 def _normalize_doc_type(document_type: str) -> str:
     """Normalize frontend camelCase document type keys to snake_case."""
     mapping = {
-        "drivingLicense": "driving_license",
-        "nationalId":     "national_id",
-        "borderPermit":   "border_permit",
+        "drivingLicense":  "driving_license",
+        "nationalId":      "national_id",   # legacy alias — maps to aadhaar provider
+        "aadhaarCard":     "aadhaar",
+        "voterId":         "voter_id",
+        "voterID":         "voter_id",
+        "panCard":         "pan_card",
+        "borderPermit":    "border_permit",
     }
     return mapping.get(document_type, document_type)
 
