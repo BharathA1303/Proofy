@@ -44,6 +44,7 @@ _PAN_NOISE_TOKENS = (
     "INCOME", "TAX", "DEPARTMENT", "GOVERNMENT", "INDIA",
     "PERMANENT", "ACCOUNT", "NUMBER", "CARD", "ITD",
     "NSDL", "UTIITSL", "NAME", "FATHER", "GUARDIAN", "DATE", "BIRTH",
+    "SIGNATURE", "AUTHORITY", "COMMISSIONER",
 )
 
 
@@ -163,6 +164,7 @@ def parse_pan_card(
 
     # ── Field 2: Name of Cardholder ──────────────────────────────────────────
     _NAME_LABEL_RE = re.compile(r"^(?:CARDHOLDER'?S?\s*NAME|NAME)\s*[:\-]?\s*(.*)$")
+    _FATHER_LABEL_RE = re.compile(r"^(?:FATHER'?S?\s*NAME|GUARDIAN'?S?\s*NAME|F/O|S/O)\s*[:\-]?\s*(.*)$")
     for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper().strip()
         m_label = _NAME_LABEL_RE.match(clean_upper)
@@ -178,8 +180,28 @@ def parse_pan_card(
                 result.name = PanCardField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
+    # Fallback: real PAN cards usually do NOT print a "Name:" label at all —
+    # the cardholder's name appears as a standalone all-caps line below the
+    # "INCOME TAX DEPARTMENT / GOVT. OF INDIA" header and above the father's
+    # name line. Take the first name-shaped line after the header block.
+    if not result.name.value:
+        header_seen = False
+        for idx, (text, conf, bbox) in enumerate(lines):
+            clean_upper = text.upper().strip()
+            if any(kw in clean_upper for kw in ("INCOME TAX", "GOVT", "GOVERNMENT", "PERMANENT ACCOUNT")):
+                header_seen = True
+                continue
+            if not header_seen:
+                continue
+            if PAN_PATTERN.search(clean_upper):
+                continue
+            if _FATHER_LABEL_RE.match(clean_upper):
+                break
+            if _is_valid_name_token(text.strip()):
+                result.name = PanCardField(value=text.strip(), confidence=conf, bbox=bbox, raw=text.strip())
+                break
+
     # ── Field 3: Father's Name ────────────────────────────────────────────────
-    _FATHER_LABEL_RE = re.compile(r"^(?:FATHER'?S?\s*NAME|GUARDIAN'?S?\s*NAME|F/O|S/O)\s*[:\-]?\s*(.*)$")
     for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper().strip()
         m_label = _FATHER_LABEL_RE.match(clean_upper)

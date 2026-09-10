@@ -166,6 +166,28 @@ def parse_voter_id(
                 result.name = VoterIdField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
+    # Fallback: the "Name" / "Elector's Name" label is frequently mis-OCR'd
+    # (missing apostrophe, merged with neighbouring text, low-confidence glyphs).
+    # Take the first name-shaped line after the header block and before the
+    # father's/husband's name label — this is where the elector's name sits
+    # on virtually every EPIC card layout.
+    if not result.name.value:
+        header_seen = False
+        for idx, (text, conf, bbox) in enumerate(lines):
+            clean_upper = text.upper().strip()
+            if any(kw in clean_upper for kw in ("ELECTION COMMISSION", "IDENTITY CARD", "ELECTORS PHOTO")):
+                header_seen = True
+                continue
+            if not header_seen:
+                continue
+            if EPIC_PATTERN.search(clean_upper):
+                continue
+            if re.match(r"^(?:FATHER|HUSBAND|RELATION|S/O|D/O|W/O|F/O)", clean_upper):
+                break
+            if _is_valid_name_token(text.strip()):
+                result.name = VoterIdField(value=text.strip(), confidence=conf, bbox=bbox, raw=text.strip())
+                break
+
     # ── Field 3: Father's Name ────────────────────────────────────────────────
     _FATHER_LABEL_RE = re.compile(
         r"^(?:FATHER'?S?\s*/?\s*HUSBAND'?S?\s*NAME|FATHER'?S?\s*NAME|HUSBAND'?S?\s*NAME|RELATION\s*NAME|S/O|D/O|W/O|F/O)\s*[:\-]?\s*(.*)$"

@@ -142,3 +142,46 @@ class TestPassportValidationService:
         assert "MALHOTRA" not in log_text
         assert "ASHOK" not in log_text
         assert "Passport validation completed" in log_text
+
+    def test_validity_period_within_standard_term_passes(self, valid_mrz, valid_traveler, reference_date):
+        """Issue 01/01/2020 -> Expiry 31/12/2029 is a standard ~10-year adult term."""
+        traveler = valid_traveler.model_copy(update={"issuedDate": "01/01/2020"})
+        res = validate_passport_document(valid_mrz, traveler, reference_date=reference_date)
+
+        assert res.checks.validity_period is not None
+        assert res.checks.validity_period.status == "passed"
+        assert res.checks.validity_period.exceeds_standard_term is False
+
+    def test_validity_period_exceeding_ten_years_flags_warning(self, valid_traveler, reference_date):
+        """Issue 01/01/2015 -> Expiry 31/12/2029 exceeds the 10-year adult term (flag, not fail)."""
+        tampered_l2 = "A1234567<6IND9001011M2912316<<<<<<<<<<<<<<<8"
+        mrz = MRZData(line1=self.LINE1_VALID, line2=tampered_l2)
+        traveler = valid_traveler.model_copy(update={"issuedDate": "01/01/2015"})
+
+        res = validate_passport_document(mrz, traveler, reference_date=reference_date)
+
+        assert res.checks.validity_period.status == "warning"
+        assert res.checks.validity_period.exceeds_standard_term is True
+        assert res.status in ("warning", "failed")
+        assert any(iss.check == "validity_period" for iss in res.issues)
+        # A longer-than-standard validity window is a flag, never a hard failure on its own.
+        assert not any(
+            iss.check == "validity_period" and iss.severity in ("critical", "failure")
+            for iss in res.issues
+        )
+
+    def test_validity_period_shorter_minor_term_does_not_flag(self, valid_mrz, valid_traveler, reference_date):
+        """A 5-year minor passport term must NOT be flagged as exceeding the standard term."""
+        traveler = valid_traveler.model_copy(update={"issuedDate": "01/01/2025"})
+        res = validate_passport_document(valid_mrz, traveler, reference_date=reference_date)
+
+        assert res.checks.validity_period.status == "passed"
+        assert res.checks.validity_period.exceeds_standard_term is False
+
+    def test_validity_period_missing_issue_date_is_unknown(self, valid_mrz, valid_traveler, reference_date):
+        """No issuedDate available -> validity period is 'unknown', never fabricated."""
+        res = validate_passport_document(valid_mrz, valid_traveler, reference_date=reference_date)
+
+        assert res.checks.validity_period.status == "unknown"
+        assert res.checks.validity_period.valid is True
+        assert res.checks.validity_period.validity_years is None

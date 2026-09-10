@@ -29,9 +29,10 @@ from app.schemas.validation import (
     PassportBindingEvidence,
     ValidationChecks,
     ValidationIssue,
+    ValidityPeriodEvidence,
     VizMrzConsistencyReport,
 )
-from app.services.validation.date_validator import parse_mrz_date, validate_expiry
+from app.services.validation.date_validator import parse_mrz_date, validate_expiry, validate_validity_period
 from app.services.validation.icao_checkdigit import validate_check_digit
 from app.services.validation.mrz_validator import normalize_mrz_line, validate_td3_structure
 from app.services.validation.viz_mrz_checker import (
@@ -44,6 +45,27 @@ from app.services.validation.viz_mrz_checker import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_viz_date(date_str: Optional[str]) -> Optional[datetime.date]:
+    """
+    Best-effort parse of a VIZ date string (DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
+    into a calendar date. Returns None if unparsable — never guesses.
+    """
+    if not date_str:
+        return None
+
+    from app.services.validation.viz_mrz_checker import _normalize_date_to_dmy
+
+    dmy = _normalize_date_to_dmy(date_str)
+    if not dmy:
+        return None
+
+    day, month, year = dmy
+    try:
+        return datetime.date(year, month, day)
+    except ValueError:
+        return None
 
 
 def validate_passport_document(
@@ -290,6 +312,34 @@ def validate_passport_document(
         )
 
     # ─────────────────────────────────────────────────────────────
+    # Check 3b: Validity Period (issueDate < expiryDate; flag if > 10 years)
+    # ─────────────────────────────────────────────────────────────
+    # Date of issue only appears in the VIZ (TD3 MRZ carries no issue date),
+    # so it is sourced from the traveler record produced by Module 1 OCR.
+    issue_date_parsed = _parse_viz_date(traveler.issuedDate if traveler else None)
+    validity_eval = validate_validity_period(
+        issue_date_parsed,
+        expiry_eval.expiry_date,
+    )
+    validity_evidence = ValidityPeriodEvidence(
+        status=validity_eval.status,
+        valid=validity_eval.valid,
+        issue_date=validity_eval.issue_date_str,
+        expiry_date=validity_eval.expiry_date_str,
+        validity_years=validity_eval.validity_years,
+        exceeds_standard_term=validity_eval.exceeds_standard_term,
+        message=validity_eval.message,
+    )
+    if validity_eval.status == "warning":
+        issues.append(
+            ValidationIssue(
+                severity="warning",
+                check="validity_period",
+                message=validity_eval.message,
+            )
+        )
+
+    # ─────────────────────────────────────────────────────────────
     # Check 4: The Passport Number Binding Trap (VIZ <-> MRZ)
     # ─────────────────────────────────────────────────────────────
     viz_doc_num = traveler.docNumber if traveler else None
@@ -489,6 +539,7 @@ def validate_passport_document(
             expiry_checksum=exp_evidence,
             composite_checksum=comp_evidence,
             expiry_date=expiry_evidence,
+            validity_period=validity_evidence,
             passport_number_binding=binding_evidence,
             viz_mrz_consistency=consistency_report,
         ),
@@ -524,6 +575,15 @@ def _build_insufficient_data_response(msg: str) -> DocumentValidationSummary:
                 expired=None,
                 expiry_date=None,
                 message="No MRZ data available to check expiration.",
+            ),
+            validity_period=ValidityPeriodEvidence(
+                status="unknown",
+                valid=True,
+                issue_date=None,
+                expiry_date=None,
+                validity_years=None,
+                exceeds_standard_term=False,
+                message="No MRZ data available to evaluate validity period.",
             ),
             passport_number_binding=PassportBindingEvidence(
                 status="unknown",

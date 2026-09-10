@@ -115,7 +115,11 @@ export default function UploadPanel() {
    * Verify — submits the selected file to the backend verification pipeline.
    */
   async function handleVerify() {
-    await submitOCR(session.file, session.documentType);
+    try {
+      await submitOCR(session.file, session.documentType);
+    } catch (err) {
+      console.error('Verification failed:', err);
+    }
   }
 
   const hasFile = isFileSelected || isSampleSelected;

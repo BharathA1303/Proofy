@@ -20,7 +20,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 # Security Hardening: Decompression bomb protection
 # Limit maximum pixel count to prevent denial-of-service via decompression bombs.
@@ -127,6 +127,9 @@ async def ingest_document(
         pil_image.verify()  # Verify without loading pixel data
         # Re-open after verify (verify() consumes the file pointer)
         pil_image = Image.open(io.BytesIO(raw_bytes))
+        # Apply EXIF orientation (phone cameras store rotation as metadata,
+        # not as pixel data) before any downstream processing sees the array.
+        pil_image = ImageOps.exif_transpose(pil_image)
         pil_image = pil_image.convert("RGB")
     except Exception as exc:
         logger.warning("PIL failed to decode image '%s': %s", filename, exc)

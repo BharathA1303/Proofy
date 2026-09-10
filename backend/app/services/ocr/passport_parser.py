@@ -48,6 +48,9 @@ _MRZ_MIN_LEN = 20
 # Passport number: 1 letter + 7 alphanumeric (ICAO format, Indian passports etc.)
 _PASSPORT_NUMBER_PATTERN = re.compile(r"\b[A-Z]\d{7}\b")
 
+# Indian passport file number: 2 letters (RPO code) + 13-16 digits, e.g. "DL0012345671234"
+_FILE_NUMBER_PATTERN = re.compile(r"\b[A-Z]{2}\d{13,16}\b")
+
 # Date patterns (various regional formats OCR may produce)
 _DATE_PATTERNS = [
     re.compile(r"\b(\d{2})[/\-\.](\d{2})[/\-\.](\d{4})\b"),   # DD/MM/YYYY
@@ -68,6 +71,8 @@ _FIELD_KEYWORDS = {
     "nationality": ["nationality", "national"],
     "gender":      ["sex", "gender", "m/f"],
     "placeOfBirth":["place of birth", "birth place", "pob"],
+    "placeOfIssue":["place of issue", "issue place"],
+    "fileNumber":  ["file number", "file no", "file no.", "application number"],
 }
 
 # Gender normalisation
@@ -97,9 +102,11 @@ class PassportParseResult:
     nationality: ParsedField = field(default_factory=ParsedField)
     gender: ParsedField = field(default_factory=ParsedField)
     placeOfBirth: ParsedField = field(default_factory=ParsedField)
+    placeOfIssue: ParsedField = field(default_factory=ParsedField)
     authority: ParsedField = field(default_factory=ParsedField)
     issuedDate: ParsedField = field(default_factory=ParsedField)
     expiry: ParsedField = field(default_factory=ParsedField)
+    fileNumber: ParsedField = field(default_factory=ParsedField)
     mrz_line1: ParsedField = field(default_factory=ParsedField)
     mrz_line2: ParsedField = field(default_factory=ParsedField)
 
@@ -403,6 +410,13 @@ def _extract_viz_fields(regions: list[OCRRegion]) -> dict[str, Optional[tuple[st
         if m:
             results.setdefault("nationality", (m.group(), region.confidence, region.bbox))
 
+    # File number — look for the pattern directly (only when a passport number
+    # was already found, so we don't confuse the two on documents without one)
+    for region in sorted_regions:
+        m = _FILE_NUMBER_PATTERN.search(region.text.upper())
+        if m:
+            results.setdefault("fileNumber", (m.group(), region.confidence, region.bbox))
+
     # Gender
     for region in sorted_regions:
         text_lower = region.text.strip().lower()
@@ -546,7 +560,7 @@ def parse_passport(
         result.expiry = ParsedField(value=v, confidence=c, bbox=b)
 
     # VIZ-only fields (no MRZ equivalent)
-    for field_name in ("issuedDate", "authority", "placeOfBirth"):
+    for field_name in ("issuedDate", "authority", "placeOfBirth", "placeOfIssue", "fileNumber"):
         if viz_fields.get(field_name):
             v, c, b = viz_fields[field_name]
             setattr(result, field_name, ParsedField(value=v, confidence=c, bbox=b))

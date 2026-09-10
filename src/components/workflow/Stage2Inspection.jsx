@@ -115,7 +115,9 @@ export default function Stage2Inspection() {
             <span className={styles.photoLabel}>PHYSICAL DOCUMENT</span>
           </div>
 
-          {/* Extracted Fields Grid */}
+          {/* Extracted Fields Grid — driven by the document profile's field list,
+              so each document type shows only the fields that actually apply to it
+              (e.g. PAN Card has no Expiry/Issue Date; Aadhaar has no Expiry Date). */}
           <div className={styles.fieldsContainer}>
             <div className={styles.primaryIdentityRow}>
               <div className={styles.fieldItem}>
@@ -129,43 +131,23 @@ export default function Stage2Inspection() {
             </div>
 
             <div className={styles.secondaryFieldsGrid}>
-              <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>DATE OF BIRTH</span>
-                <span className={styles.fieldValue}>{traveler.dob || '—'}</span>
-              </div>
-              <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>EXPIRY DATE</span>
-                <span className={styles.fieldValueExpiry}>
-                  {traveler.expiry || traveler.validTo || '—'}
-                  {traveler.expiry && <span className={styles.inForcePill}>VALID</span>}
-                </span>
-              </div>
-              <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>ISSUE DATE</span>
-                <span className={styles.fieldValue}>{traveler.issuedDate || traveler.issueDate || '—'}</span>
-              </div>
-              <div className={styles.fieldItem}>
-                <span className={styles.fieldLabel}>ISSUING AUTHORITY</span>
-                <span className={styles.fieldValue}>{traveler.authority || traveler.issuingAuthority || '—'}</span>
-              </div>
-              {traveler.nationality && (
-                <div className={styles.fieldItem}>
-                  <span className={styles.fieldLabel}>NATIONALITY</span>
-                  <span className={styles.fieldValue}>{traveler.nationality}</span>
-                </div>
-              )}
-              {traveler.gender && (
-                <div className={styles.fieldItem}>
-                  <span className={styles.fieldLabel}>GENDER</span>
-                  <span className={styles.fieldValue}>{traveler.gender}</span>
-                </div>
-              )}
-              {traveler.bloodGroup && (
-                <div className={styles.fieldItem}>
-                  <span className={styles.fieldLabel}>BLOOD GROUP</span>
-                  <span className={styles.fieldValueHighlight}>{traveler.bloodGroup}</span>
-                </div>
-              )}
+              {(profile.travelerFields || [])
+                .filter((f) => f && f.key && !['name', 'docNumber', 'mrz'].includes(f.key))
+                .map((f) => {
+                  const value = traveler[f.key];
+                  if (!value || String(value).trim() === '') return null;
+                  const isExpiry = f.key === 'expiry' || f.key === 'validTo';
+                  const isHighlight = f.key === 'bloodGroup';
+                  return (
+                    <div key={f.key} className={styles.fieldItem}>
+                      <span className={styles.fieldLabel}>{f.label.toUpperCase()}</span>
+                      <span className={isExpiry ? styles.fieldValueExpiry : isHighlight ? styles.fieldValueHighlight : styles.fieldValue}>
+                        {value}
+                        {isExpiry && <span className={styles.inForcePill}>VALID</span>}
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>

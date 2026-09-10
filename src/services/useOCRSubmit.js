@@ -114,6 +114,8 @@ export function useOCRSubmit() {
         'licenseNumber', 'vehicleClass', 'bloodGroup', 'validFrom', 'validTo', 'state',
         'identityNumber', 'maskedIdentityNumber', 'yearOfBirth', 'address', 'qrPayload',
         'permitNumber', 'permitType', 'borderZone', 'portOfEntry',
+        'epicNumber', 'fatherName', 'age', 'constituency',
+        'panNumber', 'taxpayerCategory',
       ];
 
       for (const key of fieldMap) {
@@ -347,6 +349,7 @@ export function useOCRSubmit() {
     } catch (err) {
       actions.setError(err.message || 'Verification failed. Please try again.');
       actions.setStatus(SESSION_STATUS.ERROR);
+      throw err;
     } finally {
       setIsSubmitting(false);
     }

@@ -301,9 +301,11 @@ async def ocr_document(
             nationality=parsed_passport.nationality.value,
             gender=parsed_passport.gender.value,
             placeOfBirth=parsed_passport.placeOfBirth.value,
+            placeOfIssue=parsed_passport.placeOfIssue.value,
             authority=parsed_passport.authority.value,
             issuedDate=parsed_passport.issuedDate.value,
             expiry=parsed_passport.expiry.value,
+            fileNumber=parsed_passport.fileNumber.value,
             mrz=mrz_combined,
         )
 

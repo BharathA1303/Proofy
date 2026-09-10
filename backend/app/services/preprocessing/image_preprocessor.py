@@ -10,14 +10,15 @@ Design goals:
 
 What we DO:
   - EXIF orientation correction
-  - Downscale very large images (>4000px) to reduce OCR latency
+  - Downscale only very large images to reduce OCR latency
   - Mild CLAHE contrast enhancement for dark/flat images
   - Convert to RGB for PaddleOCR input
 
 What we do NOT do:
   - Aggressive noise removal (can destroy text detail)
-  - Binarisation (damages coloured security features)
-  - Rotation correction (PaddleOCR angle_cls handles this better)
+  - Destructive binarisation of the primary image (damages coloured
+    security features) — low-contrast documents instead get a stronger,
+    non-destructive contrast boost (see _enhance_low_contrast)
   - Cropping (we must retain the full layout for field localisation)
 """
 from __future__ import annotations
@@ -31,9 +32,11 @@ from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
 
-# Maximum dimension (width or height) before we downscale
-# Optimized to 1600px for rapid high-accuracy OCR throughput without memory bloat
-_MAX_DIMENSION = 1600
+# Maximum dimension (width or height) before we downscale.
+# ID documents carry small, dense text (MRZ lines, Aadhaar/PAN numbers) that
+# needs real pixel density to survive OCR — 1600px was aggressive enough to
+# blur small glyphs on high-DPI scans, so the ceiling is raised to 2600px.
+_MAX_DIMENSION = 2600
 # Minimum dimension — warn if smaller (may degrade OCR quality)
 _MIN_DIMENSION = 200
 
@@ -169,7 +172,7 @@ def preprocess(image_np_bgr: np.ndarray) -> PreprocessedImage:
             "Image is very small (%dx%d). OCR quality may be poor.", w, h
         )
 
-    # Step 1: EXIF orientation is already handled during ingestion (PIL convert)
+    # Step 1: EXIF orientation is corrected during ingestion (ImageOps.exif_transpose)
     # so the array arriving here should already be correctly oriented.
     img = image_np_bgr.copy()
 
@@ -192,18 +195,27 @@ def preprocess(image_np_bgr: np.ndarray) -> PreprocessedImage:
         img = deskew_image(img, -skew_angle)
         h, w = img.shape[:2]
 
-    # Step 3: Mild CLAHE contrast enhancement on the luminance channel only.
-    # This helps with under-exposed phone photos without altering the colour balance.
+    # Step 3: CLAHE contrast enhancement on the luminance channel only.
+    # Clip limit adapts to how flat/faded the source looks — faded photocopies
+    # and low-contrast scans (common with older ID documents) need a stronger
+    # pull than a normally-exposed phone photo, without altering colour balance.
     try:
+        gray_for_contrast = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        contrast_std = float(gray_for_contrast.std())
+        # Low std deviation == flat/low-contrast image; scale clip limit up to compensate.
+        clip_limit = 3.5 if contrast_std < 40 else 2.0
+
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
         l_channel, a_channel, b_channel = cv2.split(lab)
 
-        # Clip limit = 2.0 is conservative; tile grid 8x8 is standard
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(8, 8))
         l_channel = clahe.apply(l_channel)
 
         lab_enhanced = cv2.merge([l_channel, a_channel, b_channel])
         img = cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2BGR)
+
+        if contrast_std < 40:
+            logger.info("Low-contrast source detected (std=%.1f) — applied stronger CLAHE (clip=%.1f)", contrast_std, clip_limit)
     except Exception as exc:
         # CLAHE failure is non-fatal — continue with the unenhanced image
         logger.warning("CLAHE enhancement failed (non-fatal): %s", exc)

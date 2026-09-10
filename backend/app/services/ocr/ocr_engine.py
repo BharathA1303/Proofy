@@ -40,6 +40,7 @@ class OCRRegion:
 
 # Module-level singleton — populated by init_engine() at app startup
 _paddle_ocr_instance: Any = None
+_use_angle_cls: bool = False
 
 
 def init_engine(lang: str = "en", use_angle_cls: bool = True, use_gpu: bool = False) -> None:
@@ -60,17 +61,21 @@ def init_engine(lang: str = "en", use_angle_cls: bool = True, use_gpu: bool = Fa
         logger.debug("OCR engine already initialized — skipping.")
         return
 
-    logger.info("Initializing PaddleOCR engine (lang=%s, gpu=%s)…", lang, use_gpu)
+    logger.info("Initializing PaddleOCR engine (lang=%s, gpu=%s, angle_cls=%s)…", lang, use_gpu, use_angle_cls)
     try:
         from paddleocr import PaddleOCR  # local import — avoids issues when testing without paddle
 
         _paddle_ocr_instance = PaddleOCR(
-            use_angle_cls=False,
+            use_angle_cls=use_angle_cls,
             lang=lang,
             use_gpu=use_gpu,
             cpu_threads=6,
             show_log=False,         # suppress PaddleOCR's internal verbose output
+            det_db_thresh=0.2,      # lower threshold catches fainter/thinner text edges
+            det_db_box_thresh=0.4,  # lower threshold detects smaller/tighter text boxes
         )
+        global _use_angle_cls
+        _use_angle_cls = use_angle_cls
         logger.info("PaddleOCR engine initialized successfully.")
     except Exception as exc:
         logger.critical("Failed to initialize PaddleOCR: %s", exc, exc_info=True)
@@ -105,7 +110,7 @@ def run_ocr(image_np: np.ndarray) -> list[OCRRegion]:
     logger.info("Running OCR on image shape=%s", image_np.shape)
 
     # PaddleOCR expects BGR numpy array
-    raw_results = _paddle_ocr_instance.ocr(image_np, cls=False)
+    raw_results = _paddle_ocr_instance.ocr(image_np, cls=_use_angle_cls)
 
     regions: list[OCRRegion] = []
 

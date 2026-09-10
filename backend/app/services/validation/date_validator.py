@@ -39,6 +39,22 @@ class ExpiryValidationResult:
     message: str
 
 
+@dataclass(frozen=True)
+class ValidityPeriodResult:
+    """Outcome of evaluating the issue-to-expiry validity window."""
+    valid: bool
+    status: str  # "passed" | "warning" | "unknown"
+    issue_date_str: Optional[str]
+    expiry_date_str: Optional[str]
+    validity_years: Optional[float]
+    exceeds_standard_term: bool
+    message: str
+
+
+# Standard adult Indian passport validity window (ICAO-permitted maximum).
+MAX_STANDARD_VALIDITY_YEARS = 10
+
+
 def parse_mrz_date(
     yymmdd: Optional[str],
     is_expiry: bool = False,
@@ -204,4 +220,73 @@ def validate_expiry(
         expiry_date_str=exp_str,
         reference_date_str=ref_str,
         message=f"Passport is valid through {exp_str}.",
+    )
+
+
+def validate_validity_period(
+    issue_date: Optional[datetime.date],
+    expiry_date: Optional[datetime.date],
+) -> ValidityPeriodResult:
+    """
+    Check that issueDate < expiryDate and flag (without hard-failing) when the
+    issue-to-expiry span exceeds the standard 10-year adult passport term.
+
+    Shorter-validity documents (minor passports, typically 5 years) are normal
+    and must NOT be flagged — only spans exceeding the 10-year maximum are.
+    """
+    if issue_date is None or expiry_date is None:
+        return ValidityPeriodResult(
+            valid=True,  # does not hard-fail when one date is unreadable
+            status="unknown",
+            issue_date_str=issue_date.isoformat() if issue_date else None,
+            expiry_date_str=expiry_date.isoformat() if expiry_date else None,
+            validity_years=None,
+            exceeds_standard_term=False,
+            message=(
+                "Validity period could not be evaluated: "
+                f"issue date is {'present' if issue_date else 'missing'}, "
+                f"expiry date is {'present' if expiry_date else 'missing'}."
+            ),
+        )
+
+    issue_str = issue_date.isoformat()
+    exp_str = expiry_date.isoformat()
+
+    if expiry_date <= issue_date:
+        return ValidityPeriodResult(
+            valid=False,
+            status="warning",
+            issue_date_str=issue_str,
+            expiry_date_str=exp_str,
+            validity_years=None,
+            exceeds_standard_term=False,
+            message=f"Date of issue ({issue_str}) is not before date of expiry ({exp_str}).",
+        )
+
+    span_days = (expiry_date - issue_date).days
+    validity_years = round(span_days / 365.25, 2)
+    exceeds = validity_years > MAX_STANDARD_VALIDITY_YEARS
+
+    if exceeds:
+        return ValidityPeriodResult(
+            valid=True,
+            status="warning",
+            issue_date_str=issue_str,
+            expiry_date_str=exp_str,
+            validity_years=validity_years,
+            exceeds_standard_term=True,
+            message=(
+                f"Validity period of {validity_years} years exceeds the standard "
+                f"{MAX_STANDARD_VALIDITY_YEARS}-year adult passport term."
+            ),
+        )
+
+    return ValidityPeriodResult(
+        valid=True,
+        status="passed",
+        issue_date_str=issue_str,
+        expiry_date_str=exp_str,
+        validity_years=validity_years,
+        exceeds_standard_term=False,
+        message=f"Validity period of {validity_years} years is within the standard term.",
     )

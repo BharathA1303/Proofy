@@ -327,3 +327,32 @@ class TestParsePassport:
         fake_names = ["John Doe", "Unknown", "Test User", "Sample", "N/A"]
         assert result.name.value not in fake_names
         assert result.name.value is None
+
+    def test_file_number_extracted(self):
+        """Indian passport file numbers (2 letters + 13-16 digits) are extracted from VIZ."""
+        regions = self._make_full_passport_regions() + [
+            make_region("File Number", top_y=930),
+            make_region("DL0012345671234", top_y=955),
+        ]
+        result = parse_passport(regions, image_height=1000)
+        assert result.fileNumber.value == "DL0012345671234"
+
+    def test_file_number_absent_is_none(self):
+        """When no file number is present in OCR output, it stays None (not fabricated)."""
+        regions = self._make_full_passport_regions()
+        result = parse_passport(regions, image_height=1000)
+        assert result.fileNumber.value is None
+
+    def test_place_of_issue_extracted_via_keyword(self):
+        """Place of Issue is located via keyword-anchored bbox geometry, below the label."""
+        regions = self._make_full_passport_regions() + [
+            make_region("Place of Issue", top_y=930),
+            make_region("NEW DELHI", top_y=955),
+        ]
+        result = parse_passport(regions, image_height=1000)
+        assert result.placeOfIssue.value == "NEW DELHI"
+
+    def test_place_of_issue_absent_is_none(self):
+        regions = self._make_full_passport_regions()
+        result = parse_passport(regions, image_height=1000)
+        assert result.placeOfIssue.value is None

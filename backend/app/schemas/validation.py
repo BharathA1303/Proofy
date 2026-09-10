@@ -43,6 +43,17 @@ class ExpiryCheckEvidence(BaseModel):
     message: str
 
 
+class ValidityPeriodEvidence(BaseModel):
+    """Evidence for the issue-to-expiry validity window check."""
+    status: str = Field(..., description="'passed' | 'warning' | 'unknown'")
+    valid: bool
+    issue_date: Optional[str] = None
+    expiry_date: Optional[str] = None
+    validity_years: Optional[float] = None
+    exceeds_standard_term: bool = False
+    message: str
+
+
 class PassportBindingEvidence(BaseModel):
     """Evidence for the Passport Number Binding Trap (VIZ <-> MRZ)."""
     status: str = Field(..., description="'passed' | 'failed' | 'unknown'")
@@ -77,6 +88,7 @@ class ValidationChecks(BaseModel):
     expiry_checksum: CheckDigitEvidence
     composite_checksum: CheckDigitEvidence
     expiry_date: ExpiryCheckEvidence
+    validity_period: Optional[ValidityPeriodEvidence] = None
     passport_number_binding: PassportBindingEvidence
     viz_mrz_consistency: VizMrzConsistencyReport
 

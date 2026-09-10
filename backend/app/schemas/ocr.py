@@ -41,9 +41,11 @@ class TravelerFields(BaseModel):
     nationality: Optional[str] = None
     gender: Optional[str] = None
     placeOfBirth: Optional[str] = None
+    placeOfIssue: Optional[str] = None
     authority: Optional[str] = None
     issuedDate: Optional[str] = None
     expiry: Optional[str] = None
+    fileNumber: Optional[str] = None
     # Combined MRZ string for display in the MRZ strip (line1 + \n + line2)
     mrz: Optional[str] = None
 
