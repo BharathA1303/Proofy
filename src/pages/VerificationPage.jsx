@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 import { useVerification } from '../state/verification/useVerification.js';
 import { useAuth } from '../state/auth/useAuth.js';
 import DocumentWorkspace from '../components/document/DocumentWorkspace.jsx';
-import StageStepper from '../components/workflow/StageStepper.jsx';
 import SidebarDrawer from '../components/navigation/SidebarDrawer.jsx';
 import styles from './VerificationPage.module.css';
 
@@ -71,18 +70,9 @@ export default function VerificationPage() {
                 />
               </div>
               <div className={styles.brandText}>
-                <div className={styles.brandTitleRow}>
-                  <h1 className={styles.brandName}>Meiyari</h1>
-                  <span className={styles.brandAiBadge}>AI</span>
-                </div>
-                <span className={styles.brandSubtitle}>AI-Powered Identity &amp; Document Verification</span>
+                <h1 className={styles.brandName}>MEIYARI</h1>
               </div>
             </div>
-          </div>
-
-          {/* Desktop Center: Integrated Workflow Stepper */}
-          <div className={styles.headerCenter}>
-            <StageStepper isHeader={true} />
           </div>
 
           <div className={styles.headerRight}>
@@ -109,13 +99,13 @@ export default function VerificationPage() {
               onClick={() => actions.resetSession()}
               title="Reset inspection workflow"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                 <path d="M21 3v5h-5" />
                 <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
                 <path d="M8 16H3v5" />
               </svg>
-              <span>Reset</span>
+              <span className={styles.headerResetText}>Reset</span>
             </button>
 
             <button
@@ -133,11 +123,6 @@ export default function VerificationPage() {
           </div>
         </div>
       </header>
-
-      {/* Mobile/Tablet Sub-Header Ribbon Stepper */}
-      <div className={styles.mobileStepperRibbon}>
-        <StageStepper isMobile={true} />
-      </div>
 
       {/* Main Content Area: Live Screening */}
       <main className={styles.main} id="main-content">

@@ -80,14 +80,14 @@
 }
 
 .brandBadge {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f0f3f8;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 11px;
   box-shadow: 
     3px 3px 8px rgba(166, 180, 200, 0.35),
     -3px -3px 8px rgba(255, 255, 255, 0.9);
@@ -112,54 +112,18 @@
 
 .brandText {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.brandTitleRow {
-  display: flex;
   align-items: center;
-  gap: 6px;
 }
 
 .brandName {
-  font-size: 1.18rem;
+  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
+  font-size: 1.22rem;
   font-weight: 800;
-  color: #0b192c;
-  letter-spacing: 0.05em;
+  color: #0a1931;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  line-height: 1.15;
-  margin: 0;
-}
-
-.brandAiBadge {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 1px 6px;
-  border-radius: 9999px;
-  line-height: 1.2;
-}
-
-.brandSubtitle {
-  font-size: 0.72rem;
-  color: #64748b;
-  font-weight: 500;
   line-height: 1;
-}
-
-/* ---------- Header Center ---------- */
-
-.headerCenter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  margin: 0 var(--space-4);
-  max-width: 820px;
+  margin: 0;
 }
 
 /* ---------- Header Right ---------- */
@@ -306,12 +270,6 @@
     inset -2px -2px 4px rgba(255, 255, 255, 0.8);
 }
 
-/* ---------- Mobile/Tablet Stepper Ribbon ---------- */
-
-.mobileStepperRibbon {
-  display: none;
-}
-
 /* ---------- Main Content Container ---------- */
 
 .main {
@@ -324,37 +282,75 @@
   align-self: stretch;
 }
 
-/* ---------- Responsive Breakpoints ---------- */
+/* ---------- Responsive Breakpoints & Mobile Architecture ---------- */
 
-@media (max-width: 1024px) {
-  .headerCenter {
-    display: none;
+@media (max-width: 768px) {
+  .headerInner {
+    padding: 0 var(--space-4);
+    gap: var(--space-2);
   }
-  .mobileStepperRibbon {
-    display: block;
-    width: 100%;
-    position: sticky;
-    top: var(--header-height);
-    z-index: 80;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .brandName {
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .officerStation {
+    display: none;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 540px) {
   .headerInner {
-    padding: 0 var(--space-3);
+    padding: 0 10px;
+    gap: 8px;
   }
-  .brandSubtitle {
+
+  .brandName {
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  .officerMeta {
     display: none;
   }
+
+  .officerPill {
+    padding: 4px 6px;
+    gap: 4px;
+  }
+
   .headerResetText {
     display: none;
   }
+
   .headerResetBtn {
-    padding: 5px 8px;
+    padding: 7px 9px;
+    gap: 0;
   }
-  .systemIndicator {
-    padding: 4px 8px;
-    font-size: 0.7rem;
+}
+
+@media (max-width: 380px) {
+  .brandBadge {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    padding: 3px;
+  }
+
+  .brandName {
+    font-size: 0.9rem;
+  }
+
+  .hamburgerBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .headerLogoutBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
   }
 }
