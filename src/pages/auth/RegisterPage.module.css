@@ -1,0 +1,14 @@
+/* RegisterPage.module.css */
+@import './LoginPage.module.css';
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}

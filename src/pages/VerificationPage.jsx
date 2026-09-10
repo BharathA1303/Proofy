@@ -9,6 +9,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useVerification } from '../state/verification/useVerification.js';
+import { useAuth } from '../state/auth/useAuth.js';
 import DocumentWorkspace from '../components/document/DocumentWorkspace.jsx';
 import StageStepper from '../components/workflow/StageStepper.jsx';
 import SidebarDrawer from '../components/navigation/SidebarDrawer.jsx';
@@ -19,6 +20,7 @@ export default function VerificationPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const { actions } = useVerification();
+  const { officer, logout } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
@@ -63,17 +65,17 @@ export default function VerificationPage() {
             <div className={styles.brand}>
               <div className={styles.brandBadge}>
                 <img
-                  src="/avanza-mark.png"
-                  alt="Avanza Logo Mark"
+                  src="/meiyari-mark.png"
+                  alt="Meiyari Logo Mark"
                   className={styles.brandLogoImg}
                 />
               </div>
               <div className={styles.brandText}>
                 <div className={styles.brandTitleRow}>
-                  <h1 className={styles.brandName}>Avanza</h1>
+                  <h1 className={styles.brandName}>Meiyari</h1>
                   <span className={styles.brandAiBadge}>AI</span>
                 </div>
-                <span className={styles.brandSubtitle}>Intelligent Document Screening</span>
+                <span className={styles.brandSubtitle}>AI-Powered Identity &amp; Document Verification</span>
               </div>
             </div>
           </div>
@@ -84,30 +86,50 @@ export default function VerificationPage() {
           </div>
 
           <div className={styles.headerRight}>
+            <div className={styles.officerPill} title={`Duty Station: ${officer?.station || 'Station T3'} • ${officer?.clearanceLevel || 'Level 3'}`}>
+              <div className={styles.officerAvatar}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div className={styles.officerMeta}>
+                <span className={styles.officerName}>{officer?.name || 'Insp. S. Raman'}</span>
+                <span className={styles.officerStation}>{officer?.station || 'T3 · Gate 4'}</span>
+              </div>
+              <span
+                className={`${styles.statusDot} ${isBackendHealthy ? styles.statusDotActive : styles.statusDotOffline}`}
+                title={isBackendHealthy ? 'Terminal Synced & Active' : 'Registry Offline'}
+              />
+            </div>
+
             <button
               type="button"
               className={styles.headerResetBtn}
               onClick={() => actions.resetSession()}
-              title="Reset inspection session"
+              title="Reset inspection workflow"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                 <path d="M21 3v5h-5" />
                 <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
                 <path d="M8 16H3v5" />
               </svg>
-              <span className={styles.headerResetText}>Reset Inspection</span>
+              <span>Reset</span>
             </button>
 
-            <span
-              className={`${styles.systemIndicator} ${isBackendHealthy ? styles.indicatorOnline : styles.indicatorOffline}`}
-              role="status"
-              aria-label={`System status: ${isBackendHealthy ? 'Operational' : 'Backend Offline'}`}
-              title={isBackendHealthy ? 'FastAPI Backend is connected & operational' : 'Backend offline on port 8000.'}
+            <button
+              type="button"
+              className={styles.headerLogoutBtn}
+              onClick={() => logout()}
+              title="Lock Terminal & Sign Out"
             >
-              <span className={`${styles.statusDot} ${!isBackendHealthy ? styles.statusDotOffline : ''}`} aria-hidden="true" />
-              <span className={styles.statusText}>{isBackendHealthy ? 'System Operational' : 'Backend Offline'}</span>
-            </span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>

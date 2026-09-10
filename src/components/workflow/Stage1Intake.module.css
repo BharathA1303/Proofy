@@ -1,9 +1,15 @@
+/* Stage1Intake.module.css — Neomorphic Border Officer Intake System */
+
 .stageContainer {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  max-width: 1220px;
+  margin: 0 auto;
+  width: 100%;
 }
 
+/* ── Section 1: Header Block ── */
 .headerBlock {
   display: flex;
   flex-direction: column;
@@ -17,42 +23,38 @@
 }
 
 .stageBadge {
-  font-size: 10px;
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-accent-border);
-}
-
-.stageTitleTag {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0066ff;
+  background: #f0f3f8;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    2px 2px 6px rgba(166, 180, 200, 0.35),
+    -2px -2px 6px rgba(255, 255, 255, 0.9);
 }
 
 .mainTitle {
-  font-size: var(--font-size-xl);
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #0a1931;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
-.mainSubtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-/* Category Grid */
+/* ── Section 2: Document Category Cards (Neomorphic Tactile Grid) ── */
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1100px) {
   .categoryGrid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -64,7 +66,7 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .categoryGrid {
     grid-template-columns: 1fr;
   }
@@ -73,291 +75,100 @@
 .categoryCard {
   display: flex;
   flex-direction: column;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
   text-align: left;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  box-shadow: 
+    6px 6px 14px rgba(166, 180, 200, 0.38),
+    -6px -6px 14px rgba(255, 255, 255, 0.95);
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
+  outline: none;
 }
 
-.categoryCard:hover {
-  border-color: #93c5fd;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.categoryCard:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    8px 8px 18px rgba(166, 180, 200, 0.45),
+    -8px -8px 18px rgba(255, 255, 255, 0.95);
 }
 
+.categoryCard:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Active Selected Neomorphic Inset State */
 .categoryCardActive {
-  background: #f8faff;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: #eaf1fb;
+  border-color: #0066ff;
+  box-shadow: 
+    inset 3px 3px 8px rgba(166, 180, 200, 0.42),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.95),
+    0 0 16px rgba(0, 102, 255, 0.2);
 }
 
 .catTop {
   display: flex;
   align-items: center;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .catIcon {
-  color: var(--color-accent);
-  display: flex;
-  align-items: center;
-}
-
-.catLabel {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.catDesc {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  line-height: 1.35;
-  margin-top: 2px;
-}
-
-.selectedIndicator {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: var(--space-2);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-
-/* Upload Section */
-.uploadSection {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.uploadSectionHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.uploadTitle {
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.uploadHint {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
-.mockModeBadge {
-  font-size: 10px;
-  font-weight: 800;
-  color: #1e40af;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  padding: 2px 8px;
-  border-radius: 999px;
-  letter-spacing: 0.03em;
-}
-
-.realDocBadge {
-  font-size: 10px;
-  font-weight: 800;
-  color: #166534;
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  padding: 2px 8px;
-  border-radius: 999px;
-  letter-spacing: 0.03em;
-}
-
-.vectorModeTag {
-  font-size: 9px;
-  font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: auto;
-}
-
-.dropZoneWrap {
-  min-height: 180px;
-}
-
-.previewCard {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-}
-
-.previewThumbBox {
-  width: 110px;
-  height: 80px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: #e2e8f0;
-  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-border);
+  color: #0a1931;
+  box-shadow: 
+    3px 3px 7px rgba(166, 180, 200, 0.35),
+    -3px -3px 7px rgba(255, 255, 255, 0.95);
+  transition: all 0.2s ease;
 }
 
-.previewImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.categoryCardActive .catIcon {
+  color: #0066ff;
+  background: #ffffff;
+  box-shadow: 
+    2px 2px 6px rgba(0, 102, 255, 0.2),
+    -2px -2px 6px rgba(255, 255, 255, 0.95);
 }
 
-.previewPlaceholder {
-  color: #94a3b8;
-}
-
-.previewDetails {
-  flex: 1;
-}
-
-.previewBadgeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: 4px;
-}
-
-.loadedBadge {
-  font-size: 10px;
+.catLabel {
+  font-size: 0.88rem;
   font-weight: 700;
-  color: var(--color-success);
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  padding: 2px 7px;
-  border-radius: 999px;
+  color: #0a1931;
+  line-height: 1.25;
 }
 
-.categoryBadge {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  padding: 2px 7px;
-  border-radius: 999px;
-}
-
-.previewFileName {
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.previewMeta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: 2px;
-}
-
-.previewNotice {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin-top: 6px;
-}
-
-.removeBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: #b91c1c;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.removeBtn:hover {
-  background: #fee2e2;
-}
-
-/* Processing Spinner */
-.processingCard {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-6);
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
-  border-radius: var(--radius-lg);
-}
-
-.spinnerRing {
-  width: 36px;
-  height: 36px;
-  border: 3.5px solid rgba(37, 99, 235, 0.2);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.procTitle {
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-accent-hover);
-}
-
-.procDesc {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+.catDesc {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.4;
   margin-top: 3px;
 }
 
-/* Error Alert */
-.errorAlert {
-  display: flex;
+.selectedIndicator {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-md);
-  color: #991b1b;
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-4);
-}
-
-.dismissBtn {
-  margin-left: auto;
+  gap: 5px;
+  margin-top: var(--space-3);
+  font-size: 0.72rem;
   font-weight: 700;
-  cursor: pointer;
-  color: #991b1b;
+  color: #0066ff;
+  background: rgba(0, 102, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  width: fit-content;
 }
 
-/* Sample Vectors */
+/* ── Section 3: Official Reference Profiles (Neomorphic Cards) ── */
 .sampleVectorsSection {
   display: flex;
   flex-direction: column;
@@ -377,29 +188,17 @@
 }
 
 .sampleTitle {
-  font-size: var(--font-size-sm);
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: 0.86rem;
   font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.sampleTag {
-  font-size: 10px;
-  font-weight: 700;
-  background: #e2e8f0;
-  color: #475569;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.sampleSubtitle {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: #0a1931;
+  letter-spacing: 0.02em;
 }
 
 .sampleGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 @media (max-width: 960px) {
@@ -411,38 +210,36 @@
 .sampleCard {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
   cursor: pointer;
   text-align: left;
-  transition: all var(--transition-fast);
+  box-shadow: 
+    5px 5px 12px rgba(166, 180, 200, 0.35),
+    -5px -5px 12px rgba(255, 255, 255, 0.95);
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  outline: none;
 }
 
 .sampleCard:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: #93c5fd;
+  box-shadow: 
+    7px 7px 16px rgba(166, 180, 200, 0.42),
+    -7px -7px 16px rgba(255, 255, 255, 0.95);
 }
 
 .sampleCardBharath {
-  background: #f0fdf4;
-  border: 1.5px solid #86efac;
-}
-
-.sampleCardBharath:hover {
-  border-color: #22c55e;
+  border-left: 3.5px solid #16a34a;
 }
 
 .sampleCardDefect {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  border-left: 3.5px solid #d97706;
 }
 
 .sampleCardBlacklist {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  border-left: 3.5px solid #dc2626;
 }
 
 .sampleTop {
@@ -452,131 +249,265 @@
 }
 
 .sampleBadgeOfficial {
-  font-size: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: #15803d;
-  background: #dcfce7;
-  padding: 2px 7px;
-  border-radius: 4px;
+  letter-spacing: 0.05em;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .sampleBadgeBharath {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   color: #166534;
-  background: #bbf7d0;
+  background: #dcfce7;
+  border: 1px solid #86efac;
   padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.03em;
+  border-radius: 9999px;
 }
 
 .sampleBadgeDefect {
-  font-size: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
+  letter-spacing: 0.05em;
   color: #b45309;
-  background: #fef3c7;
-  padding: 2px 7px;
-  border-radius: 4px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .sampleBadgeBlacklist {
-  font-size: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: #b91c1c;
-  background: #fee2e2;
-  padding: 2px 7px;
-  border-radius: 4px;
+  letter-spacing: 0.05em;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .sampleCardLabel {
-  font-size: var(--font-size-sm);
+  font-size: 0.86rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #0a1931;
 }
 
 .sampleCardDesc {
-  font-size: 11px;
-  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+  color: #64748b;
   line-height: 1.4;
   margin-top: 4px;
 }
 
-/* Action Bar */
-.actionBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-accent-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-4) var(--space-6);
-  box-shadow: var(--shadow-md);
-}
-
-.actionInfo {
+/* ── Section 4: Physical Document Upload (Neomorphic Card) ── */
+.uploadSection {
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 22px;
+  padding: var(--space-6);
+  box-shadow: 
+    8px 8px 22px rgba(166, 180, 200, 0.38),
+    -8px -8px 22px rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
 }
 
-.readyTag {
-  font-size: 10px;
+.uploadSectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.uploadTitle {
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--color-success);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #0a1931;
+  margin: 0;
 }
 
-.readyFileName {
-  font-size: var(--font-size-sm);
+.uploadHint {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dropZoneWrap {
+  min-height: 180px;
+}
+
+/* ── Document Preview Card ── */
+.previewCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: var(--space-5);
+  box-shadow: 
+    6px 6px 14px rgba(166, 180, 200, 0.35),
+    -6px -6px 14px rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 640px) {
+  .previewCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.previewThumbBox {
+  width: 120px;
+  height: 88px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #eef2f6;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 
+    inset 2px 2px 5px rgba(166, 180, 200, 0.35),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewPlaceholder {
+  color: #94a3b8;
+}
+
+.previewDetails {
+  flex: 1;
+}
+
+.previewBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.loadedBadge {
+  font-size: 0.65rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
-.proceedBtn {
+.categoryBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0066ff;
+  background: rgba(0, 102, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.mockModeBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.realDocBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0052cc;
+  background: #e0edff;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.previewFileName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0a1931;
+  margin: 2px 0 0 0;
+}
+
+.previewMeta {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.previewNotice {
+  font-size: 0.74rem;
+  color: #475569;
+  margin-top: 6px;
+}
+
+.removeBtn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 12px 24px;
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  color: #ffffff;
-  background: var(--color-accent);
-  border-radius: var(--radius-lg);
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #dc2626;
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 
+    3px 3px 7px rgba(166, 180, 200, 0.35),
+    -3px -3px 7px rgba(255, 255, 255, 0.9);
+  transition: all 0.15s ease;
 }
 
-.proceedBtn:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+.removeBtn:hover {
+  background: #fef2f2;
 }
 
-/* Catchy Inspection Timer & Gauge Animation */
+.removeBtn:active {
+  box-shadow: 
+    inset 2px 2px 4px rgba(166, 180, 200, 0.4),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+/* ── Animated Inspection Timer Card ── */
 .timerCard {
   display: flex;
   align-items: center;
   gap: var(--space-6);
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-  border: 1.5px solid #93c5fd;
-  border-radius: var(--radius-xl);
-  padding: var(--space-5) var(--space-6);
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
-  margin-top: var(--space-4);
-  position: relative;
-  overflow: hidden;
-  animation: timerCardFadeIn 0.3s ease;
+  padding: var(--space-6);
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 
+    inset 3px 3px 8px rgba(166, 180, 200, 0.35),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.95);
 }
 
-@keyframes timerCardFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (max-width: 680px) {
+  .timerCard {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
@@ -586,11 +517,8 @@
 
 .gaugeContainer {
   position: relative;
-  width: 104px;
-  height: 104px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 90px;
+  height: 90px;
 }
 
 .gaugeSvg {
@@ -601,51 +529,47 @@
 
 .gaugeBgCircle {
   fill: none;
-  stroke: #e2e8f0;
+  stroke: rgba(166, 180, 200, 0.3);
   stroke-width: 7;
 }
 
 .gaugeBarCircle {
   fill: none;
-  stroke: #2563eb;
+  stroke: #0066ff;
   stroke-width: 7;
   stroke-linecap: round;
   stroke-dasharray: 264;
   transition: stroke-dashoffset 0.08s linear;
-  filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.4));
 }
 
 .gaugeCenter {
   position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
 }
 
 .gaugeSeconds {
-  font-size: 1.45rem;
+  font-family: var(--font-family-mono);
+  font-size: 1.15rem;
   font-weight: 800;
-  font-family: var(--font-family-mono, monospace);
-  color: #0f172a;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  color: #0a1931;
 }
 
 .gaugeLabel {
-  font-size: 9px;
+  font-size: 0.6rem;
   font-weight: 700;
-  color: #64748b;
+  color: #0066ff;
   letter-spacing: 0.08em;
-  margin-top: 3px;
 }
 
 .timerDetailsCol {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .timerStatusHeader {
@@ -656,171 +580,170 @@
 }
 
 .timerLiveBadge {
-  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #0066ff;
+  background: rgba(0, 102, 255, 0.08);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: flex;
   align-items: center;
   gap: 6px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  letter-spacing: 0.03em;
 }
 
 .pulsingDot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
-  animation: pulseTimerDot 1.2s infinite;
+  background: #0066ff;
+  animation: pulseDot 1.2s infinite;
 }
 
 .dotCompleted {
-  background-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  background: #16a34a;
   animation: none;
 }
 
-@keyframes pulseTimerDot {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.35);
-    opacity: 0.65;
-  }
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
 }
 
 .timerSecondsBadge {
-  font-size: 11px;
-  font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  padding: 3px 9px;
-  border-radius: 9999px;
-  font-family: var(--font-family-mono, monospace);
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .timerMainHeading {
-  font-size: var(--font-size-base);
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #0a1931;
   margin: 0;
 }
 
 .timerSubText {
-  font-size: 12px;
-  color: #475569;
+  font-size: 0.78rem;
+  color: #64748b;
   margin: 0;
-  line-height: 1.4;
-  min-height: 18px;
 }
 
 .timerStepsRow {
   display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 6px;
   flex-wrap: wrap;
 }
 
 .timerStep {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 600;
+  gap: 6px;
+  font-size: 0.72rem;
   color: #94a3b8;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  padding: 3px 9px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .stepNum {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  display: inline-flex;
+  background: #e2e8f0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
-  font-weight: 800;
-  background: #f1f5f9;
-  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #475569;
 }
 
 .stepActive {
-  color: #1d4ed8;
-  border-color: #bfdbfe;
-  background: #f8faff;
+  color: #0066ff;
+  font-weight: 700;
 }
 
 .stepActive .stepNum {
-  background: #2563eb;
+  background: #0066ff;
   color: #ffffff;
 }
 
 .stepDone {
-  color: #065f46;
-  border-color: #a7f3d0;
-  background: #ecfdf5;
+  color: #16a34a;
 }
 
 .stepDone .stepNum {
-  background: #10b981;
+  background: #16a34a;
   color: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .uploadSection {
-    padding: var(--space-4);
-  }
-  .timerCard {
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-    padding: var(--space-4);
-    gap: var(--space-4);
-  }
-  .timerStatusHeader {
-    justify-content: center;
-  }
-  .timerStepsRow {
-    justify-content: center;
-  }
-  .previewCard {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: var(--space-3);
-  }
-  .previewThumbBox {
-    margin: 0 auto;
-    width: 140px;
-    height: 100px;
-  }
-  .previewBadgeRow {
-    justify-content: center;
-  }
-  .removeBtn {
-    justify-content: center;
-    width: 100%;
-  }
-  .actionBar {
-    flex-direction: column;
-    gap: var(--space-3);
-    align-items: stretch;
-    text-align: center;
-    padding: var(--space-4);
-  }
-  .proceedBtn {
-    justify-content: center;
-    width: 100%;
-  }
+/* ── Section 5: Primary Action Bar ── */
+.actionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: var(--space-4) var(--space-6);
+  box-shadow: 
+    8px 8px 20px rgba(166, 180, 200, 0.4),
+    -8px -8px 20px rgba(255, 255, 255, 0.95);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.actionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readyTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #16a34a;
+}
+
+.readyFileName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0a1931;
+}
+
+.proceedBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 26px;
+  background: #0a1931;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 
+    5px 5px 14px rgba(166, 180, 200, 0.45),
+    -5px -5px 14px rgba(255, 255, 255, 0.85);
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.proceedBtn:hover:not(:disabled) {
+  background: #0052cc;
+  transform: translateY(-1px);
+  box-shadow: 
+    6px 6px 18px rgba(0, 102, 255, 0.3),
+    -6px -6px 18px rgba(255, 255, 255, 0.95);
+}
+
+.proceedBtn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.35),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.1);
 }

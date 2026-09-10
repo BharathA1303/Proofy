@@ -6,12 +6,14 @@
  * Single Primary Section: Live Screening.
  */
 import { useEffect } from 'react';
+import { useAuth } from '../../state/auth/useAuth.js';
 import styles from './SidebarDrawer.module.css';
 
 export default function SidebarDrawer({
   isOpen,
   onClose,
 }) {
+  const { officer, logout } = useAuth();
   // Close drawer on Escape key press
   useEffect(() => {
     function handleKeyDown(e) {
@@ -49,17 +51,17 @@ export default function SidebarDrawer({
           <div className={styles.brand}>
             <div className={styles.brandBadge}>
               <img
-                src="/avanza-mark.png"
-                alt="Avanza Logo"
+                src="/meiyari-mark.png"
+                alt="Meiyari Logo"
                 className={styles.brandLogoImg}
               />
             </div>
             <div className={styles.brandText}>
               <div className={styles.brandTitleRow}>
-                <span className={styles.brandName}>Avanza</span>
+                <span className={styles.brandName}>Meiyari</span>
                 <span className={styles.brandAiBadge}>AI</span>
               </div>
-              <span className={styles.brandSubtitle}>Document &amp; Identity Screening</span>
+              <span className={styles.brandSubtitle}>AI-Powered Identity &amp; Document Verification</span>
             </div>
           </div>
 
@@ -120,19 +122,41 @@ export default function SidebarDrawer({
             </div>
             <div className={styles.widgetRow}>
               <span className={styles.widgetLabel}>Inspection Engine:</span>
-              <span className={styles.widgetPrivacy}>Avanza AI Vision</span>
+              <span className={styles.widgetPrivacy}>Meiyari AI Vision</span>
             </div>
             <div className={styles.widgetRow}>
               <span className={styles.widgetLabel}>Status:</span>
               <span className={styles.widgetVal}>Operational</span>
             </div>
+            {officer && (
+              <div className={styles.widgetRow}>
+                <span className={styles.widgetLabel}>Officer:</span>
+                <span className={styles.widgetVal}>{officer.name}</span>
+              </div>
+            )}
           </div>
+
+          <button
+            type="button"
+            className={styles.drawerSignOutBtn}
+            onClick={() => {
+              onClose();
+              logout();
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Lock Terminal &amp; Sign Out</span>
+          </button>
         </div>
 
         {/* Drawer Footer */}
         <div className={styles.panelFooter}>
           <div className={styles.footerVersionRow}>
-            <span>Avanza Screening Engine</span>
+            <span>Meiyari Screening Engine</span>
             <span className={styles.verTag}>v2.4.0</span>
           </div>
           <span className={styles.footerLegal}>Enterprise Border &amp; Identity Security</span>

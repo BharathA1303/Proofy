@@ -298,12 +298,30 @@ export default function Stage1Intake() {
     }
   }
 
+  function getCleanSampleDetails(sample) {
+    const isBharath = sample.id?.includes('bharath') || sample.label?.includes('Bharath');
+    const isDefect = sample.id?.includes('defective') || sample.badge?.includes('DEFECT') || sample.id?.includes('fake');
+    const isBlacklist = sample.id?.includes('blacklist') || sample.badge?.includes('BLACKLIST') || sample.id?.includes('revoked');
+
+    let badge = isDefect ? 'FLAGGED / DEFECT' : isBlacklist ? 'WATCHLIST HIT' : isBharath ? 'GENUINE SPECIMEN' : (sample.badge || 'OFFICIAL / ACTIVE');
+    let cleanDesc = sample.description || '';
+
+    cleanDesc = cleanDesc
+      .replace(/with valid ICAO TD3 MRZ\.?/gi, 'with confirmed authority issuance.')
+      .replace(/ICAO TD3 MRZ/gi, 'Official Travel Standard')
+      .replace(/Failed check digits & expiry precedes issue date\.?/gi, 'Security feature anomalies & date chronology violations detected.')
+      .replace(/Status: REVOKED on national fraud & border watchlist\.?/gi, 'Record flagged as REVOKED on national security watchlist.')
+      .replace(/Status: ACTIVE in official registry/gi, 'Status: ACTIVE in official government records');
+
+    return { badge, cleanDesc, isBharath, isDefect, isBlacklist };
+  }
+
   return (
     <div className={styles.stageContainer}>
       {/* ── Section 1: Header ── */}
       <div className={styles.headerBlock}>
         <div className={styles.badgeRow}>
-          <span className={styles.stageBadge}>DOCUMENT INTAKE</span>
+          <span className={styles.stageBadge}>BORDER CONTROL · INTAKE</span>
         </div>
         <h2 className={styles.mainTitle}>Select Document Category</h2>
       </div>
@@ -351,9 +369,7 @@ export default function Stage1Intake() {
 
           <div className={styles.sampleGrid}>
             {currentSamples.map((sample) => {
-              const isBharath = sample.id?.includes('bharath') || sample.label?.includes('Bharath');
-              const isDefect = sample.id?.includes('defective') || sample.badge?.includes('DEFECT');
-              const isBlacklist = sample.id?.includes('blacklist') || sample.badge?.includes('BLACKLIST');
+              const { badge, cleanDesc, isBharath, isDefect, isBlacklist } = getCleanSampleDetails(sample);
               const isLoadingThis = loadingSampleId === sample.id;
 
               let cardStyle = styles.sampleCard;
@@ -380,13 +396,13 @@ export default function Stage1Intake() {
                 >
                   <div className={styles.sampleTop}>
                     <span className={badgeStyle}>
-                      {sample.badge || 'OFFICIAL'}
+                      {badge}
                     </span>
                   </div>
                   <span className={styles.sampleCardLabel}>
-                    {isLoadingThis ? 'Loading...' : sample.label}
+                    {isLoadingThis ? 'Loading Dossier...' : sample.label}
                   </span>
-                  <p className={styles.sampleCardDesc}>{sample.description}</p>
+                  <p className={styles.sampleCardDesc}>{cleanDesc}</p>
                 </button>
               );
             })}

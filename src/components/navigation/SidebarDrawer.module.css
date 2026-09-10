@@ -311,6 +311,37 @@
   border-radius: 4px;
 }
 
+.drawerSignOutBtn {
+  margin-top: var(--space-3);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: #f0f3f8;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 
+    2px 2px 6px rgba(166, 180, 200, 0.3),
+    -2px -2px 6px rgba(255, 255, 255, 0.9);
+  transition: all 0.15s ease;
+}
+
+.drawerSignOutBtn:hover {
+  background: #fef2f2;
+}
+
+.drawerSignOutBtn:active {
+  box-shadow: 
+    inset 2px 2px 4px rgba(166, 180, 200, 0.4),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
 /* ---------- Drawer Footer ---------- */
 
 .panelFooter {

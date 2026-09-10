@@ -1,0 +1,367 @@
+/* LoginPage.module.css — Neomorphic Border Officer Terminal Theme */
+
+.loginRoot {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-bg, #eef2f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background architectural grid accent */
+.loginRoot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(0, 163, 255, 0.05) 0%, transparent 60%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+}
+
+/* ── Floating Tactile Neomorphic Terminal Card ── */
+.terminalCard {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: #f0f3f8;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    14px 14px 32px rgba(166, 180, 200, 0.45),
+    -14px -14px 32px rgba(255, 255, 255, 0.95);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  z-index: 10;
+  animation: cardFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Card Header ── */
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.logoBadge {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  background: #f0f3f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    6px 6px 14px rgba(166, 180, 200, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.95);
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.eyebrow {
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #0066ff;
+}
+
+.terminalTitle {
+  font-family: var(--font-family-display, 'Space Grotesk');
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0a1931;
+  margin: 0;
+}
+
+.terminalSubtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Error Banner ── */
+.errorBanner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 12px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.82rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Form Controls ── */
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inputLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+}
+
+/* Neomorphic Recessed Input Well */
+.inputWell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f0f3f8;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    inset 3px 3px 7px rgba(166, 180, 200, 0.38),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+}
+
+.inputWell:focus-within {
+  border-color: rgba(0, 102, 255, 0.4);
+  box-shadow: 
+    inset 3px 3px 7px rgba(166, 180, 200, 0.38),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.9),
+    0 0 10px rgba(0, 102, 255, 0.2);
+}
+
+.inputIcon {
+  padding-left: 14px;
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+}
+
+.textInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: #0f172a;
+  outline: none;
+}
+
+.textInput::placeholder {
+  color: #94a3b8;
+}
+
+.passwordToggle {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 0 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Tactile Buttons ── */
+.primaryBtn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: #0a1931;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 
+    5px 5px 12px rgba(166, 180, 200, 0.4),
+    -5px -5px 12px rgba(255, 255, 255, 0.8);
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.primaryBtn:hover {
+  background: #0052cc;
+  transform: translateY(-1px);
+  box-shadow: 
+    6px 6px 16px rgba(0, 102, 255, 0.25),
+    -6px -6px 16px rgba(255, 255, 255, 0.9);
+}
+
+.primaryBtn:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+}
+
+.quickDemoBtn {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: #f0f3f8;
+  color: #0066ff;
+  border: 1px solid rgba(0, 102, 255, 0.2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 
+    4px 4px 10px rgba(166, 180, 200, 0.35),
+    -4px -4px 10px rgba(255, 255, 255, 0.9);
+  transition: all 0.15s ease;
+}
+
+.quickDemoBtn:hover {
+  background: #ffffff;
+  color: #0052cc;
+  border-color: #0066ff;
+}
+
+.quickDemoBtn:active {
+  box-shadow: 
+    inset 2px 2px 5px rgba(166, 180, 200, 0.4),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+}
+
+/* ── MFA Challenge View ── */
+.mfaBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  animation: cardFadeIn 0.25s ease;
+}
+
+.mfaNotice {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.8rem;
+  color: #1e40af;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.digitRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.digitInput {
+  width: 46px;
+  height: 54px;
+  text-align: center;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0a1931;
+  background: #f0f3f8;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    inset 3px 3px 6px rgba(166, 180, 200, 0.4),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.digitInput:focus {
+  border-color: #0066ff;
+  box-shadow: 
+    inset 3px 3px 6px rgba(166, 180, 200, 0.4),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.9),
+    0 0 8px rgba(0, 102, 255, 0.3);
+}
+
+.mfaHintBtn {
+  background: transparent;
+  border: none;
+  color: #0066ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mfaHintBtn:hover {
+  color: #0052cc;
+}
+
+/* ── Card Footer ── */
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #64748b;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: var(--space-4);
+}
+
+.footerLink {
+  color: #0066ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}

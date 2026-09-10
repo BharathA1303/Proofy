@@ -76,10 +76,10 @@ export default function Stage4Clearance() {
         <div className={styles.printBrandRow}>
           <div className={styles.printBrandLeft}>
             <div className={styles.printLogoBox}>
-              <img src="/avanza-mark.png" alt="Avanza" className={styles.printLogoImg} />
+              <img src="/meiyari-mark.png" alt="Meiyari" className={styles.printLogoImg} />
             </div>
             <div className={styles.printBrandText}>
-              <h1 className={styles.printBrandTitle}>AVANZA · NATIONAL BORDER &amp; IDENTITY CLEARANCE</h1>
+              <h1 className={styles.printBrandTitle}>MEIYARI · NATIONAL BORDER &amp; IDENTITY CLEARANCE</h1>
               <p className={styles.printBrandSub}>
                 Official Automated Screening Disposition Record &bull; Certificate of Identity Verification
               </p>
@@ -439,7 +439,7 @@ export default function Stage4Clearance() {
         <div className={styles.printFooterDivider} />
         <div className={styles.printFooterText}>
           <span>OFFICIAL BORDER &amp; SCREENING CLEARANCE DOSSIER</span>
-          <span>ISSUED BY AVANZA AUTOMATED IDENTITY VERIFICATION SYSTEM &bull; DIGITAL SIGNATURE CERTIFIED</span>
+          <span>ISSUED BY MEIYARI AUTOMATED IDENTITY VERIFICATION SYSTEM &bull; DIGITAL SIGNATURE CERTIFIED</span>
           <span>PAGE 1 OF 1 &bull; STRICTLY CONFIDENTIAL</span>
         </div>
       </div>
