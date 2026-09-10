@@ -1,14 +1,641 @@
-/* RegisterPage.module.css */
-@import './LoginPage.module.css';
+/* RegisterPage.module.css — Professional Split-Screen Registration Theme */
+
+.pageRoot {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background-color: #f0f3f8;
+  font-family: var(--font-family-base, 'Inter', sans-serif);
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LEFT HERO SHOWCASE PANEL (Rich branded visual display)
+   ══════════════════════════════════════════════════════════ */
+.showcaseSide {
+  flex: 1.1;
+  background: linear-gradient(150deg, #071426 0%, #0c1f38 50%, #08162b 100%);
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.showcaseSide::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.28) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.showcaseSide::after {
+  content: '';
+  position: absolute;
+  bottom: -5%;
+  right: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 210, 255, 0.18) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.showcaseGridPattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.showcaseBrand {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.showcaseLogoBadge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.showcaseLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.showcaseBrandName {
+  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.brandBadgePill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.showcaseHero {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 520px;
+  margin: 28px 0;
+}
+
+.showcaseHeading {
+  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.highlightText {
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.showcaseSubheading {
+  font-size: 0.98rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Security steps list */
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(0, 102, 255, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepTextCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stepTitle {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.stepDesc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.showcaseFooter {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: #64748b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 20px;
+}
+
+.trustShieldIcon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RIGHT FORM PANEL (Tactile Neomorphic Registration Card)
+   ══════════════════════════════════════════════════════════ */
+.formSide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 24px;
+  background-color: #f0f3f8;
+  position: relative;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 480px;
+  background: #f0f3f8;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    12px 12px 28px rgba(166, 180, 200, 0.45),
+    -12px -12px 28px rgba(255, 255, 255, 0.95);
+  padding: 34px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step Progression Indicator */
+.stepTrackerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -4px;
+}
+
+.stepPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #64748b;
+  border: 1px solid transparent;
+}
+
+.stepPillActive {
+  background: #eff6ff;
+  color: #0066ff;
+  border-color: #bfdbfe;
+}
+
+.stepPillDone {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.stepConnector {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 3px;
+}
+
+.cardTitle {
+  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0a1931;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.errorAlert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* Form layout */
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 .fieldRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  gap: 12px;
 }
 
 @media (max-width: 480px) {
   .fieldRow {
     grid-template-columns: 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inputLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.inputWell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #eaf0f8;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    inset 3px 3px 6px rgba(166, 180, 200, 0.38),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.95);
+  transition: all 0.2s ease;
+}
+
+.inputWell:focus-within {
+  border-color: #0066ff;
+  box-shadow: 
+    inset 3px 3px 6px rgba(166, 180, 200, 0.45),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.95),
+    0 0 0 3px rgba(0, 102, 255, 0.15);
+}
+
+.textInput {
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  font-size: 0.86rem;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+}
+
+.textInput::placeholder {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: #0066ff;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 
+    4px 4px 10px rgba(0, 102, 255, 0.35),
+    -2px -2px 6px rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.submitBtn:hover {
+  background: #0052cc;
+  transform: translateY(-1px);
+}
+
+.cardFooter {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.footerLink {
+  color: #0066ff;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
+
+/* ══════════════════════════════════════════════════════════
+   STEP 2: QR CODE & SECRET KEY TOTP SETUP
+   ══════════════════════════════════════════════════════════ */
+.qrSetupSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.qrWrapper {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.secretKeyBox {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #eaf0f8;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    inset 2px 2px 5px rgba(166, 180, 200, 0.35),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.95);
+}
+
+.secretKeyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.secretKeyDisplayRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.secretKeyText {
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #0066ff;
+}
+
+.copyKeyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copyKeyBtn:hover {
+  background: #f1f5f9;
+  color: #0066ff;
+}
+
+.mfaPromptLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.mfaDigitsRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.digitInput {
+  width: 44px;
+  height: 50px;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: var(--font-family-mono, monospace);
+  color: #0f172a;
+  background: #eaf0f8;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  box-shadow: 
+    inset 3px 3px 6px rgba(166, 180, 200, 0.4),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.95);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.digitInput:focus {
+  border-color: #0066ff;
+  background: #ffffff;
+  box-shadow: 
+    0 0 0 3px rgba(0, 102, 255, 0.2),
+    inset 1px 1px 3px rgba(166, 180, 200, 0.2);
+}
+
+.demoBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: #f0f3f8;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: #0066ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 
+    3px 3px 7px rgba(166, 180, 200, 0.35),
+    -3px -3px 7px rgba(255, 255, 255, 0.95);
+  transition: all 0.15s ease;
+}
+
+.demoBtn:hover {
+  background: #eaf1fb;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.78rem;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.backBtn:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .pageRoot {
+    flex-direction: column;
+  }
+
+  .showcaseSide {
+    padding: 36px 24px;
+    flex: none;
+  }
+
+  .showcaseHero {
+    max-width: 100%;
+    margin: 16px 0;
+  }
+
+  .stepsList {
+    display: none;
+  }
+
+  .showcaseFooter {
+    display: none;
+  }
+
+  .formSide {
+    padding: 28px 16px 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .authCard {
+    padding: 26px 18px;
+    border-radius: 20px;
+  }
+
+  .digitInput {
+    width: 38px;
+    height: 46px;
+    font-size: 1.2rem;
   }
 }

@@ -916,7 +916,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "official",
             "filename": "Passport_Aarav_Sharma_Official.jpg",
             "url": "/api/v1/verification/sample/passport?variant=official",
-            "description": "Authentic passport: Aarav Sharma (Z1234567). Status: ACTIVE in official registry with valid ICAO TD3 MRZ.",
+            "description": "Authentic passport: Aarav Sharma (Z1234567). Status: ACTIVE in official government records.",
         },
         {
             "id": "passport_blacklist",
@@ -925,7 +925,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "blacklist",
             "filename": "Passport_Vikram_Malhotra_Blacklisted.jpg",
             "url": "/api/v1/verification/sample/passport?variant=blacklist",
-            "description": "Passport for Vikram Malhotra (Z7654321). Status: REVOKED on national fraud & border watchlist.",
+            "description": "Passport for Vikram Malhotra (Z7654321). Status: REVOKED on national security watchlist.",
         },
         {
             "id": "passport_defective",
@@ -934,7 +934,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "defective",
             "filename": "Passport_Rohit_Verma_Defective.jpg",
             "url": "/api/v1/verification/sample/passport?variant=defective",
-            "description": "Tampered passport for Rohit Verma (Z9999999). Failed check digits & expiry precedes issue date.",
+            "description": "Tampered passport for Rohit Verma (Z9999999). Failed security checks with invalid dates.",
         },
     ]
 
@@ -955,7 +955,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "blacklist",
             "filename": "Visa_Vikram_Malhotra_Blacklisted.jpg",
             "url": "/api/v1/verification/sample/visa?variant=blacklist",
-            "description": "Consular visa for Vikram Malhotra (V7008009). Status: REVOKED in immigration registry.",
+            "description": "Consular visa for Vikram Malhotra (V7008009). Status: REVOKED in immigration records.",
         },
         {
             "id": "visa_defective",
@@ -964,7 +964,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "defective",
             "filename": "Visa_Rohit_Verma_Defective.jpg",
             "url": "/api/v1/verification/sample/visa?variant=defective",
-            "description": "Defective visa (V999) with missed details (passport reference missing, issue date missing).",
+            "description": "Defective visa (V999) with missing required personal details and issue date.",
         },
     ]
 
@@ -976,7 +976,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "bharath",
             "filename": "DL_Bharath_A_TamilNadu_Genuine.jpg",
             "url": "/api/v1/verification/sample/driving_license?variant=bharath",
-            "description": "Original Indian Driving Licence: BHARATH A (TN05 20250014128). Issued by Govt of Tamil Nadu. Status: ACTIVE in transport registry.",
+            "description": "Original Indian Driving Licence: BHARATH A (TN05 20250014128). Issued by Govt of Tamil Nadu. Status: ACTIVE in transport records.",
         },
         {
             "id": "dl_official",
@@ -985,7 +985,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "official",
             "filename": "DL_Priya_Sundar_Official.jpg",
             "url": "/api/v1/verification/sample/driving_license?variant=official",
-            "description": "Original driving license: Priya Sundar (DL-0420230012345). Active and verified in official government registry.",
+            "description": "Original driving license: Priya Sundar (DL-0420230012345). Active and verified in official government records.",
         },
         {
             "id": "dl_blacklist",
@@ -994,7 +994,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "blacklist",
             "filename": "DL_Kabir_Mehta_Blacklisted.jpg",
             "url": "/api/v1/verification/sample/driving_license?variant=blacklist",
-            "description": "Driving license for Kabir Mehta (DL-0120180099887). Status: REVOKED for fraudulent documentation.",
+            "description": "Driving license for Kabir Mehta (DL-0120180099887). Status: REVOKED for invalid documentation.",
         },
         {
             "id": "dl_defective",
@@ -1003,7 +1003,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "defective",
             "filename": "DL_Anil_Kumar_Defective.jpg",
             "url": "/api/v1/verification/sample/driving_license?variant=defective",
-            "description": "Tampered DL (INVALID-DL-12): Issue date 2005 precedes DOB 2012; missing vehicle classes & authority.",
+            "description": "Tampered DL (INVALID-DL-12): Invalid issue date; missing vehicle categories and issuing authority.",
         },
     ]
 
@@ -1015,7 +1015,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "official",
             "filename": "Aadhaar_Sneha_Patel_Official.jpg",
             "url": "/api/v1/verification/sample/aadhaar?variant=official",
-            "description": "Official 12-digit UIDAI Aadhaar Card for Sneha Patel (8472 9103 8473). Valid Verhoeff check digit & registered.",
+            "description": "Official 12-digit Aadhaar Card for Sneha Patel (8472 9103 8473). Verified and active in government records.",
         },
         {
             "id": "aadhaar_blacklist",
@@ -1033,7 +1033,7 @@ async def get_sample_options() -> JSONResponse:
             "variant": "defective",
             "filename": "Aadhaar_Devraj_Singh_Defective.jpg",
             "url": "/api/v1/verification/sample/aadhaar?variant=defective",
-            "description": "Defective Aadhaar (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.",
+            "description": "Defective Aadhaar (1234 5678 9999): Invalid card number format with missing required personal details.",
         },
     ]
 

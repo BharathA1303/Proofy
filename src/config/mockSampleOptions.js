@@ -39,7 +39,7 @@ export const DEFAULT_SAMPLE_OPTIONS = {
       filename: 'Passport_Rohit_Verma_Defective.jpg',
       url: '/api/v1/verification/sample/passport?variant=defective',
       fallbackUrl: '/samples/passport/passport_defective.jpg',
-      description: 'Tampered credential · Checksum & date mismatch',
+      description: 'Tampered passport with invalid issue date and altered photo.',
     },
   ],
 
@@ -95,7 +95,7 @@ export const DEFAULT_SAMPLE_OPTIONS = {
       filename: 'Aadhaar_Sneha_Patel_Official.jpg',
       url: '/api/v1/verification/sample/aadhaar?variant=official',
       fallbackUrl: '/samples/aadhaar/aadhaar_official.jpg',
-      description: 'Official 12-digit UIDAI Aadhaar Card for Sneha Patel (8472 9103 8473). Valid Verhoeff checksum & active status.',
+      description: 'Official 12-digit Aadhaar Card for Sneha Patel (8472 9103 8473). Verified and active in government records.',
     },
     {
       id: 'aadhaar_blacklist',
@@ -115,7 +115,7 @@ export const DEFAULT_SAMPLE_OPTIONS = {
       filename: 'Aadhaar_Devraj_Singh_Defective.jpg',
       url: '/api/v1/verification/sample/aadhaar?variant=defective',
       fallbackUrl: '/samples/aadhaar/aadhaar_defective.jpg',
-      description: 'Defective Aadhaar (1234 5678 9999): Fails Verhoeff checksum algorithm with missing demographic fields.',
+      description: 'Defective Aadhaar (1234 5678 9999): Invalid card number format with missing required personal details.',
     },
   ],
 
@@ -148,7 +148,7 @@ export const DEFAULT_SAMPLE_OPTIONS = {
       filename: 'VoterID_Invalid_Defective.jpg',
       url: '/api/v1/verification/sample/voter_id?variant=defective',
       fallbackUrl: '/samples/voter_id/voter_id_defective.jpg',
-      description: 'Defective Voter ID (INVALID-EPIC-99): Malformed EPIC format and missing constituency metadata.',
+      description: 'Defective Voter ID (INVALID-EPIC-99): Invalid document format and missing constituency details.',
     },
   ],
 
@@ -181,7 +181,7 @@ export const DEFAULT_SAMPLE_OPTIONS = {
       filename: 'PAN_Invalid_Defective.jpg',
       url: '/api/v1/verification/sample/pan_card?variant=defective',
       fallbackUrl: '/samples/pan_card/pan_card_defective.jpg',
-      description: 'Defective PAN Card (PAN-123-INVALID): Non-standard alphanumeric structure and missing taxpayer category.',
+      description: 'Defective PAN Card (PAN-123-INVALID): Invalid card number structure and missing taxpayer category.',
     },
   ],
 

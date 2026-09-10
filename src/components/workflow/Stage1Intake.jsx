@@ -307,11 +307,17 @@ export default function Stage1Intake() {
     let cleanDesc = sample.description || '';
 
     cleanDesc = cleanDesc
+      .replace(/Valid Verhoeff check digit & registered\.?/gi, 'Verified and active in government records.')
+      .replace(/Valid Verhoeff checksum & active status\.?/gi, 'Verified and active in government records.')
+      .replace(/Fails Verhoeff checksum algorithm with missing demographic fields\.?/gi, 'Invalid card number format with missing required personal details.')
       .replace(/with valid ICAO TD3 MRZ\.?/gi, 'with confirmed authority issuance.')
       .replace(/ICAO TD3 MRZ/gi, 'Official Travel Standard')
-      .replace(/Failed check digits & expiry precedes issue date\.?/gi, 'Security feature anomalies & date chronology violations detected.')
+      .replace(/Failed check digits & expiry precedes issue date\.?/gi, 'Security checks failed with invalid dates.')
       .replace(/Status: REVOKED on national fraud & border watchlist\.?/gi, 'Record flagged as REVOKED on national security watchlist.')
-      .replace(/Status: ACTIVE in official registry/gi, 'Status: ACTIVE in official government records');
+      .replace(/Status: ACTIVE in official registry/gi, 'Status: ACTIVE in official government records')
+      .replace(/Malformed EPIC format and missing constituency metadata\.?/gi, 'Invalid document format and missing constituency details.')
+      .replace(/Non-standard alphanumeric structure and missing taxpayer category\.?/gi, 'Invalid card number structure and missing taxpayer category.')
+      .replace(/Checksum & date mismatch/gi, 'Security checks failed & invalid dates');
 
     return { badge, cleanDesc, isBharath, isDefect, isBlacklist };
   }
