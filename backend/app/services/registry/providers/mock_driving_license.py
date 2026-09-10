@@ -110,8 +110,6 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
 
         doc_num_provenance = request.document_number
         doc_num = doc_num_provenance.value if doc_num_provenance else None
-        if not doc_num and request.traveler:
-            doc_num = getattr(request.traveler, "licenseNumber", None) or getattr(request.traveler, "docNumber", None)
         lookup_key = (doc_num or "").strip().upper()
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0

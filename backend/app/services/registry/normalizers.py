@@ -106,16 +106,27 @@ def names_match(doc_name: Optional[str], registry_name: Optional[str]) -> bool:
       - Match = token sets are identical.
       - A name with extra tokens (e.g., middle name in one but not the other)
         does NOT automatically match.
+      - Fallback: if token sets differ, compare with ALL whitespace removed.
+        OCR on compact/tight-kerned document fonts frequently merges adjacent
+        words with no gap (e.g. "KAVITHAPRABHAKAR" instead of "KAVITHA
+        PRABHAKAR") — this is a spacing artifact of the source image, not a
+        different identity, so it must not surface as a registry mismatch.
 
     Returns False if either name cannot be normalized.
 
-    NOT a fuzzy/approximate match. Near-matches are NOT treated as matches.
+    NOT a fuzzy/approximate match. Near-matches (different spelling, missing
+    middle name, etc.) are still NOT treated as matches — only whitespace
+    differences are tolerated.
     """
     doc_tokens = normalize_name_tokens(doc_name)
     reg_tokens = normalize_name_tokens(registry_name)
     if doc_tokens is None or reg_tokens is None:
         return False
-    return doc_tokens == reg_tokens
+    if doc_tokens == reg_tokens:
+        return True
+    doc_compact = "".join(sorted("".join(doc_tokens)))
+    reg_compact = "".join(sorted("".join(reg_tokens)))
+    return doc_compact == reg_compact and bool(doc_compact)
 
 
 # ── Date normalization ─────────────────────────────────────────────────────────

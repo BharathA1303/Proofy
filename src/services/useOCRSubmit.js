@@ -303,18 +303,23 @@ export function useOCRSubmit() {
 
       // Compute final decision outcome
       const riskLevel = riskData?.risk_level || 'LOW';
+      const registryStatus = registryData?.registry?.status || null;
+      const registryRejectStatuses = ['REVOKED', 'SUSPENDED', 'MISMATCH'];
+      const registryReviewStatuses = ['NOT_FOUND'];
       let decision = 'cleared';
       if (
         riskLevel === 'CRITICAL' ||
         riskLevel === 'HIGH' ||
         validationStatus === 'failed' ||
-        tamperingStatus === 'failed'
+        tamperingStatus === 'failed' ||
+        registryRejectStatuses.includes(registryStatus)
       ) {
         decision = 'rejected';
       } else if (
         riskLevel === 'MEDIUM' ||
         validationStatus === 'warning' ||
-        tamperingStatus === 'warning'
+        tamperingStatus === 'warning' ||
+        registryReviewStatuses.includes(registryStatus)
       ) {
         decision = 'review';
       }

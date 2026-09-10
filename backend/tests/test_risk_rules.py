@@ -42,7 +42,7 @@ def test_unavailable_items_always_zero():
 def test_revoked_critical_highest():
     item = _item("registry_revoked", EvidenceSeverity.CRITICAL, status=EvidenceStatus.REVOKED)
     item.category = EvidenceCategory.REGISTRY_STATUS
-    assert get_base_contribution(item) == 22.0
+    assert get_base_contribution(item) == 55.0
 
 
 def test_presentation_attack_critical():

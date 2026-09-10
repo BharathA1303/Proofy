@@ -43,7 +43,7 @@ PAN_CATEGORY_MAP = {
 _PAN_NOISE_TOKENS = (
     "INCOME", "TAX", "DEPARTMENT", "GOVERNMENT", "INDIA",
     "PERMANENT", "ACCOUNT", "NUMBER", "CARD", "ITD",
-    "NSDL", "UTIITSL",
+    "NSDL", "UTIITSL", "NAME", "FATHER", "GUARDIAN", "DATE", "BIRTH",
 )
 
 
@@ -151,27 +151,48 @@ def parse_pan_card(
     if result.pan_number.value:
         result.taxpayer_category = decode_pan_category(result.pan_number.value)
 
+    def _is_valid_name_token(cand: str) -> bool:
+        clean = cand.strip()
+        if not clean or len(clean) < 3 or len(clean) > 45 or re.search(r"\d", clean):
+            return False
+        if any(tok in clean.upper() for tok in _PAN_NOISE_TOKENS):
+            return False
+        if not re.search(r"[AEIOUYaeiouy]", clean):
+            return False
+        return True
+
     # ── Field 2: Name of Cardholder ──────────────────────────────────────────
-    for text, conf, bbox in lines:
-        clean_upper = text.upper()
-        m_name = re.search(r"(?:NAME|CARDHOLDER'?S?\s*NAME)\s*[:\-]?\s*([A-Z][A-Z\s.'-]{2,40})", clean_upper)
-        if m_name and not result.name.value:
-            cand = m_name.group(1).strip()
-            if not any(tok in cand for tok in _PAN_NOISE_TOKENS):
-                result.name = PanCardField(value=cand, confidence=conf, bbox=bbox, raw=cand)
+    _NAME_LABEL_RE = re.compile(r"^(?:CARDHOLDER'?S?\s*NAME|NAME)\s*[:\-]?\s*(.*)$")
+    for idx, (text, conf, bbox) in enumerate(lines):
+        clean_upper = text.upper().strip()
+        m_label = _NAME_LABEL_RE.match(clean_upper)
+        if not m_label:
+            continue
+        inline_val = m_label.group(1).strip()
+        if inline_val and _is_valid_name_token(inline_val):
+            result.name = PanCardField(value=inline_val, confidence=conf, bbox=bbox, raw=inline_val)
+            break
+        if idx + 1 < len(lines):
+            next_text, next_conf, next_bbox = lines[idx + 1]
+            if _is_valid_name_token(next_text.strip()):
+                result.name = PanCardField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
     # ── Field 3: Father's Name ────────────────────────────────────────────────
-    for text, conf, bbox in lines:
-        clean_upper = text.upper()
-        m_father = re.search(
-            r"(?:FATHER'?S?\s*NAME|GUARDIAN'?S?\s*NAME|F/O|S/O)\s*[:\-]?\s*([A-Z][A-Z\s.'-]{2,40})",
-            clean_upper,
-        )
-        if m_father and not result.father_name.value:
-            cand = m_father.group(1).strip()
-            if not any(tok in cand for tok in _PAN_NOISE_TOKENS):
-                result.father_name = PanCardField(value=cand, confidence=conf, bbox=bbox, raw=cand)
+    _FATHER_LABEL_RE = re.compile(r"^(?:FATHER'?S?\s*NAME|GUARDIAN'?S?\s*NAME|F/O|S/O)\s*[:\-]?\s*(.*)$")
+    for idx, (text, conf, bbox) in enumerate(lines):
+        clean_upper = text.upper().strip()
+        m_label = _FATHER_LABEL_RE.match(clean_upper)
+        if not m_label:
+            continue
+        inline_val = m_label.group(1).strip()
+        if inline_val and _is_valid_name_token(inline_val):
+            result.father_name = PanCardField(value=inline_val, confidence=conf, bbox=bbox, raw=inline_val)
+            break
+        if idx + 1 < len(lines):
+            next_text, next_conf, next_bbox = lines[idx + 1]
+            if _is_valid_name_token(next_text.strip()):
+                result.father_name = PanCardField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
     # ── Field 4: Date of Birth ────────────────────────────────────────────────
@@ -184,6 +205,14 @@ def parse_pan_card(
         if m_dob and not result.dob.value:
             result.dob = PanCardField(value=m_dob.group(1), confidence=conf, bbox=bbox, raw=m_dob.group(1))
             break
+
+    # Fallback: label and value printed on separate lines/rows.
+    if not result.dob.value:
+        for text, conf, bbox in lines:
+            m_date = re.match(r"^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{4})$", text.strip())
+            if m_date:
+                result.dob = PanCardField(value=m_date.group(1), confidence=conf, bbox=bbox, raw=m_date.group(1))
+                break
 
     # ── Field 5: Issuing Authority ────────────────────────────────────────────
     if has_pan_indicator or "INCOME TAX" in all_text_combined:

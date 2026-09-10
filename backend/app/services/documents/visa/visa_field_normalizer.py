@@ -59,8 +59,8 @@ def normalize_visa_date(raw: Optional[str]) -> Optional[str]:
         except ValueError:
             return None
 
-    # 2. DD MMM YYYY match (e.g. 15 OCT 2028 or 15-OCT-2028)
-    m_alpha = re.search(r"(\d{1,2})[-\s]([a-zA-Z]{3,9})[-\s](\d{4})", raw)
+    # 2. DD MMM YYYY match (e.g. 15 OCT 2028, 15-OCT-2028, or no-separator 15OCT2028)
+    m_alpha = re.search(r"(\d{1,2})[-\s]?([a-zA-Z]{3,9})[-\s]?(\d{4})", raw)
     if m_alpha:
         d_str, mon_str, y_str = m_alpha.group(1), m_alpha.group(2)[:3].lower(), m_alpha.group(3)
         month = _MONTH_MAP.get(mon_str)

@@ -39,11 +39,16 @@ class Settings(BaseSettings):
     CASE_SESSION_TTL_SECONDS: int = 3600
 
     # Security / CORS
+    # Vite falls back to the next free port (5174, 5175, ...) whenever a prior
+    # dev server instance is still holding 5173, so a fixed single-port list
+    # breaks CORS the moment more than one dev server is running. A regex
+    # covering any localhost/127.0.0.1 port is used instead (see main.py).
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:4173",
     ]
+    CORS_ORIGIN_REGEX: str = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
     # File ingestion limits
     MAX_FILE_SIZE_MB: int = 10

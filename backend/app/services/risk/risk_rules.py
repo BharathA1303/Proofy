@@ -287,6 +287,22 @@ RULE_TABLE: Dict[str, Dict[str, float]] = {
         "LOW":     3.0,
         "NONE":    0.0,
     },
+    "identifier_checksum_fail": {
+        "HIGH":   14.0,
+        "MEDIUM":  8.0,
+        "LOW":     3.0,
+        "NONE":    0.0,
+    },
+    "identifier_format_invalid": {
+        "MEDIUM":  6.0,
+        "LOW":     2.0,
+        "NONE":    0.0,
+    },
+    "qr_consistency_failed": {
+        "HIGH":   12.0,
+        "MEDIUM":  6.0,
+        "NONE":    0.0,
+    },
 
     # ── Forensic Analysis (M3) ────────────────────────────────────────────
     "forensic_high_concern": {
@@ -378,7 +394,7 @@ RULE_TABLE: Dict[str, Dict[str, float]] = {
         "NONE": 0.0,   # Positive evidence — no contribution
     },
     "registry_revoked": {
-        "CRITICAL": 22.0,
+        "CRITICAL": 55.0,
         "NONE":      0.0,
     },
     "registry_mismatch": {
@@ -398,7 +414,7 @@ RULE_TABLE: Dict[str, Dict[str, float]] = {
         "NONE":    0.0,
     },
     "registry_suspended": {
-        "CRITICAL": 18.0,
+        "CRITICAL": 50.0,
         "HIGH":     16.0,
         "NONE":      0.0,
     },

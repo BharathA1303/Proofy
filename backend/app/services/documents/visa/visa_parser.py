@@ -104,34 +104,71 @@ def parse_visa(
         (r.text.strip(), r.confidence, r.bbox) for r in regions
     ]
 
+    def _text_below(label_bbox, max_dy: int = 60):
+        """
+        Find the OCR line whose bbox sits directly below label_bbox (roughly
+        the same x-range, next row down). Needed on multi-column visa layouts
+        where the label's next line in reading order (idx+1) is actually the
+        adjacent column's label, not this label's own value.
+        """
+        if not label_bbox:
+            return None
+        lx0, ly0 = label_bbox[0]
+        lx1 = label_bbox[1][0] if len(label_bbox) > 1 else lx0 + 100
+        ly_bottom = max(pt[1] for pt in label_bbox)
+        best = None
+        best_dy = None
+        for cand_text, cand_conf, cand_bbox in lines:
+            if not cand_bbox:
+                continue
+            cx0, cy0 = cand_bbox[0]
+            dy = cy0 - ly_bottom
+            if dy <= 0 or dy > max_dy:
+                continue
+            # require horizontal overlap with the label's x-range (same column)
+            cx1 = cand_bbox[1][0] if len(cand_bbox) > 1 else cx0 + 100
+            overlap = min(lx1, cx1) - max(lx0, cx0)
+            if overlap <= -20:
+                continue
+            if best_dy is None or dy < best_dy:
+                best = (cand_text, cand_conf, cand_bbox)
+                best_dy = dy
+        return best
+
     for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper()
 
         # Visa Number / Document Number
         if not result.docNumber.value:
             m_num = re.search(r"(?:VISA\s*(?:NO|NUMBER|#)?|CONTROL\s*NO)\s*[:.\-]?\s*([A-Z0-9]{6,14})", clean_upper)
-            if m_num:
+            if m_num and re.search(r"\d", m_num.group(1)):
                 norm_val = normalize_visa_number(m_num.group(1))
                 if norm_val:
                     result.docNumber = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_num.group(1))
-            elif "VISA NO" in clean_upper and idx + 1 < len(lines):
-                next_text = lines[idx + 1][0]
-                norm_val = normalize_visa_number(next_text)
-                if norm_val and len(norm_val) >= 6:
-                    result.docNumber = VisaField(value=norm_val, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=next_text)
+            elif re.search(r"\b(?:VISA\s+(?:NO|NUMBER|#)|CONTROL\s*NO)\s*[:.\-]?\s*$", clean_upper):
+                below = _text_below(bbox)
+                if below:
+                    m_sub = re.search(r"([A-Z0-9]{6,14})$", below[0].strip().upper())
+                    cand = m_sub.group(1) if m_sub else below[0]
+                    norm_val = normalize_visa_number(cand)
+                    if norm_val and len(norm_val) >= 6:
+                        result.docNumber = VisaField(value=norm_val, confidence=below[1], bbox=below[2], raw=below[0])
 
         # Passport Number (Reference Document)
         if not result.passportNumber.value:
             m_ppt = re.search(r"(?:PASSPORT\s*(?:NO|NUMBER|#)?|PPT\s*NO|TRAVEL\s*DOC)\s*[:.\-]?\s*([A-Z0-9]{6,12})", clean_upper)
-            if m_ppt:
+            if m_ppt and re.search(r"\d", m_ppt.group(1)):
                 norm_val = normalize_visa_number(m_ppt.group(1))
                 if norm_val:
                     result.passportNumber = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_ppt.group(1))
-            elif "PASSPORT NO" in clean_upper and idx + 1 < len(lines):
-                next_text = lines[idx + 1][0]
-                norm_val = normalize_visa_number(next_text)
-                if norm_val and len(norm_val) >= 6:
-                    result.passportNumber = VisaField(value=norm_val, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=next_text)
+            elif re.search(r"\b(?:PASSPORT\s+(?:NO|NUMBER|#)|PPT\s*NO|TRAVEL\s*DOC)\s*[:.\-]?\s*$", clean_upper):
+                below = _text_below(bbox)
+                if below:
+                    m_sub = re.search(r"([A-Z0-9]{6,12})$", below[0].strip().upper())
+                    cand = m_sub.group(1) if m_sub else below[0]
+                    norm_val = normalize_visa_number(cand)
+                    if norm_val and len(norm_val) >= 6:
+                        result.passportNumber = VisaField(value=norm_val, confidence=below[1], bbox=below[2], raw=below[0])
 
         # Full Name / Bearer
         if not result.name.value:
@@ -174,12 +211,23 @@ def parse_visa(
 
         # Visa Type / Category
         if not result.visaType.value:
-            m_type = re.search(r"(?:VISA\s*TYPE|TYPE|CLASS|CATEGORY)\s*[:.\-]?\s*([A-Z0-9\/\-\s]{1,15})", clean_upper)
-            if m_type and not any(kw in m_type.group(1) for kw in ["PASSPORT", "NUMBER", "EXPIRY", "VALID"]):
+            m_type = re.search(r"(?:VISA\s*TYPE|TYPE|CLASS|CATEGORY)\s*[:.\-]?\s*([A-Z0-9][A-Z0-9\/\-\s]{0,14})", clean_upper)
+            if (
+                m_type
+                and not any(kw in m_type.group(1) for kw in ["PASSPORT", "NUMBER", "EXPIRY", "VALID"])
+                and not re.match(r"^(?:TYPE|CLASS|CATEGORY)\b", m_type.group(1))
+            ):
                 norm_val = normalize_visa_text(m_type.group(1))
                 if norm_val:
                     result.visaType = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_type.group(1))
                     result.visaCategory = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_type.group(1))
+            elif re.search(r"(?:VISA\s*TYPE\s*\/?\s*CLASS|VISA\s*TYPE|VISA\s*CLASS|VISA\s*CATEGORY)\s*$", clean_upper):
+                below = _text_below(bbox)
+                if below:
+                    norm_val = normalize_visa_text(below[0])
+                    if norm_val and len(norm_val) >= 2:
+                        result.visaType = VisaField(value=norm_val, confidence=below[1], bbox=below[2], raw=below[0])
+                        result.visaCategory = VisaField(value=norm_val, confidence=below[1], bbox=below[2], raw=below[0])
 
         # Issue Date
         if not result.issuedDate.value:
@@ -218,14 +266,25 @@ def parse_visa(
                 norm_val = normalize_entries(m_ent.group(1))
                 if norm_val:
                     result.entries = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_ent.group(1))
+            elif re.search(r"(?:NUMBER\s*OF\s*ENTRIES|ENTRIES|ENTRY)\s*$", clean_upper):
+                below = _text_below(bbox)
+                if below:
+                    norm_val = normalize_entries(below[0])
+                    if norm_val:
+                        result.entries = VisaField(value=norm_val, confidence=below[1], bbox=below[2], raw=below[0])
 
         # Issuing Authority / Place of Issue
         if not result.authority.value:
-            m_auth = re.search(r"(?:AUTHORITY|ISSUING\s*POST|ISSUED\s*AT|PLACE\s*OF\s*ISSUE)\s*[:.\-]?\s*([A-Z\s]{3,30})", clean_upper)
-            if m_auth:
+            m_auth = re.search(r"(?:ISSUING\s*AUTHORITY|AUTHORITY|ISSUING\s*POST|ISSUED\s*AT|PLACE\s*OF\s*ISSUE)\s*[:.\-]?\s*([A-Z\s]{3,30})", clean_upper)
+            if m_auth and m_auth.group(1).strip():
                 norm_val = normalize_visa_text(m_auth.group(1))
                 if norm_val:
                     result.authority = VisaField(value=norm_val, confidence=conf, bbox=bbox, raw=m_auth.group(1))
+            elif re.search(r"(?:ISSUING\s*AUTHORITY|AUTHORITY|ISSUING\s*POST|ISSUED\s*AT|PLACE\s*OF\s*ISSUE)\s*$", clean_upper) and idx + 1 < len(lines):
+                next_text = lines[idx + 1][0]
+                norm_val = normalize_visa_text(next_text)
+                if norm_val and len(norm_val) >= 3:
+                    result.authority = VisaField(value=norm_val, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=next_text)
 
     return result
 

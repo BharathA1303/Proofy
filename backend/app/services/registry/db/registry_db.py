@@ -881,11 +881,11 @@ class GovernmentRegistryDB:
             doc_type="voter_id",
             doc_number="ABC1234567",
             full_name="PRIYA KRISHNAMURTHY",
-            dob="1988-07-22",
+            dob="1990-04-15",
             status="ACTIVE",
             authority="Election Commission of India",
             expiry="2099-12-31",
-            metadata={"gender": "FEMALE", "constituency": "CHENNAI NORTH", "state": "Tamil Nadu"},
+            metadata={"gender": "FEMALE", "constituency": "120-CHENNAI CENTRAL", "state": "Tamil Nadu"},
         )
         self.insert_official_record(
             doc_type="voter_id",
@@ -965,7 +965,7 @@ class GovernmentRegistryDB:
             doc_type="pan_card",
             doc_number="AABCP1234C",
             full_name="KAVITHA PRABHAKAR",
-            dob="1983-04-12",
+            dob="1988-03-12",
             status="ACTIVE",
             authority="Income Tax Department, Government of India",
             expiry="2099-12-31",

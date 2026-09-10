@@ -112,7 +112,7 @@ def normalize_ocr(m1_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceItem]:
 
     overall_conf = m1_data.get("overall_confidence") or 0.0
     has_low_conf = m1_data.get("has_low_confidence_regions", False)
-    mrz_available = m1_data.get("mrz_available", False)
+    mrz_available = m1_data.get("mrz_detected", m1_data.get("mrz_available", False))
     critical_fields_missing = m1_data.get("critical_fields_missing", [])
     ocr_status = m1_data.get("status", "unknown")
 
@@ -273,6 +273,98 @@ def normalize_validation(m2_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
             confidence=0.90,
             explanation="Composite check digit mismatch. Multiple fields may be corrupted.",
             provenance=p({"check": "composite_checksum"}),
+        ))
+
+    # ── Aadhaar / National ID Check: Verhoeff identifier checksum
+    id_chk = checks.get("identifier_checksum", {})
+    if id_chk and not id_chk.get("valid", True) and id_chk.get("checksum_status") == "FAIL":
+        items.append(_item(
+            module="M2", signal="identifier_checksum_fail",
+            category=EvidenceCategory.DOCUMENT_INTEGRITY,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.HIGH,
+            confidence=0.90,
+            explanation=id_chk.get("message", "Identifier checksum validation failed."),
+            provenance=p({"check": "identifier_checksum",
+                         "checksum_status": id_chk.get("checksum_status")}),
+        ))
+
+    # ── Generic identifier format failure (Aadhaar / Voter ID / PAN / Border Permit)
+    id_fmt = checks.get("identifier_format", {})
+    if id_fmt and id_fmt.get("valid") is False and id_fmt.get("status") not in ("unknown",):
+        items.append(_item(
+            module="M2", signal="identifier_format_invalid",
+            category=EvidenceCategory.DOCUMENT_STRUCTURE,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.MEDIUM,
+            confidence=0.85,
+            explanation=id_fmt.get("message", "Identifier format is invalid."),
+            provenance=p({"check": "identifier_format"}),
+        ))
+
+    # ── Aadhaar / Border Permit Check: QR payload consistency
+    qr_chk = checks.get("qr_consistency", {})
+    if qr_chk and qr_chk.get("valid") is False:
+        items.append(_item(
+            module="M2", signal="qr_consistency_failed",
+            category=EvidenceCategory.DOCUMENT_CONSISTENCY,
+            status=EvidenceStatus.MISMATCH,
+            severity=EvidenceSeverity.HIGH,
+            confidence=0.90,
+            explanation=qr_chk.get("message", "QR payload is inconsistent with printed fields."),
+            provenance=p({"check": "qr_consistency"}),
+        ))
+
+    # ── Driving Licence Check: Licence number format
+    dl_num_chk = checks.get("license_number_format", {})
+    if dl_num_chk and dl_num_chk.get("valid") is False:
+        items.append(_item(
+            module="M2", signal="document_format_invalid",
+            category=EvidenceCategory.DOCUMENT_STRUCTURE,
+            status=EvidenceStatus.WARNING,
+            severity=EvidenceSeverity.MEDIUM,
+            confidence=0.90,
+            explanation=dl_num_chk.get("message", "Licence number format irregular."),
+            provenance=p({"check": "license_number_format"}),
+        ))
+
+    # ── Driving Licence Check: Age eligibility
+    age_chk = checks.get("age_eligibility", {})
+    if age_chk and age_chk.get("valid") is False:
+        items.append(_item(
+            module="M2", signal="date_range_invalid",
+            category=EvidenceCategory.DOCUMENT_INTEGRITY,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.HIGH,
+            confidence=0.90,
+            explanation=age_chk.get("message", "Age eligibility check failed."),
+            provenance=p({"check": "age_eligibility"}),
+        ))
+
+    # ── Border Permit Check: Validity period / Passport binding
+    validity_chk = checks.get("validity_period", {})
+    if validity_chk and validity_chk.get("valid") is False:
+        items.append(_item(
+            module="M2", signal="date_range_invalid",
+            category=EvidenceCategory.DOCUMENT_INTEGRITY,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.MEDIUM,
+            confidence=0.90,
+            explanation=validity_chk.get("message", "Validity period is invalid."),
+            provenance=p({"check": "validity_period"}),
+        ))
+
+    permit_binding_chk = checks.get("passport_binding", {})
+    if permit_binding_chk and permit_binding_chk.get("valid") is False:
+        items.append(_item(
+            module="M2", signal="document_number_binding_mismatch",
+            category=EvidenceCategory.DOCUMENT_CONSISTENCY,
+            status=EvidenceStatus.MISMATCH,
+            severity=EvidenceSeverity.HIGH,
+            confidence=0.90,
+            explanation=permit_binding_chk.get("message", "Passport reference binding mismatch."),
+            provenance=p({"check": "passport_binding"}),
+            correlation_group=CorrelationGroup.DOCUMENT_NUMBER_BINDING,
         ))
 
     # ── Universal Check: Expiry date
@@ -760,12 +852,15 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
         pass
 
     elif reg_status == "REVOKED":
+        # A REVOKED/watchlist hit is a deterministic identity match, not a
+        # probabilistic signal — the mock-source discount does not apply,
+        # otherwise a confirmed blacklisted document is under-scored into LOW risk.
         items.append(_item(
             module="M5", signal="registry_revoked",
             category=EvidenceCategory.REGISTRY_STATUS,
             status=EvidenceStatus.REVOKED,
             severity=EvidenceSeverity.CRITICAL,
-            confidence=0.97 * mock_confidence_factor,
+            confidence=0.97,
             explanation="Registry reports this document as REVOKED. "
                         "The document may have been cancelled or invalidated.",
             provenance=prov_base,
@@ -777,7 +872,7 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
             category=EvidenceCategory.REGISTRY_STATUS,
             status=EvidenceStatus.SUSPENDED,
             severity=EvidenceSeverity.CRITICAL,
-            confidence=0.97 * mock_confidence_factor,
+            confidence=0.97,
             explanation="Registry reports this document as SUSPENDED.",
             provenance=prov_base,
         ))

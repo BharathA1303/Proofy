@@ -35,8 +35,10 @@ class CategoryConfig:
 
 
 # ── Default category caps ─────────────────────────────────────────────────────
-# Sum of all caps = 145.  This means the engine cannot reach 100 from a single
-# category signal alone; multiple independent adverse signals are required.
+# Sum of all caps = 175.  Most categories require multiple independent adverse
+# signals to matter; REGISTRY_STATUS is the exception — a confirmed REVOKED /
+# SUSPENDED watchlist hit is a deterministic identity match (not a probabilistic
+# forensic signal) and is intentionally weighted to push risk into HIGH on its own.
 # Final score is min(sum, 100).
 
 DEFAULT_CATEGORY_CAPS: Dict[EvidenceCategory, CategoryConfig] = {
@@ -46,7 +48,7 @@ DEFAULT_CATEGORY_CAPS: Dict[EvidenceCategory, CategoryConfig] = {
     EvidenceCategory.FORENSIC_ANOMALY:         CategoryConfig(20.0,  "Forensic Analysis"),
     EvidenceCategory.BIOMETRIC_CONSISTENCY:    CategoryConfig(20.0,  "Biometric Consistency"),
     EvidenceCategory.PRESENTATION_ATTACK:      CategoryConfig(20.0,  "Presentation Attack"),
-    EvidenceCategory.REGISTRY_STATUS:          CategoryConfig(25.0,  "Registry Verification"),
+    EvidenceCategory.REGISTRY_STATUS:          CategoryConfig(55.0,  "Registry Verification"),
     EvidenceCategory.VERIFICATION_UNCERTAINTY: CategoryConfig(10.0,  "Verification Uncertainty"),
 }
 

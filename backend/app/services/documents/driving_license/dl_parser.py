@@ -93,6 +93,38 @@ def parse_driving_license(
     ]
     all_text_combined = " ".join([t[0].upper() for t in lines])
 
+    def _text_below(label_bbox, max_dy: int = 60):
+        """
+        Find the OCR line whose bbox sits directly below label_bbox (same
+        column, next row down). Multi-column DL layouts (DOB next to Blood
+        Group, Vehicle Class next to smart-card metadata, etc.) print several
+        labels on one row and their values on the row(s) beneath — the next
+        OCR line in reading order is often a neighboring column's label
+        rather than this label's own value.
+        """
+        if not label_bbox:
+            return None
+        lx0, ly0 = label_bbox[0]
+        lx1 = label_bbox[1][0] if len(label_bbox) > 1 else lx0 + 100
+        ly_bottom = max(pt[1] for pt in label_bbox)
+        best = None
+        best_dy = None
+        for cand_text, cand_conf, cand_bbox in lines:
+            if not cand_bbox:
+                continue
+            cx0, cy0 = cand_bbox[0]
+            dy = cy0 - ly_bottom
+            if dy <= 0 or dy > max_dy:
+                continue
+            cx1 = cand_bbox[1][0] if len(cand_bbox) > 1 else cx0 + 100
+            overlap = min(lx1, cx1) - max(lx0, cx0)
+            if overlap <= -20:
+                continue
+            if best_dy is None or dy < best_dy:
+                best = (cand_text, cand_conf, cand_bbox)
+                best_dy = dy
+        return best
+
     # Check for general Driving License indication
     dl_indicators = [
         "DRIVING", "LICENCE", "LICENSE", "UNION OF INDIA",
@@ -266,10 +298,10 @@ def parse_driving_license(
             result.expiry = result.valid_to
 
     # ── Field 5: Blood Group ─────────────────────────────────────────────────
-    for text, conf, bbox in lines:
+    for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper()
         m_bg = re.search(
-            r"(?:BLOOD\s*(?:GRP|GROUP)?|BG)\s*[:.\-]?\s*([A-Z0-9\+\-]+)",
+            r"(?:BLOOD\s*(?:GRP|GROUP)|BG)\s*[:.\-]?\s*([A-Z0-9\+\-]+)",
             clean_upper,
         )
         if m_bg and not result.blood_group.value:
@@ -277,33 +309,69 @@ def parse_driving_license(
             if norm_bg:
                 result.blood_group = DLField(value=norm_bg, confidence=conf, bbox=bbox, raw=m_bg.group(1))
                 break
+        elif re.search(r"(?:BLOOD\s*(?:GRP|GROUP)?|BG)\s*$", clean_upper):
+            below = _text_below(bbox)
+            if below:
+                norm_bg = normalize_blood_group(below[0].strip())
+                if norm_bg and not result.blood_group.value:
+                    result.blood_group = DLField(value=norm_bg, confidence=below[1], bbox=below[2], raw=below[0])
+                    break
 
     # ── Field 6: Vehicle Classes (COV) ───────────────────────────────────────
-    for text, conf, bbox in lines:
+    _COV_LABEL_TOKENS = ("CLASS", "VEHICLE", "VEHICLES", "COV", "AUTHORISATION", "AUTHORIZATION", "DRIVE", "OF")
+    for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper()
-        if any(kw in clean_upper for kw in ("COV", "CLASS OF VEHICLE", "VEHICLE CLASS", "AUTHORISATION TO DRIVE")):
-            classes = normalize_vehicle_classes(clean_upper)
-            if classes and not result.vehicle_classes.value:
-                result.vehicle_classes = DLField(
-                    value=", ".join(classes),
-                    confidence=conf,
-                    bbox=bbox,
-                    raw=clean_upper,
-                )
-                break
+        is_cov_label = any(kw in clean_upper for kw in ("COV", "CLASS OF VEHICLE", "VEHICLE CLASS", "AUTHORISATION TO DRIVE"))
+        if not is_cov_label:
+            continue
+        # Try the label line itself first (covers "COV: MCWG, LMV" inline layouts),
+        # excluding label vocabulary so the label text is never mistaken for a class.
+        classes = normalize_vehicle_classes(clean_upper)
+        classes = [c for c in classes if c not in _COV_LABEL_TOKENS]
+        if not classes and idx + 1 < len(lines):
+            # Label-only line (e.g. "CLASS OF VEHICLES (COV)") — value is on the next line.
+            classes = normalize_vehicle_classes(lines[idx + 1][0].upper())
+        if classes and not result.vehicle_classes.value:
+            result.vehicle_classes = DLField(
+                value=", ".join(classes),
+                confidence=conf,
+                bbox=bbox,
+                raw=clean_upper,
+            )
+            break
 
     # ── Field 7: Issuing Authority / RTO ─────────────────────────────────────
-    for text, conf, bbox in lines:
+    for idx, (text, conf, bbox) in enumerate(lines):
         clean_upper = text.upper()
+        # "RTO"/"DTO" followed directly by a place name (e.g. "RTO DELHI CENTRAL")
+        # is itself the office name — keep the prefix rather than treating it as
+        # a bare label to strip.
+        m_office = re.match(r"^(RTO|DTO)\s+([A-Za-z][A-Za-z\s,\-]{2,40})$", clean_upper)
+        if m_office and not result.issuing_authority.value:
+            norm_auth = normalize_dl_text(clean_upper)
+            if norm_auth:
+                result.issuing_authority = DLField(value=norm_auth, confidence=conf, bbox=bbox, raw=clean_upper)
+                break
+
         m_auth = re.search(
-            r"(?:RTO|DTO|ISSUING\s*AUTHORITY|LICENSING\s*AUTHORITY)\s*[:.\-]?\s*([A-Za-z0-9\s,\-]+)",
+            r"(?:ISSUING\s*AUTHORITY|LICENSING\s*AUTHORITY)\s*[:.\-]?\s*([A-Za-z0-9\s,\-]+)",
             clean_upper,
         )
-        if m_auth and not result.issuing_authority.value:
+        if m_auth and m_auth.group(1).strip() and not result.issuing_authority.value:
             norm_auth = normalize_dl_text(m_auth.group(1))
             if norm_auth and len(norm_auth) >= 3:
                 result.issuing_authority = DLField(value=norm_auth, confidence=conf, bbox=bbox, raw=m_auth.group(1))
                 break
+        elif (
+            not result.issuing_authority.value
+            and re.search(r"(?:ISSUING\s*AUTHORITY|LICENSING\s*AUTHORITY)\s*$", clean_upper)
+        ):
+            below = _text_below(bbox)
+            if below:
+                norm_auth = normalize_dl_text(below[0])
+                if norm_auth and len(norm_auth) >= 3:
+                    result.issuing_authority = DLField(value=norm_auth, confidence=below[1], bbox=below[2], raw=below[0])
+                    break
 
     # ── Profile Compatibility Assessment ─────────────────────────────────────
     # If there are zero indicators and no primary fields, flag unsupported layout

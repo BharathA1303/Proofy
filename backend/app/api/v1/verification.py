@@ -16,6 +16,7 @@ Future endpoints (Phase 2+):
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from pathlib import Path
@@ -573,9 +574,8 @@ async def ocr_document(
     try:
         from app.services.face.face_detector import face_detector
         from app.services.face.face_enhancer import DocumentFaceEnhancer
-        from app.services.face.face_verification_service import _crop_to_b64
+        from app.services.face.face_verification_service import _crop_to_b64, face_verification_service
         from app.services.face.face_aligner import FaceAligner
-        from app.services.face.arcface_embedding import ArcFaceEmbeddingModel
 
         doc_detect = face_detector.detect_faces(ingested.image_np, is_document=True)
         if doc_detect.face_count == 1:
@@ -590,7 +590,7 @@ async def ocr_document(
                 else:
                     d_aligned = aligner.align_bbox_fallback(ingested.image_np, d_box.bbox, target_size=(112, 112))
                 d_aligned_enh = aligner.enhance_document_face(d_aligned)
-                arc_model = ArcFaceEmbeddingModel()
+                arc_model = face_verification_service.embedding_model
                 d_emb = arc_model.get_embedding(d_aligned_enh) if arc_model.is_available() else None
                 session_document_store.set_face_cache(
                     verification_id=verification_id,
@@ -1308,7 +1308,8 @@ async def forensic_analysis(
     session_document_store.set(verification_id, ingested.raw_bytes)
 
     try:
-        forensic_summary = run_forensic_analysis(
+        forensic_summary = await asyncio.to_thread(
+            run_forensic_analysis,
             ingested.raw_bytes,
             ingested.image_np,
             document_type=profile.document_type,
@@ -1855,11 +1856,20 @@ def _populate_registry_session(
 
 
 def _set_field(session_data: dict, key: str, value=None, source: str = None) -> None:
-    """Set a field in session_data only if value is non-null and non-empty."""
+    """
+    Set a field in session_data only if value is non-null and non-empty.
+
+    `source` is provenance metadata (e.g. "mrz"/"viz") for *_source keys —
+    it must never be written into a data field's value when the extracted
+    value is missing, or a literal "viz"/"mrz" string leaks through as the
+    document's name/DOB/etc. and corrupts the registry field comparison.
+    """
+    is_source_key = key.endswith("_source")
     if value is not None and str(value).strip():
         session_data[key] = str(value).strip()
-    elif source is not None:
-        # Always set source keys even if value is empty (for provenance tracking)
+    elif is_source_key and source is not None:
+        # *_source keys track provenance and may be set even when the
+        # corresponding data field extraction failed.
         session_data[key] = source
 
 

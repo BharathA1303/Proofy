@@ -126,6 +126,37 @@ class BorderPermitParser:
 
         full_text = " ".join(t for t, _, _ in lines)
 
+        def _text_below(label_bbox, max_dy: int = 60):
+            """
+            Find the OCR line whose bbox sits directly below label_bbox (same
+            column, next row down). Multi-column permit layouts print several
+            labels on one row and their values on the row(s) beneath — the
+            next OCR line in reading order is often a neighboring column's
+            label rather than this label's own value.
+            """
+            if not label_bbox:
+                return None
+            lx0, ly0 = label_bbox[0]
+            lx1 = label_bbox[1][0] if len(label_bbox) > 1 else lx0 + 100
+            ly_bottom = max(pt[1] for pt in label_bbox)
+            best = None
+            best_dy = None
+            for cand_text, cand_conf, cand_bbox in lines:
+                if not cand_bbox:
+                    continue
+                cx0, cy0 = cand_bbox[0]
+                dy = cy0 - ly_bottom
+                if dy <= 0 or dy > max_dy:
+                    continue
+                cx1 = cand_bbox[1][0] if len(cand_bbox) > 1 else cx0 + 100
+                overlap = min(lx1, cx1) - max(lx0, cx0)
+                if overlap <= -20:
+                    continue
+                if best_dy is None or dy < best_dy:
+                    best = (cand_text, cand_conf, cand_bbox)
+                    best_dy = dy
+            return best
+
         # 1. Header & Layout plausibility check
         header_patterns = [
             r"BORDER\s*(?:CROSSING)?\s*PERMIT",
@@ -201,15 +232,19 @@ class BorderPermitParser:
         for idx, (text, conf, bbox) in enumerate(lines):
             for pat in passport_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
-                if m:
+                if m and re.search(r"\d", m.group(1)):
                     raw_val = m.group(1).strip().upper()
                     result.passport_number = BorderPermitField(value=raw_val, confidence=conf, bbox=bbox, raw=raw_val)
                     break
-            if not result.passport_number.value and any(text.upper() == kw for kw in ("PASSPORT NUMBER", "PASSPORT NO", "PPT NO")) and idx + 1 < len(lines):
-                cand_ppt = lines[idx + 1][0].strip().upper()
-                if re.match(r"^[A-Z0-9]{6,9}$", cand_ppt):
-                    result.passport_number = BorderPermitField(value=cand_ppt, confidence=lines[idx + 1][1], bbox=lines[idx + 1][2], raw=cand_ppt)
-                    break
+            if (
+                not result.passport_number.value
+                and any(text.upper() == kw for kw in ("PASSPORT NUMBER", "PASSPORT NO", "PPT NO"))
+            ):
+                below = _text_below(bbox)
+                if below:
+                    cand_ppt = below[0].strip().upper()
+                    if re.match(r"^[A-Z0-9]{6,9}$", cand_ppt) and re.search(r"\d", cand_ppt):
+                        result.passport_number = BorderPermitField(value=cand_ppt, confidence=below[1], bbox=below[2], raw=cand_ppt)
             if result.passport_number.value:
                 break
 
@@ -314,6 +349,12 @@ class BorderPermitParser:
                     if norm_type:
                         result.permit_type = BorderPermitField(value=norm_type, confidence=conf, bbox=bbox, raw=raw_val)
                         break
+            if not result.permit_type.value and re.search(r"(?:PERMIT\s*TYPE|CATEGORY|TYPE)\s*$", text, re.IGNORECASE):
+                below = _text_below(bbox)
+                if below:
+                    norm_type = normalize_permit_type(below[0].strip())
+                    if norm_type:
+                        result.permit_type = BorderPermitField(value=norm_type, confidence=below[1], bbox=below[2], raw=below[0])
             if result.permit_type.value:
                 break
 
@@ -323,6 +364,10 @@ class BorderPermitParser:
             r"(?:PORT\s+OF\s+ENTRY)\s*[:.-]?\s*([A-Za-z0-9\s-]{3,35})",
             r"(?:BORDER\s+ZONE)\s*[:.-]?\s*([A-Za-z0-9\s-]{3,35})",
         ]
+        zone_label_re = re.compile(
+            r"(?:PORT\s*(?:OF\s*)?ENTRY\s*.{0,3}\s*ZONE|PORT\s*(?:OF\s*)?ENTRY|BORDER\s*ZONE|ENTRY\s*PORT|CHECKPOST|BORDER\s*POST)\s*$",
+            re.IGNORECASE,
+        )
         for text, conf, bbox in lines:
             for pat in zone_patterns:
                 m = re.search(pat, text, re.IGNORECASE)
@@ -331,6 +376,12 @@ class BorderPermitParser:
                     result.border_zone = BorderPermitField(value=raw_val, confidence=conf, bbox=bbox, raw=raw_val)
                     result.port_of_entry = BorderPermitField(value=raw_val, confidence=conf, bbox=bbox, raw=raw_val)
                     break
+            if not result.border_zone.value and zone_label_re.search(text):
+                below = _text_below(bbox)
+                if below:
+                    raw_val = below[0].strip().upper()
+                    result.border_zone = BorderPermitField(value=raw_val, confidence=below[1], bbox=below[2], raw=raw_val)
+                    result.port_of_entry = BorderPermitField(value=raw_val, confidence=below[1], bbox=below[2], raw=raw_val)
             if result.border_zone.value:
                 break
 
@@ -347,6 +398,10 @@ class BorderPermitParser:
                     raw_val = m.group(1).strip()
                     result.issuing_authority = BorderPermitField(value=raw_val, confidence=conf, bbox=bbox, raw=raw_val)
                     break
+            if not result.issuing_authority.value and re.search(r"(?:ISSUING\s*AUTHORITY|AUTHORITY)\s*$", text, re.IGNORECASE):
+                below = _text_below(bbox)
+                if below and len(below[0].strip()) >= 4:
+                    result.issuing_authority = BorderPermitField(value=below[0].strip(), confidence=below[1], bbox=below[2], raw=below[0])
             if result.issuing_authority.value:
                 break
 

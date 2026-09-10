@@ -27,6 +27,8 @@ _EPIC_NOISE_TOKENS = (
     "ELECTION", "COMMISSION", "INDIA", "ELECTORS", "PHOTO",
     "IDENTITY", "CARD", "VOTER", "EPIC", "GOVERNMENT", "BHARAT",
     "ELECTOR", "CONSTITUENCY", "PART", "SERIAL", "STATE",
+    "NAME", "FATHER", "HUSBAND", "RELATION", "GENDER", "SEX",
+    "DATE", "BIRTH", "AGE", "ASSEMBLY", "ISSUING", "AUTHORITY",
 )
 
 
@@ -134,29 +136,58 @@ def parse_voter_id(
     result.docNumber = result.epic_number
 
     # ── Field 2: Name ─────────────────────────────────────────────────────────
-    for text, conf, bbox in lines:
-        clean_upper = text.upper()
-        m_name = re.search(r"(?:NAME|ELECTOR'?S?\s*NAME)\s*[:\-]?\s*([A-Z][A-Z\s.'-]{2,40})", clean_upper)
-        if m_name and not result.name.value:
-            cand = m_name.group(1).strip()
-            if not any(tok in cand for tok in _EPIC_NOISE_TOKENS):
-                result.name = VoterIdField(value=cand, confidence=conf, bbox=bbox, raw=cand)
+    def _is_valid_name_token(cand: str) -> bool:
+        clean = cand.strip()
+        if not clean or len(clean) < 3 or len(clean) > 45 or re.search(r"\d", clean):
+            return False
+        words = clean.split()
+        if any(w in _EPIC_NOISE_TOKENS for w in words):
+            return False
+        if not re.search(r"[AEIOUYaeiouy]", clean):
+            return False
+        return True
+
+    _NAME_LABEL_RE = re.compile(r"^(?:ELECTOR'?S?\s*NAME|NAME)\s*[:\-]?\s*(.*)$")
+
+    for idx, (text, conf, bbox) in enumerate(lines):
+        clean_upper = text.upper().strip()
+        m_label = _NAME_LABEL_RE.match(clean_upper)
+        if not m_label:
+            continue
+        # Same-line value after the label (e.g. "NAME: PRIYA KRISHNAMURTHY")
+        inline_val = m_label.group(1).strip()
+        if inline_val and _is_valid_name_token(inline_val):
+            result.name = VoterIdField(value=inline_val, confidence=conf, bbox=bbox, raw=inline_val)
+            break
+        # Label-only line (e.g. "ELECTOR NAME") — value is on the next OCR line
+        if idx + 1 < len(lines):
+            next_text, next_conf, next_bbox = lines[idx + 1]
+            if _is_valid_name_token(next_text.strip()):
+                result.name = VoterIdField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
     # ── Field 3: Father's Name ────────────────────────────────────────────────
-    for text, conf, bbox in lines:
-        clean_upper = text.upper()
-        m_father = re.search(
-            r"(?:FATHER'?S?\s*NAME|HUSBAND'?S?\s*NAME|RELATION\s*NAME|S/O|D/O|W/O|F/O)\s*[:\-]?\s*([A-Z][A-Z\s.'-]{2,40})",
-            clean_upper,
-        )
-        if m_father and not result.father_name.value:
-            cand = m_father.group(1).strip()
-            if not any(tok in cand for tok in _EPIC_NOISE_TOKENS):
-                result.father_name = VoterIdField(value=cand, confidence=conf, bbox=bbox, raw=cand)
+    _FATHER_LABEL_RE = re.compile(
+        r"^(?:FATHER'?S?\s*/?\s*HUSBAND'?S?\s*NAME|FATHER'?S?\s*NAME|HUSBAND'?S?\s*NAME|RELATION\s*NAME|S/O|D/O|W/O|F/O)\s*[:\-]?\s*(.*)$"
+    )
+
+    for idx, (text, conf, bbox) in enumerate(lines):
+        clean_upper = text.upper().strip()
+        m_label = _FATHER_LABEL_RE.match(clean_upper)
+        if not m_label:
+            continue
+        inline_val = m_label.group(1).strip()
+        if inline_val and _is_valid_name_token(inline_val):
+            result.father_name = VoterIdField(value=inline_val, confidence=conf, bbox=bbox, raw=inline_val)
+            break
+        if idx + 1 < len(lines):
+            next_text, next_conf, next_bbox = lines[idx + 1]
+            if _is_valid_name_token(next_text.strip()):
+                result.father_name = VoterIdField(value=next_text.strip(), confidence=next_conf, bbox=next_bbox, raw=next_text.strip())
                 break
 
     # ── Field 4: Date of Birth / Age ──────────────────────────────────────────
+    # Try inline "DOB: DD/MM/YYYY" first (label and value on the same line).
     for text, conf, bbox in lines:
         clean_upper = text.upper()
         m_dob = re.search(r"(?:DOB|DATE\s*OF\s*BIRTH|D\.O\.B)\s*[:\-]?\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{4})", clean_upper)
@@ -171,6 +202,16 @@ def parse_voter_id(
             result.age = VoterIdField(value=m_age.group(1), confidence=conf, bbox=bbox, raw=m_age.group(1))
             break
 
+    # Fallback: some card layouts print labels and values on separate lines/rows
+    # (e.g. "DATE OF BIRTH/AGE" label, then "FEMALE" and "15/04/1990" below it).
+    # Scan for a standalone DD/MM/YYYY date anywhere on the card.
+    if not result.dob.value:
+        for text, conf, bbox in lines:
+            m_date = re.match(r"^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{4})$", text.strip())
+            if m_date:
+                result.dob = VoterIdField(value=m_date.group(1), confidence=conf, bbox=bbox, raw=m_date.group(1))
+                break
+
     # ── Field 5: Gender ───────────────────────────────────────────────────────
     for text, conf, bbox in lines:
         clean_upper = text.upper()
@@ -181,14 +222,36 @@ def parse_voter_id(
             result.gender = VoterIdField(value=g_norm, confidence=conf, bbox=bbox, raw=g)
             break
 
+    # Fallback: standalone gender value on its own line (label was on a
+    # separate preceding line, e.g. a "GENDER" header row above a value row).
+    if not result.gender.value:
+        for text, conf, bbox in lines:
+            clean_upper = text.strip().upper()
+            if clean_upper in ("MALE", "FEMALE", "TRANSGENDER", "M", "F"):
+                g_norm = "MALE" if clean_upper in ("M", "MALE") else ("FEMALE" if clean_upper in ("F", "FEMALE") else "TRANSGENDER")
+                result.gender = VoterIdField(value=g_norm, confidence=conf, bbox=bbox, raw=clean_upper)
+                break
+
     # ── Field 6: Constituency / AC Name ───────────────────────────────────────
-    for text, conf, bbox in lines:
-        clean_upper = text.upper()
-        m_const = re.search(r"(?:CONSTITUENCY|AC\s*NAME|ASSEMBLY\s*CONSTITUENCY|VIDHAN\s*SABHA)\s*[:\-]?\s*([A-Z][A-Z\s]{2,40})", clean_upper)
-        if m_const and not result.constituency.value:
-            cand = m_const.group(1).strip()
-            result.constituency = VoterIdField(value=cand, confidence=conf, bbox=bbox, raw=cand)
+    _CONSTITUENCY_LABEL_RE = re.compile(
+        r"^(?:ASSEMBLY\s*CONSTITUENCY|CONSTITUENCY|AC\s*NAME|VIDHAN\s*SABHA)\s*[:\-]?\s*(.*)$"
+    )
+    for idx, (text, conf, bbox) in enumerate(lines):
+        clean_upper = re.sub(r"\s+", " ", text.upper().strip())
+        m_label = _CONSTITUENCY_LABEL_RE.match(clean_upper)
+        if not m_label:
+            continue
+        inline_val = m_label.group(1).strip()
+        if inline_val and len(inline_val) >= 3:
+            result.constituency = VoterIdField(value=inline_val, confidence=conf, bbox=bbox, raw=inline_val)
             break
+        # Label-only line — value (e.g. "120-CHENNAI CENTRAL") is on the next line.
+        if idx + 1 < len(lines):
+            next_text, next_conf, next_bbox = lines[idx + 1]
+            next_clean = next_text.strip()
+            if len(next_clean) >= 3 and re.search(r"[A-Za-z]", next_clean):
+                result.constituency = VoterIdField(value=next_clean, confidence=next_conf, bbox=next_bbox, raw=next_clean)
+                break
 
     # ── Field 7: Part & Serial Number ────────────────────────────────────────
     for text, conf, bbox in lines:
