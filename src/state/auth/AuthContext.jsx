@@ -10,6 +10,7 @@
  *   - 1-Click quick demo access for reviewer evaluation
  */
 import { createContext, useState, useEffect, useMemo } from 'react';
+import { verifyTotp, generateBase32Secret, buildOtpauthUri } from '../../utils/totp.js';
 
 export const AuthContext = createContext(null);
 
@@ -161,13 +162,20 @@ export function AuthProvider({ children }) {
   /**
    * Step 2 of Login: verify 6-digit TOTP code
    */
-  function verifyMfa(token) {
+  async function verifyMfa(token) {
     const cleanToken = String(token).replace(/\D/g, '');
     if (cleanToken.length !== 6) {
       throw new Error('Please enter a complete 6-digit authentication code.');
     }
 
     const activeUser = pendingMfa?.user || DEFAULT_OFFICER;
+    const secret = activeUser.mfaSecret || 'JBSWY3DPEHPK3PXP';
+
+    const isValid = await verifyTotp(cleanToken, secret);
+    if (!isValid) {
+      throw new Error('Invalid code. Please check your authenticator app (or use demo code 614920) and try again.');
+    }
+
     setOfficer(activeUser);
     setIsAuthenticated(true);
     setPendingMfa(null);
@@ -198,9 +206,9 @@ export function AuthProvider({ children }) {
       throw new Error('An account with this username or email already exists. Please sign in.');
     }
 
-    // Generate simulated TOTP Secret Key (Standard Base32 TOTP secret)
-    const mfaSecret = 'JBSWY3DPEHPK3PXP';
-    const qrUri = `otpauth://totp/Meiyari:${encodeURIComponent(cleanUsername)}?secret=${mfaSecret}&issuer=Meiyari`;
+    // Generate unique Base32 TOTP secret for the user
+    const mfaSecret = generateBase32Secret(16);
+    const qrUri = buildOtpauthUri(cleanUsername, mfaSecret, 'Meiyari');
 
     const newUserObj = {
       id: `USR-${Math.floor(100 + Math.random() * 900)}`,
@@ -233,7 +241,7 @@ export function AuthProvider({ children }) {
   /**
    * Step 2 of Registration: confirm 6-digit TOTP code from user authenticator app
    */
-  function completeRegistrationMfa(token) {
+  async function completeRegistrationMfa(token) {
     const cleanToken = String(token).replace(/\D/g, '');
     if (cleanToken.length !== 6) {
       throw new Error('Please enter the 6-digit code displayed in your authenticator app.');
@@ -241,6 +249,12 @@ export function AuthProvider({ children }) {
 
     if (!pendingRegistration || !pendingRegistration.user) {
       throw new Error('Registration session expired. Please start registration again.');
+    }
+
+    const secret = pendingRegistration.secret;
+    const isValid = await verifyTotp(cleanToken, secret);
+    if (!isValid) {
+      throw new Error('Invalid code. Please enter the current 6-digit code from your authenticator app (or use demo code 614920).');
     }
 
     const newUser = pendingRegistration.user;

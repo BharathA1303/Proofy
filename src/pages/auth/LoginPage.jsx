@@ -82,26 +82,26 @@ export default function LoginPage() {
     digitRefs.current[focusIdx]?.focus();
   }
 
-  function handleMfaSubmit(e) {
+  async function handleMfaSubmit(e) {
     e?.preventDefault();
     setError('');
     const fullCode = mfaDigits.join('');
 
     try {
-      verifyMfa(fullCode);
+      await verifyMfa(fullCode);
       navigate('/');
     } catch (err) {
       setError(err.message);
     }
   }
 
-  function handleQuickFillMfa() {
+  async function handleQuickFillMfa() {
     const hint = pendingMfa?.mfaCodeHint || '614920';
     const digits = hint.split('');
     setMfaDigits(digits);
     setError('');
     try {
-      verifyMfa(hint);
+      await verifyMfa(hint);
       navigate('/');
     } catch (err) {
       setError(err.message);

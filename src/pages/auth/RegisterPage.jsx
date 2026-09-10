@@ -108,13 +108,13 @@ export default function RegisterPage() {
     digitRefs.current[focusIdx]?.focus();
   }
 
-  function handleStep2Submit(e) {
+  async function handleStep2Submit(e) {
     e?.preventDefault();
     setError('');
     const code = mfaDigits.join('');
 
     try {
-      completeRegistrationMfa(code);
+      await completeRegistrationMfa(code);
       // Navigate to login with success confirmation
       navigate('/login', {
         state: {
@@ -126,12 +126,12 @@ export default function RegisterPage() {
     }
   }
 
-  function handleQuickFillMfa() {
+  async function handleQuickFillMfa() {
     const hint = pendingRegistration?.hint || '614920';
     setMfaDigits(hint.split(''));
     setError('');
     try {
-      completeRegistrationMfa(hint);
+      await completeRegistrationMfa(hint);
       navigate('/login', {
         state: {
           registeredMessage: `Account successfully created! Please sign in with your username and password.`,
@@ -348,7 +348,7 @@ export default function RegisterPage() {
               <div className={styles.qrWrapper}>
                 <QRCodeView
                   value={pendingRegistration.qrUri}
-                  size={160}
+                  size={180}
                 />
               </div>
 
