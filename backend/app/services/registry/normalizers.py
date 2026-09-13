@@ -270,3 +270,135 @@ def normalize_authority(value: Optional[str]) -> Optional[str]:
         return None
     normalized = re.sub(r"\s+", " ", value.strip()).upper()
     return normalized if normalized else None
+
+
+# ── Driving License & Vehicle Classes Normalization ───────────────────────────
+
+def license_numbers_match(doc_num: Optional[str], reg_num: Optional[str]) -> bool:
+    """
+    Match Driving License numbers using Phase 3 normalization.
+    Tolerates formatting spaces and hyphens while strictly checking alphanumeric components.
+    """
+    if not doc_num or not reg_num:
+        return False
+    c1 = re.sub(r"[\s\-_]+", "", str(doc_num).strip().upper())
+    c2 = re.sub(r"[\s\-_]+", "", str(reg_num).strip().upper())
+    if c1 == c2:
+        return True
+
+    # Check via dl_field_normalizer if available
+    try:
+        from app.services.documents.driving_license.dl_field_normalizer import normalize_license_number
+        n1 = normalize_license_number(doc_num)
+        n2 = normalize_license_number(reg_num)
+        if n1.value and n2.value and n1.value == n2.value:
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
+def normalize_cov_token(token: str) -> Optional[str]:
+    """Canonicalize a single vehicle class endorsement."""
+    if not token:
+        return None
+    clean = re.sub(r"[\s\.\-_]+", "", token.strip().upper())
+    try:
+        from app.services.documents.driving_license.dl_field_normalizer import COV_CANONICAL_MAP
+        for k, v in COV_CANONICAL_MAP.items():
+            if re.sub(r"[\s\.\-_]+", "", k.upper()) == clean:
+                return v
+    except Exception:
+        pass
+    return clean or None
+
+
+def _parse_cov_set(value: Any) -> set[str]:
+    """Extract set of normalized COV tokens from string or list."""
+    if not value:
+        return set()
+    tokens = []
+    if isinstance(value, (list, tuple, set)):
+        tokens = [str(x) for x in value]
+    elif isinstance(value, str):
+        tokens = re.split(r"[,;/\n]+", value)
+    result = set()
+    for t in tokens:
+        norm = normalize_cov_token(t)
+        if norm:
+            result.add(norm)
+    return result
+
+
+def vehicle_classes_match(doc_cov: Any, reg_cov: Any) -> tuple[str, Optional[str]]:
+    """
+    Compare document COVs against registry COVs.
+    Returns (FieldMatchStatus value, note).
+    """
+    from app.schemas.registry import FieldMatchStatus
+
+    s_doc = _parse_cov_set(doc_cov)
+    s_reg = _parse_cov_set(reg_cov)
+
+    if not s_doc and not s_reg:
+        return FieldMatchStatus.NOT_COMPARED.value, "Vehicle classes not provided in document or registry"
+    if not s_doc:
+        return FieldMatchStatus.MISSING_IN_DOCUMENT.value, "Vehicle classes not extracted from document"
+    if not s_reg:
+        return FieldMatchStatus.MISSING_IN_REGISTRY.value, "Vehicle classes not present in registry record"
+
+    if s_doc == s_reg:
+        return FieldMatchStatus.MATCH.value, "All vehicle classes match exactly"
+
+    intersection = s_doc.intersection(s_reg)
+    if not intersection:
+        return FieldMatchStatus.MISMATCH.value, f"Vehicle classes do not overlap: doc={sorted(s_doc)} reg={sorted(s_reg)}"
+
+    if s_doc.issubset(s_reg):
+        return FieldMatchStatus.PARTIAL_MATCH.value, f"Document classes {sorted(s_doc)} are a subset of registry classes {sorted(s_reg)}"
+    if s_reg.issubset(s_doc):
+        return FieldMatchStatus.PARTIAL_MATCH.value, f"Registry classes {sorted(s_reg)} are a subset of document classes {sorted(s_doc)}"
+
+    return FieldMatchStatus.PARTIAL_MATCH.value, f"Partial overlap in vehicle classes: shared={sorted(intersection)}"
+
+
+# ── State / Jurisdiction Normalization ────────────────────────────────────────
+
+def states_match(doc_state: Optional[str], reg_state: Optional[str]) -> bool:
+    """
+    Compare state/jurisdiction between document and registry.
+    Handles 2-letter codes, legacy codes (OR=OD, UA=UK), and full state names.
+    """
+    if not doc_state or not reg_state:
+        return False
+
+    ds = doc_state.strip().upper()
+    rs = reg_state.strip().upper()
+    if ds == rs:
+        return True
+
+    # Legacy Indian state aliases
+    aliases = {
+        "OR": "OD", "OD": "OR",
+        "UA": "UK", "UK": "UA",
+        "TG": "TS", "TS": "TG",
+        "DD": "DH", "DN": "DH",
+    }
+    if aliases.get(ds) == rs or aliases.get(rs) == ds:
+        return True
+
+    try:
+        from app.services.documents.driving_license.dl_field_normalizer import STATE_CODE_REGISTRY
+        # Check if one is a 2-letter code and the other is a full state name
+        entry_d = STATE_CODE_REGISTRY.get(ds)
+        entry_r = STATE_CODE_REGISTRY.get(rs)
+
+        name_d = entry_d.canonical_state.upper() if entry_d else ds
+        name_r = entry_r.canonical_state.upper() if entry_r else rs
+        if name_d == name_r:
+            return True
+    except Exception:
+        pass
+
+    return False

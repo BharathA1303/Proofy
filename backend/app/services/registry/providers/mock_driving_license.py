@@ -114,6 +114,10 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
 
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 
+        import hashlib
+        q_ref = f"driving_license:{lookup_key}"
+        query_hash = hashlib.sha256(q_ref.encode("utf-8")).hexdigest()
+
         logger.info(
             "MockDrivingLicenseRegistry lookup: id=%s doc_num=%s",
             request.verification_id, lookup_key,
@@ -152,6 +156,7 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
                     )
                 ],
                 response_time_ms=t_elapsed_ms,
+                query_hash=query_hash,
             )
 
         raw_record = _MOCK_DL_RECORDS[lookup_key]
@@ -161,7 +166,12 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
             name=raw_record.get("name"),
             date_of_birth=raw_record.get("date_of_birth"),
             expiry_date=raw_record.get("expiry_date"),
+            valid_from=raw_record.get("valid_from") or raw_record.get("issued_date"),
             issuing_authority=raw_record.get("issuing_authority"),
+            vehicle_classes=raw_record.get("vehicle_classes") or raw_record.get("cov"),
+            state=raw_record.get("state") or raw_record.get("jurisdiction"),
+            blood_group=raw_record.get("blood_group"),
+            metadata=dict(raw_record),
         )
 
         field_results, status = compare_fields(request, reg_record)
@@ -176,6 +186,21 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
                 description=f"GOVERNMENT WATCHLIST ALERT: {raw_record.get('watchlist_reason', 'Driving licence revoked on transport watchlist.')}",
             ))
 
+        # Check active registry vs expired document condition
+        if status == RegistryStatus.MATCHED and reg_record.registry_document_status in ("ACTIVE", "VALID"):
+            doc_exp = request.expiry_date.value if request.expiry_date else None
+            if doc_exp:
+                try:
+                    exp_dt = datetime.date.fromisoformat(str(doc_exp).strip()[:10])
+                    if exp_dt < datetime.date.today():
+                        evidence.append(RegistryEvidence(
+                            type="registry_active_document_expired",
+                            severity="info",
+                            description=f"Registry status is ACTIVE while document expired on {doc_exp} (indicates credential renewed in registry).",
+                        ))
+                except Exception:
+                    pass
+
         t_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 
         return self._build_response(
@@ -185,6 +210,7 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
             field_results=field_results,
             evidence=evidence,
             response_time_ms=t_elapsed_ms,
+            query_hash=query_hash,
         )
 
     def _build_response(
@@ -195,7 +221,20 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
         field_results: list[RegistryFieldResult],
         evidence: list[RegistryEvidence],
         response_time_ms: float,
+        query_hash: Optional[str] = None,
     ) -> RegistryVerificationResponse:
+        now_iso = datetime.datetime.utcnow().isoformat() + "Z"
+        field_comp_dicts = [
+            {
+                "field": fr.field,
+                "status": fr.status.value if hasattr(fr.status, "value") else str(fr.status),
+                "is_critical": fr.is_critical,
+                "document_value": fr.document_value,
+                "registry_value": fr.registry_value,
+                "comparison_method": fr.comparison_method or "strict_equality",
+            }
+            for fr in field_results
+        ]
         return RegistryVerificationResponse(
             verification_id=request.verification_id,
             document_type=request.document_type,
@@ -214,9 +253,19 @@ class MockDrivingLicenseRegistryProvider(RegistryProvider):
                 source_type=ProviderSourceType.DEVELOPMENT_MOCK,
                 response_time_ms=round(response_time_ms, 2),
             ),
+            provider_type=ProviderSourceType.DEVELOPMENT_MOCK.value,
+            query_hash=query_hash,
+            freshness={
+                "cached": False,
+                "is_fresh": True,
+                "ttl_seconds": 300,
+                "retrieved_at": now_iso,
+            },
+            profile_version="0.9.0",
+            field_comparisons=field_comp_dicts,
             audit={
                 "verification_id": request.verification_id,
-                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                "timestamp": now_iso,
                 "document_type": request.document_type,
                 "provider_id": self._PROVIDER_ID,
                 "source_type": ProviderSourceType.DEVELOPMENT_MOCK.value,

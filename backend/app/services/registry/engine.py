@@ -31,6 +31,7 @@ ARCHITECTURE NOTE:
 from __future__ import annotations
 
 import datetime
+import hashlib
 import logging
 import time
 from typing import Optional
@@ -52,6 +53,7 @@ from app.schemas.registry import (
 )
 from app.services.registry.adapters.passport_adapter import PassportRegistryAdapter
 from app.services.registry.adapters.visa_adapter import VisaRegistryAdapter
+from app.services.registry.cache import registry_cache
 from app.services.registry.resolver import provider_resolver
 from app.services.registry.session_store import registry_session_store
 
@@ -109,6 +111,10 @@ class RegistryEngine:
     handles errors. It contains no registry data, no document parsing,
     and no risk scoring.
     """
+
+    def __init__(self, cache_enabled: bool = True) -> None:
+        self.cache_enabled = cache_enabled
+        self.cache = registry_cache
 
     def verify(
         self,
@@ -174,6 +180,7 @@ class RegistryEngine:
                 "RegistryEngine: provider unavailable for id=%s doc_type=%s provider=%s",
                 verification_id, document_type, provider.provider_id,
             )
+            src_t = getattr(provider, "source_type", ProviderSourceType.UNAVAILABLE)
             return self._build_error_response(
                 verification_id=verification_id,
                 document_type=document_type,
@@ -185,6 +192,7 @@ class RegistryEngine:
                 ),
                 elapsed_ms=(time.perf_counter() - t_start) * 1000,
                 provider_id=provider.provider_id,
+                source_type=src_t,
             )
 
         # ── Step 4: Build adapter request ─────────────────────────────────
@@ -193,6 +201,26 @@ class RegistryEngine:
             verification_id=verification_id,
             session_data=session_data,
         )
+
+        # Ensure query_hash is computed
+        if not request.query_hash:
+            doc_num_p = request.document_number
+            doc_val = (doc_num_p.value if doc_num_p else "").strip().upper()
+            q_ref = f"{document_type}:{doc_val}"
+            request.query_hash = hashlib.sha256(q_ref.encode("utf-8")).hexdigest()
+
+        # Check Cache
+        if self.cache_enabled and request.query_hash:
+            cached_resp = self.cache.get(document_type, request.query_hash, provider.provider_id)
+            if cached_resp is not None:
+                cached_resp.verification_id = verification_id
+                if cached_resp.audit:
+                    cached_resp.audit["verification_id"] = verification_id
+                logger.info(
+                    "RegistryEngine: returning cached response for id=%s hash=%s provider=%s",
+                    verification_id, request.query_hash[:8], provider.provider_id,
+                )
+                return cached_resp
 
         # ── Step 5: Call provider ─────────────────────────────────────────
         try:
@@ -289,6 +317,36 @@ class RegistryEngine:
             )
 
         elapsed_ms = (time.perf_counter() - t_start) * 1000
+
+        if not response.query_hash and request.query_hash:
+            response.query_hash = request.query_hash
+
+        if not response.profile_version and document_type in ("driving_license", "drivinglicense"):
+            response.profile_version = "0.9.0"
+
+        if not response.field_comparisons and response.field_results:
+            response.field_comparisons = [
+                {
+                    "field": fr.field,
+                    "status": fr.status.value,
+                    "document_value": fr.document_value,
+                    "registry_value": fr.registry_value,
+                    "is_critical": fr.is_critical,
+                    "comparison_method": getattr(fr, "comparison_method", "strict"),
+                    "note": fr.note,
+                }
+                for fr in response.field_results
+            ]
+
+        # Store in cache
+        if self.cache_enabled and request.query_hash:
+            self.cache.set(
+                document_type=document_type,
+                query_hash=request.query_hash,
+                response=response,
+                provider_id=provider.provider_id,
+            )
+
         logger.info(
             "RegistryEngine: completed id=%s doc_type=%s status=%s elapsed_ms=%.1f",
             verification_id, document_type,
@@ -306,8 +364,17 @@ class RegistryEngine:
         error_description: str,
         elapsed_ms: float,
         provider_id: str = "unknown",
+        source_type: Optional[ProviderSourceType] = None,
+        query_hash: Optional[str] = None,
     ) -> RegistryVerificationResponse:
         """Build a structured error response that is safe to return to the API."""
+        if not isinstance(source_type, (ProviderSourceType, str)):
+            src_type = ProviderSourceType.DEVELOPMENT_MOCK
+        else:
+            try:
+                src_type = ProviderSourceType(source_type)
+            except ValueError:
+                src_type = ProviderSourceType.DEVELOPMENT_MOCK
         return RegistryVerificationResponse(
             verification_id=verification_id,
             document_type=document_type,
@@ -327,7 +394,7 @@ class RegistryEngine:
             ],
             provider_metadata=RegistryProviderMetadata(
                 provider_id=provider_id,
-                source_type=ProviderSourceType.DEVELOPMENT_MOCK,
+                source_type=src_type,
                 response_time_ms=round(elapsed_ms, 2),
             ),
             audit={
@@ -339,6 +406,11 @@ class RegistryEngine:
                 "error": error_description,
                 "response_time_ms": round(elapsed_ms, 2),
             },
+            provider_type=src_type.value if hasattr(src_type, "value") else str(src_type),
+            query_hash=query_hash,
+            freshness={"cached": False, "is_fresh": False, "retrieved_at": None, "source": "error"},
+            profile_version="0.9.0" if document_type in ("driving_license", "drivinglicense") else None,
+            field_comparisons=[],
         )
 
 

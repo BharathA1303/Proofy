@@ -41,6 +41,14 @@ class DetectedFaceBox:
     def bbox(self) -> Tuple[int, int, int, int]:
         return (self.x, self.y, self.width, self.height)
 
+    def get_normalized_bbox(self, img_h: int, img_w: int) -> Tuple[float, float, float, float]:
+        """Return (ymin, xmin, ymax, xmax) normalized to [0.0, 1.0]."""
+        ymin = round(max(0.0, min(1.0, self.y / max(img_h, 1))), 4)
+        xmin = round(max(0.0, min(1.0, self.x / max(img_w, 1))), 4)
+        ymax = round(max(0.0, min(1.0, (self.y + self.height) / max(img_h, 1))), 4)
+        xmax = round(max(0.0, min(1.0, (self.x + self.width) / max(img_w, 1))), 4)
+        return (ymin, xmin, ymax, xmax)
+
 
 @dataclass
 class FaceDetectionResult:

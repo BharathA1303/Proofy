@@ -44,6 +44,7 @@ class ConflictReport:
     """Result of the conflict detection pass."""
     detected: bool
     conflicts: List[ConflictItem] = field(default_factory=list)
+    contradictions: List[Dict[str, Any]] = field(default_factory=list)
 
 
 def _has_status(items: List[RiskEvidenceItem], *statuses: str) -> bool:
@@ -71,10 +72,10 @@ class ConflictDetector:
         Scan the full evidence list for conflict patterns.
 
         Args:
-            items: All normalized evidence items from M1–M5.
+            items: All normalized evidence items from M1–M7.
 
         Returns:
-            ConflictReport with detected flag and list of ConflictItems.
+            ConflictReport with detected flag, list of ConflictItems, and structured contradictions.
         """
         conflicts: List[ConflictItem] = []
 
@@ -82,6 +83,7 @@ class ConflictDetector:
         m3 = _get_m_items(items, "M3")
         m4 = _get_m_items(items, "M4")
         m5 = _get_m_items(items, "M5")
+        m7 = _get_m_items(items, "M7")
 
         # ── C-01: Biometrics pass but registry revoked/suspended ────────────
         biometric_pass = _has_signal(m4, "face_match_pass") or (
@@ -152,8 +154,6 @@ class ConflictDetector:
 
         # ── C-04: Presentation attack suspected but registry matched ─────────
         pad_flag = _has_signal(m4, "presentation_attack_detected")
-        # registry_matched items use EvidenceStatus.PASS (positive evidence generates no adverse item)
-        # Check for the absence of any adverse M5 status as a proxy for "registry matched"
         registry_matched = (
             _has_status(m5, "MATCHED") or
             _has_signal(m5, "registry_matched") or
@@ -198,7 +198,81 @@ class ConflictDetector:
                 severity="high",
             ))
 
+        # ── C-06: Machine-readable (QR) vs Visual (OCR) mismatch ────────────
+        qr_mismatches = [
+            i for i in m7
+            if i.available and ("mismatch" in i.signal or i.status == EvidenceStatus.MISMATCH)
+        ]
+        if qr_mismatches:
+            conflicts.append(ConflictItem(
+                conflict_id="C-06",
+                description=(
+                    "Discrepancy detected between machine-readable QR payload and visual OCR text. "
+                    "Physical alterations to document text or synthetic barcode generation may be indicated."
+                ),
+                modules_involved=["M1", "M7"],
+                severity="high",
+            ))
+
+        # ── Structured Contradictions (Section 19) ──────────────────────────
+        contradictions: List[Dict[str, Any]] = []
+
+        # From QR vs OCR mismatches
+        for qm in qr_mismatches:
+            fld = qm.field or ("dob" if "dob" in qm.signal else ("document_number" if "docnumber" in qm.signal else "data_field"))
+            contradictions.append({
+                "type": "CROSS_SOURCE_CONTRADICTION",
+                "fields": [fld],
+                "sources": ["ocr", "m7_qr"],
+                "severity": "CRITICAL" if fld in ("dob", "document_number", "docnumber") else "HIGH",
+                "explanation": qm.explanation,
+            })
+
+        # From C-01: Biometrics pass vs Registry Revoked
+        if biometric_pass and registry_adverse:
+            contradictions.append({
+                "type": "CROSS_SOURCE_CONTRADICTION",
+                "fields": ["identity_status"],
+                "sources": ["m4_biometrics", "m5_registry"],
+                "severity": "CRITICAL",
+                "explanation": "Live facial biometric matched document photograph, but registry records document as REVOKED or SUSPENDED.",
+            })
+
+        # From C-03: M2 validation pass vs Registry Mismatch
+        if m2_passed and m5_doc_mismatch:
+            contradictions.append({
+                "type": "CROSS_SOURCE_CONTRADICTION",
+                "fields": ["document_number"],
+                "sources": ["m2_validation", "m5_registry"],
+                "severity": "HIGH",
+                "explanation": "Document internal structural checks passed, but registry lookup returned mismatching identifiers.",
+            })
+
+        # From C-04: PAD suspected vs Registry matched
+        if pad_flag and registry_matched:
+            contradictions.append({
+                "type": "CROSS_SOURCE_CONTRADICTION",
+                "fields": ["liveness_vs_registry"],
+                "sources": ["m4_biometrics", "m5_registry"],
+                "severity": "HIGH",
+                "explanation": "Presentation attack detected on live selfie capture despite document existing in registry.",
+            })
+
+        # From general DOB mismatches across documents/regions
+        dob_mismatches = [i for i in items if i.available and "dob_mismatch" in i.signal]
+        for dm in dob_mismatches:
+            if not any("dob" in c["fields"] for c in contradictions):
+                contradictions.append({
+                    "type": "CROSS_SOURCE_CONTRADICTION",
+                    "fields": ["dob"],
+                    "sources": ["ocr_viz", "ocr_mrz_or_secondary"],
+                    "severity": "HIGH",
+                    "explanation": dm.explanation,
+                })
+
         return ConflictReport(
             detected=len(conflicts) > 0,
             conflicts=conflicts,
+            contradictions=contradictions,
         )
+

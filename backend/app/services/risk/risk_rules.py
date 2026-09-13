@@ -433,6 +433,85 @@ RULE_TABLE: Dict[str, Dict[str, float]] = {
         "NONE":    0.0,
     },
 
+    # ── Machine-Readable / QR (M7) ───────────────────────────────────────
+    "qr_ocr_mismatch": {
+        "CRITICAL": 20.0,
+        "HIGH":     18.0,
+        "MEDIUM":   10.0,
+        "NONE":      0.0,
+    },
+    "qr_ocr_docnumber_mismatch": {
+        "CRITICAL": 20.0,
+        "HIGH":     18.0,
+        "MEDIUM":   10.0,
+        "NONE":      0.0,
+    },
+    "qr_ocr_dob_mismatch": {
+        "HIGH":   18.0,
+        "MEDIUM": 10.0,
+        "NONE":    0.0,
+    },
+    "qr_ocr_name_mismatch": {
+        "HIGH":   12.0,
+        "MEDIUM":  6.0,
+        "NONE":    0.0,
+    },
+    "qr_crypto_invalid": {
+        "CRITICAL": 25.0,
+        "HIGH":     20.0,
+        "NONE":      0.0,
+    },
+    "qr_crypto_verified": {
+        "NONE": 0.0,
+    },
+    "qr_crypto_unavailable": {
+        "LOW":  0.0,
+        "NONE": 0.0,
+    },
+    "qr_undecodable": {
+        "MEDIUM": 5.0,
+        "LOW":    2.0,
+        "NONE":   0.0,
+    },
+    "qr_not_detected": {
+        "LOW":  0.0,
+        "NONE": 0.0,
+    },
+    "qr_payload_corrupted": {
+        "HIGH":   12.0,
+        "MEDIUM":  6.0,
+        "NONE":    0.0,
+    },
+    "qr_ocr_matched": {
+        "NONE": 0.0,
+    },
+    "machine_readable_unavailable": {
+        "LOW":  0.0,
+        "NONE": 0.0,
+    },
+    "cross_source_contradiction": {
+        "CRITICAL": 20.0,
+        "HIGH":     15.0,
+        "MEDIUM":    8.0,
+        "NONE":      0.0,
+    },
+    "neural_tampering_detected": {
+        "CRITICAL": 25.0,
+        "HIGH":     20.0,
+        "MEDIUM":   10.0,
+        "NONE":      0.0,
+    },
+    "face_anti_spoof_failed": {
+        "CRITICAL": 30.0,
+        "HIGH":     25.0,
+        "NONE":      0.0,
+    },
+    "face_mismatch": {
+        "HIGH":   20.0,
+        "MEDIUM": 10.0,
+        "NONE":    0.0,
+    },
+
     # ── Verification Uncertainty ─────────────────────────────────────────
     "module_not_run": {
         "LOW":  3.0,
@@ -461,6 +540,7 @@ RULE_TABLE: Dict[str, Dict[str, float]] = {
         "NONE": 0.0,
     },
 }
+
 
 # Fallback for unknown signals
 _FALLBACK_CONTRIBUTION: Dict[str, float] = {

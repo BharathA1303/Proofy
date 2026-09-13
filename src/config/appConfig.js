@@ -17,7 +17,7 @@ export const ENVIRONMENT = 'production';
  * Read from env var first; fall back to localhost for local development.
  */
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:9000';
 
 /**
  * Feature flags

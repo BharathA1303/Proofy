@@ -127,11 +127,16 @@ class ProviderResolver:
             )
             return self._create_mock_provider(document_type)
         elif provider_mode == "external":
-            # Future: real authorized external providers
-            raise RegistryConfigurationError(
-                f"External registry provider for '{document_type}' is not yet implemented. "
-                "Set REGISTRY_PROVIDER_* to 'mock' for development. "
-                "Contact system administration to configure an authorized external provider."
+            from app.services.registry.providers.external_provider import (
+                AuthorizedExternalRegistryProvider,
+            )
+            endpoint_url = getattr(settings, f"REGISTRY_ENDPOINT_{document_type.upper()}", None)
+            api_key = getattr(settings, f"REGISTRY_API_KEY_{document_type.upper()}", None)
+            return AuthorizedExternalRegistryProvider(
+                provider_id=f"authorized_external_{document_type}_registry",
+                endpoint_url=endpoint_url,
+                api_key=api_key,
+                document_type=document_type,
             )
         else:
             raise RegistryConfigurationError(

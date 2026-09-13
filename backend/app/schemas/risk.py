@@ -91,6 +91,40 @@ class ConflictDetail(BaseModel):
     severity: str = Field(..., description="'warning' | 'high'")
 
 
+class TopContributorDetail(BaseModel):
+    """A primary contributor to the adverse risk score."""
+    source_module: str = Field(..., description="Source module (e.g. 'M2', 'M3')")
+    evidence_type: str = Field(..., description="Evidence type or signal identifier")
+    contribution: float = Field(..., description="Risk score contribution")
+    raw_value: Any = Field(default=None, description="Raw evidence value or observed metric")
+    reliability: float = Field(default=1.0, description="Evidence reliability score (0.0–1.0)")
+    explanation: str = Field(..., description="Officer-facing explanation")
+
+
+class SupportingEvidenceDetail(BaseModel):
+    """Positive corroborating finding supporting consistency or validity."""
+    source_module: str = Field(..., description="Source module (e.g. 'M1', 'M7')")
+    evidence_type: str = Field(..., description="Evidence type or signal identifier")
+    status: str = Field(default="PASS", description="'PASS' | 'CORROBORATED' | 'AVAILABLE'")
+    explanation: str = Field(..., description="Officer-facing explanation of positive finding")
+
+
+class LimitationDetail(BaseModel):
+    """An unrun, unconfigured, or inconclusive module/service."""
+    source_module: str = Field(..., description="Source module (e.g. 'M5', 'M7')")
+    limitation: str = Field(..., description="Description of the limitation or unavailable signal")
+    impact: str = Field(default="MEDIUM", description="'HIGH' | 'MEDIUM' | 'LOW'")
+
+
+class ContradictionDetail(BaseModel):
+    """Structured discrepancy across independent evidence sources."""
+    type: str = Field(default="CROSS_SOURCE_CONTRADICTION", description="Type of contradiction")
+    fields: List[str] = Field(default_factory=list, description="Fields involved in the contradiction")
+    sources: List[str] = Field(default_factory=list, description="Sources involved (e.g. ['ocr', 'm7_qr'])")
+    severity: str = Field(default="HIGH", description="'WARNING' | 'HIGH' | 'CRITICAL'")
+    explanation: str = Field(..., description="Officer-facing explanation of contradiction")
+
+
 class RiskAssessmentSummary(BaseModel):
     """
     The complete Module 6 risk assessment.
@@ -106,7 +140,7 @@ class RiskAssessmentSummary(BaseModel):
     )
     risk_level: str = Field(
         ...,
-        description="'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'",
+        description="'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'INCONCLUSIVE'",
     )
     officer_recommendation: str = Field(
         ...,
@@ -154,6 +188,20 @@ class RiskAssessmentSummary(BaseModel):
     evidence_count: int = Field(default=0, description="Number of available evidence items")
     unavailable_count: int = Field(default=0, description="Number of unavailable evidence items")
 
+    # Section 36 additions
+    assessment_id: Optional[str] = Field(default=None, description="Unique assessment ID")
+    profile_version: Optional[str] = Field(default=None, description="Document profile version")
+    engine_version: Optional[str] = Field(default="0.6.0", description="M6 Risk Engine version")
+    assessment_confidence: Optional[float] = Field(default=1.0, description="Overall confidence in assessment (0.0–1.0)")
+    top_contributors: List[TopContributorDetail] = Field(default_factory=list, description="Ranked adverse contributors")
+    supporting_evidence: List[SupportingEvidenceDetail] = Field(default_factory=list, description="Positive corroboration")
+    limitations: List[LimitationDetail] = Field(default_factory=list, description="Unavailable or unconfigured modules")
+    contradictions: List[ContradictionDetail] = Field(default_factory=list, description="Cross-source discrepancies")
+    evidence_summary: Dict[str, Any] = Field(default_factory=dict, description="Summary counts and evidence categories")
+    explanation: Optional[str] = Field(default=None, description="Deterministic multi-paragraph officer summary")
+    snapshot_hash: Optional[str] = Field(default=None, description="SHA-256 reproducibility audit hash")
+    critical_override_applied: bool = Field(default=False, description="True if a critical policy override was triggered")
+
 
 # ──────────────────────────────────────────────
 #  Top-level response
@@ -163,7 +211,58 @@ class RiskAssessmentResponse(BaseModel):
     """
     Response returned by POST /api/v1/verification/risk.
     Module 6: Risk Engine & Officer Decision Support.
+    Provides dual compatibility with both root-level fields and nested risk_assessment.
     """
     verification_id: str
     document_type: str
     risk_assessment: RiskAssessmentSummary
+
+    # Section 36 root-level fields
+    assessment_id: Optional[str] = None
+    profile_version: Optional[str] = None
+    engine_version: Optional[str] = None
+    risk_score: Optional[int] = None
+    risk_level: Optional[str] = None
+    assessment_confidence: Optional[float] = None
+    top_contributors: List[TopContributorDetail] = Field(default_factory=list)
+    supporting_evidence: List[SupportingEvidenceDetail] = Field(default_factory=list)
+    limitations: List[LimitationDetail] = Field(default_factory=list)
+    contradictions: List[ContradictionDetail] = Field(default_factory=list)
+    evidence_summary: Dict[str, Any] = Field(default_factory=dict)
+    officer_recommendation: Optional[str] = None
+    explanation: Optional[str] = None
+    snapshot_hash: Optional[str] = None
+    critical_override_applied: bool = False
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.risk_assessment is not None:
+            if self.risk_score is None:
+                self.risk_score = self.risk_assessment.risk_score
+            if self.risk_level is None:
+                self.risk_level = self.risk_assessment.risk_level
+            if self.officer_recommendation is None:
+                self.officer_recommendation = self.risk_assessment.officer_recommendation
+            if self.assessment_id is None:
+                self.assessment_id = self.risk_assessment.assessment_id
+            if self.profile_version is None:
+                self.profile_version = self.risk_assessment.profile_version
+            if self.engine_version is None:
+                self.engine_version = self.risk_assessment.engine_version
+            if self.assessment_confidence is None:
+                self.assessment_confidence = self.risk_assessment.assessment_confidence
+            if not self.top_contributors:
+                self.top_contributors = self.risk_assessment.top_contributors
+            if not self.supporting_evidence:
+                self.supporting_evidence = self.risk_assessment.supporting_evidence
+            if not self.limitations:
+                self.limitations = self.risk_assessment.limitations
+            if not self.contradictions:
+                self.contradictions = self.risk_assessment.contradictions
+            if not self.evidence_summary:
+                self.evidence_summary = self.risk_assessment.evidence_summary
+            if self.explanation is None:
+                self.explanation = self.risk_assessment.explanation
+            if self.snapshot_hash is None:
+                self.snapshot_hash = self.risk_assessment.snapshot_hash
+            if not self.critical_override_applied:
+                self.critical_override_applied = self.risk_assessment.critical_override_applied

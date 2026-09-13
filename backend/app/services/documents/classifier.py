@@ -40,15 +40,18 @@ DOCUMENT_TYPE_LABELS = {
 }
 
 
-@dataclass(frozen=True)
-class DocumentClassificationResult:
-    """Result of document type analysis from extracted OCR text."""
-    declared_type: str
-    detected_type: Optional[str]
-    is_mismatch: bool
-    confidence: float
-    reasons: List[str]
-    error_message: Optional[str] = None
+from app.services.document_intelligence.schema import (
+    ClassificationDecision,
+    ClassificationModelInfo,
+    DocumentClassificationResult,
+    ModelStatus,
+)
+from app.services.document_intelligence.classifier import (
+    BaseDocumentClassifier,
+    MockDocumentClassifier,
+    MultiSignalDocumentClassifier,
+    VisionModelClassifier,
+)
 
 
 def detect_document_type_from_text(raw_text: str) -> Optional[str]:

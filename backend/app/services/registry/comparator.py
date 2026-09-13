@@ -44,6 +44,7 @@ from app.schemas.registry import (
 from app.services.registry.normalizers import (
     dates_match,
     document_numbers_match,
+    license_numbers_match,
     names_match,
     nationalities_match,
     normalize_authority,
@@ -51,6 +52,8 @@ from app.services.registry.normalizers import (
     normalize_document_number,
     normalize_name,
     normalize_nationality,
+    states_match,
+    vehicle_classes_match,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,7 +76,7 @@ CRITICAL_FIELDS: dict[str, list[str]] = {
 SECONDARY_FIELDS: dict[str, list[str]] = {
     "passport":        ["expiry_date", "issuing_authority"],
     "visa":            ["expiry_date", "issuing_authority"],
-    "driving_license": ["expiry_date", "issuing_authority"],
+    "driving_license": ["expiry_date", "valid_from", "vehicle_classes", "issuing_authority", "state", "blood_group"],
     # Indian identity documents
     "aadhaar":         ["issuing_authority"],
     "voter_id":        ["date_of_birth", "issuing_authority"],  # DOB optional on Voter ID
@@ -224,22 +227,52 @@ def _compare_single_field(
 
     # Normalize both sides
     doc_normalized = _normalize_field(field_name, doc_raw)
-    reg_normalized  = _normalize_field(field_name, reg_raw)
+    reg_normalized = _normalize_field(field_name, reg_raw)
+
+    comp_method = "strict_equality"
+    note = None
 
     # Determine match status
     if doc_raw is None and reg_raw is None:
         status = FieldMatchStatus.NOT_COMPARED
         note = "Field not available in document or registry"
+        comp_method = "none"
     elif doc_raw is None:
         status = FieldMatchStatus.MISSING_IN_DOCUMENT
         note = "Field not extracted from document"
+        comp_method = "none"
     elif reg_raw is None:
         status = FieldMatchStatus.MISSING_IN_REGISTRY
         note = "Field not present in registry record"
-    else:
-        matched = _fields_equal(field_name, doc_raw, reg_raw)
+        comp_method = "none"
+    elif field_name == "vehicle_classes":
+        comp_method = "cov_taxonomy"
+        status_val, note = vehicle_classes_match(doc_raw, reg_raw)
+        status = FieldMatchStatus(status_val)
+    elif field_name == "state":
+        comp_method = "state_code_registry"
+        matched = states_match(str(doc_raw), str(reg_raw))
         status = FieldMatchStatus.MATCH if matched else FieldMatchStatus.MISMATCH
-        note = None
+        note = "State jurisdiction corroborated" if matched else "State jurisdiction mismatch"
+    else:
+        if field_name == "document_number":
+            comp_method = "normalized_identifier"
+            is_dl = request.document_type in ("driving_license", "drivinglicense")
+            matched = license_numbers_match(str(doc_raw), str(reg_raw)) if is_dl else document_numbers_match(str(doc_raw), str(reg_raw))
+        elif field_name in ("date_of_birth", "expiry_date", "valid_from"):
+            comp_method = "iso_date_equality"
+            matched = dates_match(str(doc_raw), str(reg_raw))
+        elif field_name == "name":
+            comp_method = "token_normalized"
+            matched = names_match(str(doc_raw), str(reg_raw))
+        elif field_name == "nationality":
+            comp_method = "iso_alpha3_equality"
+            matched = nationalities_match(str(doc_raw), str(reg_raw))
+        else:
+            comp_method = "case_insensitive"
+            matched = (str(doc_raw) or "").strip().upper() == (str(reg_raw) or "").strip().upper()
+
+        status = FieldMatchStatus.MATCH if matched else FieldMatchStatus.MISMATCH
 
     return RegistryFieldResult(
         field=field_name,
@@ -247,6 +280,11 @@ def _compare_single_field(
         registry_value=reg_normalized,
         status=status,
         is_critical=is_critical,
+        comparison_method=comp_method,
+        source_document=str(doc_raw) if doc_raw is not None else None,
+        source_registry=str(reg_raw) if reg_raw is not None else None,
+        normalized_document=doc_normalized,
+        normalized_registry=reg_normalized,
         note=note,
     )
 
@@ -259,13 +297,17 @@ def _get_request_field(field_name: str, request: RegistryVerificationRequest):
         "name": request.name,
         "nationality": request.nationality,
         "expiry_date": request.expiry_date,
+        "valid_from": getattr(request, "valid_from", None),
         "issuing_authority": request.issuing_authority,
         "gender": request.gender,
+        "vehicle_classes": getattr(request, "vehicle_classes", None),
+        "state": getattr(request, "state", None),
+        "blood_group": getattr(request, "blood_group", None),
     }
     return mapping.get(field_name)
 
 
-def _get_record_field(field_name: str, record: RegistryRecord) -> Optional[str]:
+def _get_record_field(field_name: str, record: RegistryRecord) -> Any:
     """Map field name to the registry record value."""
     mapping = {
         "document_number": record.document_number,
@@ -273,41 +315,51 @@ def _get_record_field(field_name: str, record: RegistryRecord) -> Optional[str]:
         "name": record.name,
         "nationality": record.nationality,
         "expiry_date": record.expiry_date,
+        "valid_from": getattr(record, "valid_from", None),
         "issuing_authority": record.issuing_authority,
         "gender": record.gender,
+        "vehicle_classes": getattr(record, "vehicle_classes", None),
+        "state": getattr(record, "state", None),
+        "blood_group": getattr(record, "blood_group", None),
     }
     return mapping.get(field_name)
 
 
-def _normalize_field(field_name: str, value: Optional[str]) -> Optional[str]:
+def _normalize_field(field_name: str, value: Any) -> Optional[str]:
     """Apply appropriate normalization for display purposes."""
     if value is None:
         return None
     if field_name == "document_number":
-        return normalize_document_number(value)
-    elif field_name in ("date_of_birth", "expiry_date"):
-        return normalize_date(value) or value.strip().upper()
+        return normalize_document_number(str(value))
+    elif field_name in ("date_of_birth", "expiry_date", "valid_from"):
+        return normalize_date(str(value)) or str(value).strip().upper()
     elif field_name == "name":
-        return normalize_name(value)
+        return normalize_name(str(value))
     elif field_name == "nationality":
-        return normalize_nationality(value)
+        return normalize_nationality(str(value))
     elif field_name == "issuing_authority":
-        return normalize_authority(value)
+        return normalize_authority(str(value))
+    elif field_name == "vehicle_classes":
+        if isinstance(value, (list, tuple, set)):
+            return ", ".join(sorted(str(x).strip().upper() for x in value if str(x).strip()))
+        return str(value).strip().upper()
+    elif field_name in ("state", "blood_group"):
+        return str(value).strip().upper()
     else:
-        return value.strip().upper()
+        return str(value).strip().upper()
 
 
 def _fields_equal(field_name: str, doc_value: str, reg_value: str) -> bool:
     """Apply field-type-specific equality check."""
     if field_name == "document_number":
-        # STRICT: no fuzzy matching
         return document_numbers_match(doc_value, reg_value)
-    elif field_name in ("date_of_birth", "expiry_date"):
+    elif field_name in ("date_of_birth", "expiry_date", "valid_from"):
         return dates_match(doc_value, reg_value)
     elif field_name == "name":
         return names_match(doc_value, reg_value)
     elif field_name == "nationality":
         return nationalities_match(doc_value, reg_value)
+    elif field_name == "state":
+        return states_match(doc_value, reg_value)
     else:
-        # Generic: normalized case-insensitive equality
         return (doc_value or "").strip().upper() == (reg_value or "").strip().upper()

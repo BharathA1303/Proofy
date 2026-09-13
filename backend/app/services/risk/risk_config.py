@@ -50,7 +50,9 @@ DEFAULT_CATEGORY_CAPS: Dict[EvidenceCategory, CategoryConfig] = {
     EvidenceCategory.PRESENTATION_ATTACK:      CategoryConfig(20.0,  "Presentation Attack"),
     EvidenceCategory.REGISTRY_STATUS:          CategoryConfig(55.0,  "Registry Verification"),
     EvidenceCategory.VERIFICATION_UNCERTAINTY: CategoryConfig(10.0,  "Verification Uncertainty"),
+    EvidenceCategory.MACHINE_READABLE:         CategoryConfig(20.0,  "Machine-Readable / QR"),
 }
+
 
 
 @dataclass

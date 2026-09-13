@@ -86,6 +86,7 @@ class EvidenceCategory(str, Enum):
     PRESENTATION_ATTACK      = "PRESENTATION_ATTACK"
     REGISTRY_STATUS          = "REGISTRY_STATUS"
     VERIFICATION_UNCERTAINTY = "VERIFICATION_UNCERTAINTY"
+    MACHINE_READABLE         = "MACHINE_READABLE"
 
 
 # ── Correlation groups ────────────────────────────────────────────────────────
@@ -95,17 +96,19 @@ class CorrelationGroup(str, Enum):
     Signals within the same group are correlated.
     The aggregator applies diminishing returns within each group to
     prevent double-counting of evidence from the same underlying event.
-
-    Example: ELA + compression anomalies may both result from the
-    same image re-save operation. Counting both at full weight inflates
-    the score unjustifiably.
     """
-    FORENSIC_IMAGE_SIGNALS    = "FORENSIC_IMAGE_SIGNALS"
-    DOCUMENT_NUMBER_BINDING   = "DOCUMENT_NUMBER_BINDING"
-    OCR_FIELD_AVAILABILITY    = "OCR_FIELD_AVAILABILITY"
-    BIOMETRIC_QUALITY         = "BIOMETRIC_QUALITY"
-    REGISTRY_FIELD_MISMATCHES = "REGISTRY_FIELD_MISMATCHES"
-    DOB_CONSISTENCY           = "DOB_CONSISTENCY"
+    FORENSIC_IMAGE_SIGNALS        = "FORENSIC_IMAGE_SIGNALS"
+    OCR_LAYOUT_SIGNALS            = "OCR_LAYOUT_SIGNALS"
+    BIOMETRIC_QUALITY             = "BIOMETRIC_QUALITY"
+    BIOMETRIC_QUALITY_SIGNALS     = "BIOMETRIC_QUALITY_SIGNALS"
+    PRESENTATION_ATTACK_SIGNALS   = "PRESENTATION_ATTACK_SIGNALS"
+    REGISTRY_STATUS_SIGNALS       = "REGISTRY_STATUS_SIGNALS"
+    REGISTRY_FIELD_MISMATCHES     = "REGISTRY_FIELD_MISMATCHES"
+    MACHINE_READABLE_SIGNALS      = "MACHINE_READABLE_SIGNALS"
+    DOCUMENT_NUMBER_BINDING       = "DOCUMENT_NUMBER_BINDING"
+    OCR_FIELD_AVAILABILITY        = "OCR_FIELD_AVAILABILITY"
+    DOB_CONSISTENCY               = "DOB_CONSISTENCY"
+    FACE_IDENTITY_CONSISTENCY     = "FACE_IDENTITY_CONSISTENCY"
     NID_PASSPORT_DOB_CONSISTENCY  = "NID_PASSPORT_DOB_CONSISTENCY"
     NID_PASSPORT_NAME_CONSISTENCY = "NID_PASSPORT_NAME_CONSISTENCY"
     NID_DL_DOB_CONSISTENCY        = "NID_DL_DOB_CONSISTENCY"
@@ -123,24 +126,6 @@ class RiskEvidenceItem:
 
     This is the canonical unit of evidence within the risk engine.
     Every score contribution is traceable to one of these items.
-
-    Fields:
-        module:           Source module identifier ("M1", "M2", …, "M5").
-        signal:           Machine-readable signal name (stable identifier for
-                          rules lookup and provenance tracking).
-        category:         Logical grouping for score capping.
-        status:           Discrete outcome of the signal.
-        severity:         Severity of an adverse finding.
-        confidence:       Confidence IN THE SIGNAL MEASUREMENT, not a
-                          probability of fraud or forgery. Range [0.0, 1.0].
-        available:        False if the module was not run or failed to produce
-                          this signal. True even if the signal value is negative.
-        explanation:      Officer-facing single-sentence explanation.
-        provenance:       Structured trace back to source (module, field, tool).
-        contribution:     Filled by the aggregator (base × confidence_factor).
-        is_uncertain:     True if this item has operationally significant
-                          severity but low confidence. Flagged in uncertainties.
-        correlation_group: Optional group for diminishing-returns protection.
     """
     module: str
     signal: str
@@ -154,6 +139,33 @@ class RiskEvidenceItem:
     contribution: float = 0.0
     is_uncertain: bool = False
     correlation_group: Optional[CorrelationGroup] = None
+
+    # Section 14 requirements
+    evidence_id: Optional[str] = None
+    source_module: Optional[str] = None
+    evidence_type: Optional[str] = None
+    quality: float = 1.0
+    reliability: float = 1.0
+    field: Optional[str] = None
+    value: Any = None
+    reference_value: Any = None
+    timestamp: Optional[str] = None
+    profile_version: Optional[str] = None
+    is_independent: bool = True
+    is_positive: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.evidence_id:
+            self.evidence_id = f"EV-{self.module}-{self.signal}"
+        if not self.source_module:
+            self.source_module = self.module
+        if not self.evidence_type:
+            self.evidence_type = self.signal
+        if self.reliability == 1.0 and (self.confidence is not None or self.quality is not None):
+            conf = self.confidence if self.confidence is not None else 1.0
+            qual = self.quality if self.quality is not None else 1.0
+            self.reliability = round(conf * (0.5 + 0.5 * qual), 4)
+
 
 
 # ── Module availability ───────────────────────────────────────────────────────

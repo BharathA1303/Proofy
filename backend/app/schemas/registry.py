@@ -31,7 +31,7 @@ Registry status vocabulary (aligned with ICAO / border screening practice):
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -41,6 +41,7 @@ from pydantic import BaseModel, Field
 
 class RegistryStatus(str, Enum):
     """Explicit outcome of a registry verification attempt."""
+    ACTIVE               = "ACTIVE"
     MATCHED              = "MATCHED"
     NOT_FOUND            = "NOT_FOUND"
     MISMATCH             = "MISMATCH"
@@ -50,27 +51,41 @@ class RegistryStatus(str, Enum):
     INVALID              = "INVALID"
     AMBIGUOUS            = "AMBIGUOUS"
     UNAVAILABLE          = "UNAVAILABLE"
+    PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"
     TIMEOUT              = "TIMEOUT"
     AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR"
+    UNAUTHORIZED         = "UNAUTHORIZED"
+    RATE_LIMITED         = "RATE_LIMITED"
+    INVALID_REQUEST      = "INVALID_REQUEST"
     PROVIDER_ERROR       = "PROVIDER_ERROR"
+    ERROR                = "ERROR"
+    NOT_CONFIGURED       = "NOT_CONFIGURED"
+    LIVE_PROVIDER_NOT_CONFIGURED = "LIVE_PROVIDER_NOT_CONFIGURED"
+    PROVIDER_RESPONSE_INVALID = "PROVIDER_RESPONSE_INVALID"
     INCONCLUSIVE         = "INCONCLUSIVE"
 
 
 class FieldMatchStatus(str, Enum):
     """Result of comparing a single identity field between document and registry."""
-    MATCH              = "MATCH"
-    MISMATCH           = "MISMATCH"
+    MATCH                = "MATCH"
+    PARTIAL_MATCH        = "PARTIAL_MATCH"
+    MISMATCH             = "MISMATCH"
     MISSING_IN_REGISTRY  = "MISSING_IN_REGISTRY"
     MISSING_IN_DOCUMENT  = "MISSING_IN_DOCUMENT"
     NOT_COMPARED         = "NOT_COMPARED"
+    AMBIGUOUS            = "AMBIGUOUS"
+    UNAVAILABLE          = "UNAVAILABLE"
 
 
 class ProviderSourceType(str, Enum):
     """Identifies the nature of the registry provider.
     MUST be visible in all responses so UI never misleads the officer."""
-    DEVELOPMENT_MOCK    = "development_mock"
-    SANDBOX             = "sandbox"
-    AUTHORIZED_EXTERNAL = "authorized_external"
+    DEVELOPMENT_MOCK             = "development_mock"
+    SANDBOX                      = "sandbox"
+    AUTHORIZED_EXTERNAL          = "authorized_external"
+    AUTHORIZED_EXTERNAL_PROVIDER = "authorized_external_provider"
+    UNAVAILABLE                  = "unavailable"
+    NOT_CONFIGURED               = "not_configured"
 
 
 class DocumentFieldSource(str, Enum):
@@ -117,8 +132,14 @@ class RegistryVerificationRequest(BaseModel):
     name: Optional[FieldProvenance] = None
     nationality: Optional[FieldProvenance] = None
     expiry_date: Optional[FieldProvenance] = None
+    valid_from: Optional[FieldProvenance] = None
     issuing_authority: Optional[FieldProvenance] = None
     gender: Optional[FieldProvenance] = None
+    vehicle_classes: Optional[FieldProvenance] = None
+    state: Optional[FieldProvenance] = None
+    blood_group: Optional[FieldProvenance] = None
+    client_metadata: Optional[Dict[str, Any]] = None
+    query_hash: Optional[str] = None
 
 
 # ──────────────────────────────────────────────
@@ -136,8 +157,13 @@ class RegistryRecord(BaseModel):
     date_of_birth: Optional[str] = None
     nationality: Optional[str] = None
     expiry_date: Optional[str] = None
+    valid_from: Optional[str] = None
     issuing_authority: Optional[str] = None
     gender: Optional[str] = None
+    vehicle_classes: Optional[Union[List[str], str]] = None
+    state: Optional[str] = None
+    blood_group: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     # Document status according to registry
     registry_document_status: str = Field(
@@ -172,6 +198,14 @@ class RegistryFieldResult(BaseModel):
         default=False,
         description="True if this field is part of the critical identity set for this document type",
     )
+    comparison_method: Optional[str] = Field(
+        default=None,
+        description="Method used for comparison (e.g. 'strict_equality', 'token_normalized', 'cov_taxonomy')",
+    )
+    source_document: Optional[str] = Field(default=None, description="Raw document extracted value")
+    source_registry: Optional[str] = Field(default=None, description="Raw registry record value")
+    normalized_document: Optional[str] = Field(default=None, description="Normalized document value")
+    normalized_registry: Optional[str] = Field(default=None, description="Normalized registry value")
     note: Optional[str] = Field(
         default=None,
         description="Optional explanation (e.g. normalization note, mismatch detail)",
@@ -279,3 +313,47 @@ class RegistryVerificationResponse(BaseModel):
         default_factory=dict,
         description="Audit trail: timestamps, provider id, processing duration",
     )
+
+    provider_type: Optional[str] = Field(
+        default=None,
+        description="Type of registry provider (e.g. 'development_mock', 'authorized_external')",
+    )
+
+    query_hash: Optional[str] = Field(
+        default=None,
+        description="Cryptographic SHA-256 hash of query parameters (privacy-preserving reference)",
+    )
+
+    freshness: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Cache freshness telemetry: cached, retrieved_at, ttl_seconds, is_fresh",
+    )
+
+    profile_version: Optional[str] = Field(
+        default=None,
+        description="Document profile version used for field corroboration rules",
+    )
+
+    field_comparisons: Optional[List[Dict[str, Any]]] = Field(
+        default_factory=list,
+        description="Structured field comparison summaries",
+    )
+
+    def to_evidence_dict(self) -> Dict[str, Any]:
+        """Serialize evidence dictionary for audit trail, M6 risk engine, and blockchain ledger."""
+        src_t = self.provider_metadata.source_type
+        p_type = src_t.value if hasattr(src_t, "value") else str(src_t)
+        return {
+            "verification_id": self.verification_id,
+            "document_type": self.document_type,
+            "provider": self.registry.get("provider"),
+            "provider_type": p_type,
+            "lookup_status": self.registry.get("status"),
+            "record_found": self.registry.get("record_found", False),
+            "registry_document_status": self.registry.get("registry_document_status"),
+            "query_hash": self.query_hash,
+            "field_results": [f.model_dump() for f in self.field_results],
+            "evidence": [e.model_dump() for e in self.evidence],
+            "freshness": self.freshness or {},
+            "profile_version": self.profile_version or "default",
+        }

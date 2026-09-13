@@ -52,8 +52,15 @@ def _item(
     provenance: Dict[str, Any],
     available: bool = True,
     correlation_group: Optional[CorrelationGroup] = None,
+    quality: float = 1.0,
+    reliability: Optional[float] = None,
+    field: Optional[str] = None,
+    value: Any = None,
+    reference_value: Any = None,
+    is_positive: bool = False,
 ) -> RiskEvidenceItem:
     """Convenience factory for RiskEvidenceItem."""
+    rel = reliability if reliability is not None else round(confidence * (0.5 + 0.5 * quality), 4)
     return RiskEvidenceItem(
         module=module,
         signal=signal,
@@ -65,7 +72,14 @@ def _item(
         explanation=explanation,
         provenance=provenance,
         correlation_group=correlation_group,
+        quality=quality,
+        reliability=rel,
+        field=field,
+        value=value,
+        reference_value=reference_value,
+        is_positive=is_positive,
     )
+
 
 
 def _unavailable(
@@ -610,6 +624,31 @@ def normalize_forensics(m3_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceI
             explanation="Forensic analysis detected image anomalies requiring officer attention.",
             provenance=prov_base,
         ))
+    elif overall in ("no_significant_anomaly", "clean", "passed"):
+        items.append(_item(
+            module="M3", signal="forensic_clean",
+            category=EvidenceCategory.FORENSIC_ANOMALY,
+            status=EvidenceStatus.PASS,
+            severity=EvidenceSeverity.NONE,
+            confidence=0.90,
+            explanation="Forensic analysis detected no significant image tampering or manipulation anomalies.",
+            provenance=prov_base,
+            is_positive=True,
+        ))
+
+    # Neural tampering detection check
+    ai_tampering = m3_data.get("ai_tampering") or {}
+    if ai_tampering.get("status") == "tampering_detected":
+        items.append(_item(
+            module="M3", signal="neural_tampering_detected",
+            category=EvidenceCategory.FORENSIC_ANOMALY,
+            status=EvidenceStatus.SUSPICIOUS,
+            severity=EvidenceSeverity.CRITICAL,
+            confidence=float(ai_tampering.get("confidence", 0.85)),
+            explanation=ai_tampering.get("explanation", "Deep learning model detected image manipulation."),
+            provenance={**prov_base, "model": "neural_tampering_detector"},
+            correlation_group=CorrelationGroup.FORENSIC_IMAGE_SIGNALS,
+        ))
 
     return items
 
@@ -690,6 +729,18 @@ def normalize_biometrics(m4_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
                         "Presentation attack suspected. Capture exhibits spoof anomalies."),
             provenance={**prov_base, "pad_model": anti_spoof.get("model", "MiniFASNetV2"),
                         "pad_score": pad_score},
+            correlation_group=CorrelationGroup.PRESENTATION_ATTACK_SIGNALS,
+        ))
+    elif pad_status in ("pass", "live"):
+        items.append(_item(
+            module="M4", signal="pad_pass",
+            category=EvidenceCategory.PRESENTATION_ATTACK,
+            status=EvidenceStatus.PASS,
+            severity=EvidenceSeverity.NONE,
+            confidence=pad_confidence,
+            explanation="Presentation attack detection confirmed live subject.",
+            provenance={**prov_base, "pad_model": anti_spoof.get("model", "MiniFASNetV2")},
+            is_positive=True,
         ))
     elif pad_status == "inconclusive":
         items.append(_item(
@@ -722,6 +773,7 @@ def normalize_biometrics(m4_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
                 confidence=0.70,
                 explanation=f"Secondary optical telemetry anomaly detected: {', '.join(secondary_flags)}.",
                 provenance={**prov_base, "flags": secondary_flags},
+                correlation_group=CorrelationGroup.PRESENTATION_ATTACK_SIGNALS,
             ))
 
     # Face match
@@ -730,8 +782,16 @@ def normalize_biometrics(m4_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
     fm_conf = float(fm_similarity) if fm_similarity is not None else 0.60
 
     if fm_status == "match":
-        # Positive evidence — no contribution
-        pass
+        items.append(_item(
+            module="M4", signal="face_match_pass",
+            category=EvidenceCategory.BIOMETRIC_CONSISTENCY,
+            status=EvidenceStatus.MATCH,
+            severity=EvidenceSeverity.NONE,
+            confidence=max(0.70, min(1.0, fm_conf)),
+            explanation=face_match.get("explanation", "Facial biometric match confirmed."),
+            provenance={**prov_base, "similarity": fm_similarity},
+            is_positive=True,
+        ))
     elif fm_status == "no_match":
         signal = ("face_mismatch_high_quality" if both_acceptable
                   else "face_mismatch_poor_quality")
@@ -753,6 +813,7 @@ def normalize_biometrics(m4_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
             provenance={**prov_base, "similarity": fm_similarity,
                         "threshold": face_match.get("threshold"),
                         "doc_quality": doc_quality, "live_quality": live_quality},
+            correlation_group=CorrelationGroup.FACE_IDENTITY_CONSISTENCY,
         ))
     elif fm_status in ("inconclusive", "unavailable"):
         items.append(_item(
@@ -771,7 +832,10 @@ def normalize_biometrics(m4_data: Optional[Dict[str, Any]]) -> List[RiskEvidence
 # ── M5 — Registry ─────────────────────────────────────────────────────────────
 
 # Status values that are provider failures (NOT fraud evidence)
-_PROVIDER_FAILURE_STATUSES = {"UNAVAILABLE", "TIMEOUT", "AUTHENTICATION_ERROR", "PROVIDER_ERROR"}
+_PROVIDER_FAILURE_STATUSES = {
+    "UNAVAILABLE", "TIMEOUT", "AUTHENTICATION_ERROR", "PROVIDER_ERROR",
+    "LIVE_PROVIDER_NOT_CONFIGURED", "UNCONFIGURED", "NOT_CONFIGURED"
+}
 
 def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceItem]:
     """
@@ -827,20 +891,23 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
     # Provider failures → uncertainty, not fraud
     if reg_status in _PROVIDER_FAILURE_STATUSES:
         signal = {
-            "UNAVAILABLE":          "registry_provider_unavailable",
-            "TIMEOUT":              "module_timeout",
-            "AUTHENTICATION_ERROR": "module_error",
-            "PROVIDER_ERROR":       "module_error",
+            "UNAVAILABLE":                  "registry_provider_unavailable",
+            "TIMEOUT":                      "module_timeout",
+            "AUTHENTICATION_ERROR":         "module_error",
+            "PROVIDER_ERROR":               "module_error",
+            "LIVE_PROVIDER_NOT_CONFIGURED": "registry_provider_unavailable",
+            "UNCONFIGURED":                 "registry_provider_unavailable",
+            "NOT_CONFIGURED":               "registry_provider_unavailable",
         }.get(reg_status, "registry_provider_unavailable")
 
         items.append(_item(
             module="M5", signal=signal,
             category=EvidenceCategory.VERIFICATION_UNCERTAINTY,
             status=EvidenceStatus(reg_status) if reg_status in EvidenceStatus._value2member_map_ else EvidenceStatus.UNAVAILABLE,
-            severity=EvidenceSeverity.LOW,
+            severity=EvidenceSeverity.NONE if "NOT_CONFIGURED" in reg_status or "UNCONFIGURED" in reg_status else EvidenceSeverity.LOW,
             confidence=1.0,
-            explanation=f"Registry provider was not available ({reg_status}). "
-                        "Document could not be checked against the registry.",
+            explanation=f"Registry provider was not available or not configured ({reg_status}). "
+                        "Document could not be checked against the live registry.",
             provenance=prov_base,
             available=False,
         ))
@@ -848,8 +915,16 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
 
     # Registry statuses → evidence items
     if reg_status == "MATCHED":
-        # Positive evidence — no contribution
-        pass
+        items.append(_item(
+            module="M5", signal="registry_matched",
+            category=EvidenceCategory.REGISTRY_STATUS,
+            status=EvidenceStatus.MATCH,
+            severity=EvidenceSeverity.NONE,
+            confidence=mock_confidence_factor,
+            explanation=f"Document record confirmed in registry ({'development mock' if source_type == 'development_mock' else 'authoritative'}).",
+            provenance=prov_base,
+            is_positive=True,
+        ))
 
     elif reg_status == "REVOKED":
         # A REVOKED/watchlist hit is a deterministic identity match, not a
@@ -864,6 +939,7 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
             explanation="Registry reports this document as REVOKED. "
                         "The document may have been cancelled or invalidated.",
             provenance=prov_base,
+            correlation_group=CorrelationGroup.REGISTRY_STATUS_SIGNALS,
         ))
 
     elif reg_status == "SUSPENDED":
@@ -875,6 +951,7 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
             confidence=0.97,
             explanation="Registry reports this document as SUSPENDED.",
             provenance=prov_base,
+            correlation_group=CorrelationGroup.REGISTRY_STATUS_SIGNALS,
         ))
 
     elif reg_status == "INVALID":
@@ -955,11 +1032,176 @@ def normalize_registry(m5_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceIt
     return items
 
 
+# ── M7 — Machine-Readable / QR ────────────────────────────────────────────────
+
+def normalize_machine_readable(m7_data: Optional[Dict[str, Any]]) -> List[RiskEvidenceItem]:
+    """
+    Normalize Module 7 machine-readable / QR verification results.
+    """
+    if not m7_data:
+        return [_unavailable(
+            "M7", "machine_readable_unavailable",
+            EvidenceCategory.VERIFICATION_UNCERTAINTY,
+            "Module 7 (Machine-Readable / QR) did not run.",
+            "machine_readable_service",
+        )]
+
+    items: List[RiskEvidenceItem] = []
+    prov_base = {"source": "machine_readable_service", "module": "M7"}
+
+    applicable = m7_data.get("applicable", True)
+    if not applicable:
+        return items
+
+    detection_status = m7_data.get("detection_status", "NOT_DETECTED")
+    if hasattr(detection_status, "value"):
+        detection_status = detection_status.value
+
+    if detection_status == "NOT_DETECTED":
+        items.append(_item(
+            module="M7",
+            signal="qr_not_detected",
+            category=EvidenceCategory.MACHINE_READABLE,
+            status=EvidenceStatus.NOT_FOUND,
+            severity=EvidenceSeverity.NONE,
+            confidence=0.90,
+            explanation="No machine-readable QR code detected on document.",
+            provenance=prov_base,
+            available=False,
+        ))
+        return items
+
+    if detection_status == "DETECTED_NOT_DECODABLE":
+        items.append(_item(
+            module="M7",
+            signal="qr_undecodable",
+            category=EvidenceCategory.MACHINE_READABLE,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.LOW,
+            confidence=0.85,
+            explanation="QR code detected on document but could not be decoded.",
+            provenance=prov_base,
+            correlation_group=CorrelationGroup.MACHINE_READABLE_SIGNALS,
+        ))
+        return items
+
+    # DECODED QR
+    # 1. Cryptographic signature verification check
+    crypto = m7_data.get("crypto_verification") or {}
+    if hasattr(crypto, "model_dump"):
+        crypto = crypto.model_dump()
+    elif hasattr(crypto, "to_dict"):
+        crypto = crypto.to_dict()
+    elif hasattr(crypto, "dict"):
+        crypto = crypto.dict()
+
+    crypto_status = crypto.get("status")
+    if hasattr(crypto_status, "value"):
+        crypto_status = crypto_status.value
+
+    if crypto_status == "CRYPTO_VERIFICATION_PASSED":
+        items.append(_item(
+            module="M7",
+            signal="qr_crypto_verified",
+            category=EvidenceCategory.MACHINE_READABLE,
+            status=EvidenceStatus.PASS,
+            severity=EvidenceSeverity.NONE,
+            confidence=1.0,
+            explanation="QR code cryptographic digital signature verified successfully.",
+            provenance={**prov_base, "crypto_algorithm": crypto.get("algorithm")},
+            is_positive=True,
+        ))
+    elif crypto_status == "CRYPTO_VERIFICATION_FAILED":
+        items.append(_item(
+            module="M7",
+            signal="qr_crypto_invalid",
+            category=EvidenceCategory.MACHINE_READABLE,
+            status=EvidenceStatus.FAIL,
+            severity=EvidenceSeverity.CRITICAL,
+            confidence=0.95,
+            explanation="QR code cryptographic digital signature verification failed.",
+            provenance={**prov_base, "crypto_details": crypto.get("details")},
+            correlation_group=CorrelationGroup.MACHINE_READABLE_SIGNALS,
+        ))
+    elif crypto_status in ("CRYPTO_VERIFICATION_NOT_CONFIGURED", "CRYPTO_VERIFICATION_UNAVAILABLE", "CRYPTO_VERIFICATION_NOT_APPLICABLE"):
+        items.append(_item(
+            module="M7",
+            signal="qr_crypto_unavailable",
+            category=EvidenceCategory.VERIFICATION_UNCERTAINTY,
+            status=EvidenceStatus.UNAVAILABLE,
+            severity=EvidenceSeverity.NONE,
+            confidence=1.0,
+            explanation="Cryptographic signature verification keys or service are not configured.",
+            provenance=prov_base,
+            available=False,
+        ))
+
+    # 2. Field cross-checks between QR and OCR
+    checks = m7_data.get("field_cross_checks") or {}
+    for field_name, f_res in checks.items():
+        if hasattr(f_res, "model_dump"):
+            f_dict = f_res.model_dump()
+        elif hasattr(f_res, "to_dict"):
+            f_dict = f_res.to_dict()
+        elif hasattr(f_res, "dict"):
+            f_dict = f_res.dict()
+        elif isinstance(f_res, dict):
+            f_dict = f_res
+        else:
+            f_dict = {}
+
+        status = f_dict.get("status", "")
+        if hasattr(status, "value"):
+            status = status.value
+        is_match = f_dict.get("is_match", False)
+        qr_val = f_dict.get("qr_value")
+        ocr_val = f_dict.get("ocr_value")
+
+        if is_match or status == "QR_FIELD_MATCH":
+            items.append(_item(
+                module="M7",
+                signal="qr_ocr_matched",
+                category=EvidenceCategory.MACHINE_READABLE,
+                status=EvidenceStatus.MATCH,
+                severity=EvidenceSeverity.NONE,
+                confidence=0.95,
+                explanation=f"Field '{field_name}' matches between QR payload and visual OCR.",
+                provenance={**prov_base, "field": field_name, "value": qr_val},
+                field=field_name,
+                value=qr_val,
+                reference_value=ocr_val,
+                is_positive=True,
+            ))
+        elif status == "QR_FIELD_MISMATCH":
+            is_dob = field_name.lower() in ("dob", "date_of_birth")
+            is_docnum = field_name.lower() in ("docnumber", "document_number", "license_number")
+            cg = CorrelationGroup.DOB_CONSISTENCY if is_dob else CorrelationGroup.MACHINE_READABLE_SIGNALS
+            sev = EvidenceSeverity.CRITICAL if is_docnum else EvidenceSeverity.HIGH
+            signal_name = "qr_ocr_docnumber_mismatch" if is_docnum else ("qr_ocr_dob_mismatch" if is_dob else "qr_ocr_mismatch")
+
+            items.append(_item(
+                module="M7",
+                signal=signal_name,
+                category=EvidenceCategory.MACHINE_READABLE,
+                status=EvidenceStatus.MISMATCH,
+                severity=sev,
+                confidence=0.92,
+                explanation=f"Field '{field_name}' discrepancy between QR payload ({qr_val}) and visual OCR ({ocr_val}).",
+                provenance={**prov_base, "field": field_name, "qr_value": qr_val, "ocr_value": ocr_val},
+                field=field_name,
+                value=ocr_val,
+                reference_value=qr_val,
+                correlation_group=cg,
+            ))
+
+    return items
+
+
 # ── Main entry point ──────────────────────────────────────────────────────────
 
 class RiskNormalizer:
     """
-    Converts the M1–M5 session data dict into a flat list of
+    Converts the M1–M5 (and optional M7) session data dict into a flat list of
     canonical RiskEvidenceItems and module availability records.
     """
 
@@ -984,6 +1226,8 @@ class RiskNormalizer:
             ("m4_biometrics", "M4", "Biometric Verification",  normalize_biometrics),
             ("m5_registry",   "M5", "Registry Verification",   normalize_registry),
         ]
+        if "m7_machine_readable" in session_data:
+            module_map.append(("m7_machine_readable", "M7", "Machine-Readable / QR", normalize_machine_readable))
 
         for key, module_id, label, fn in module_map:
             raw = session_data.get(key)
@@ -1005,3 +1249,4 @@ class RiskNormalizer:
             ))
 
         return all_evidence, availability
+

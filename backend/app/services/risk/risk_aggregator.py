@@ -172,10 +172,18 @@ class RiskAggregator:
             )
             for idx, item in enumerate(ordered):
                 base = get_base_contribution(item)
-                corr_factor = (1.0 if idx == 0
-                               else self._config.correlation_secondary_factor)
+                if idx == 0:
+                    corr_factor = 1.0
+                elif idx == 1:
+                    corr_factor = self._config.correlation_secondary_factor
+                elif idx == 2:
+                    corr_factor = 0.25
+                else:
+                    corr_factor = 0.10
+
                 conf_factor = self._config.confidence_factor(item.confidence)
-                effective = base * corr_factor * conf_factor
+                qual_factor = (0.5 + 0.5 * item.quality) if item.quality < 0.99 else 1.0
+                effective = base * corr_factor * conf_factor * qual_factor
                 is_uncertain = (
                     item.severity.value in ("HIGH", "CRITICAL") and
                     item.confidence < self._config.confidence_low_threshold
@@ -194,7 +202,8 @@ class RiskAggregator:
         for item in ungrouped:
             base = get_base_contribution(item)
             conf_factor = self._config.confidence_factor(item.confidence)
-            effective = base * conf_factor
+            qual_factor = (0.5 + 0.5 * item.quality) if item.quality < 0.99 else 1.0
+            effective = base * conf_factor * qual_factor
             is_uncertain = (
                 item.severity.value in ("HIGH", "CRITICAL") and
                 item.confidence < self._config.confidence_low_threshold

@@ -32,7 +32,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-MODULE_KEYS = ("m1_ocr", "m2_validation", "m3_forensics", "m4_biometrics", "m5_registry")
+MODULE_KEYS = ("m1_ocr", "m2_validation", "m3_forensics", "m4_biometrics", "m5_registry", "m7_machine_readable")
 
 
 class RiskSessionStore:

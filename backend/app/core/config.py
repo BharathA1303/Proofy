@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     # breaks CORS the moment more than one dev server is running. A regex
     # covering any localhost/127.0.0.1 port is used instead (see main.py).
     CORS_ORIGINS: list[str] = [
+        "http://localhost:4000",
+        "http://127.0.0.1:4000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:4173",

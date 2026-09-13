@@ -84,6 +84,44 @@ class DrivingLicenseRegistryAdapter:
             normalizer=None,
         )
 
+        valid_from = _build_provenance(
+            value=session_data.get("valid_from") or session_data.get("issuedDate"),
+            source_key="valid_from_source",
+            session_data=session_data,
+            default_source=DocumentFieldSource.VIZ,
+            normalizer=normalize_dl_date,
+        )
+
+        vehicle_classes_raw = session_data.get("vehicle_classes") or session_data.get("cov")
+        if isinstance(vehicle_classes_raw, (list, tuple)):
+            cov_val = ", ".join(str(x) for x in vehicle_classes_raw)
+        else:
+            cov_val = str(vehicle_classes_raw) if vehicle_classes_raw else None
+
+        vehicle_classes = _build_provenance(
+            value=cov_val,
+            source_key="vehicle_classes_source",
+            session_data=session_data,
+            default_source=DocumentFieldSource.VIZ,
+            normalizer=None,
+        )
+
+        state = _build_provenance(
+            value=session_data.get("state") or session_data.get("jurisdiction"),
+            source_key="state_source",
+            session_data=session_data,
+            default_source=DocumentFieldSource.VIZ,
+            normalizer=None,
+        )
+
+        blood_group = _build_provenance(
+            value=session_data.get("blood_group"),
+            source_key="blood_group_source",
+            session_data=session_data,
+            default_source=DocumentFieldSource.VIZ,
+            normalizer=None,
+        )
+
         return RegistryVerificationRequest(
             verification_id=verification_id,
             document_type=doc_type,
@@ -92,7 +130,11 @@ class DrivingLicenseRegistryAdapter:
             date_of_birth=dob,
             nationality=None,
             expiry_date=expiry,
+            valid_from=valid_from,
             issuing_authority=authority,
+            vehicle_classes=vehicle_classes,
+            state=state,
+            blood_group=blood_group,
         )
 
 

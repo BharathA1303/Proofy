@@ -12,7 +12,7 @@ Architecture:
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
 
@@ -71,6 +71,26 @@ class DocumentFaceResult(BaseModel):
         default=None,
         description="Error code if detection/extraction failed",
     )
+    source: Optional[str] = Field(
+        default=None,
+        description="Provenance of the document portrait ('DOCUMENT_PORTRAIT_REGION', 'FULL_IMAGE_DETECTION')",
+    )
+    bbox: Optional[Tuple[int, int, int, int]] = Field(
+        default=None,
+        description="Bounding box in original image pixels: (x, y, width, height)",
+    )
+    normalized_bbox: Optional[Tuple[float, float, float, float]] = Field(
+        default=None,
+        description="Normalized coordinates in [0.0, 1.0]: (ymin, xmin, ymax, xmax)",
+    )
+    landmarks: Optional[List[Tuple[float, float]]] = Field(
+        default=None,
+        description="Detected 5-point facial landmarks mapped to image coordinate space",
+    )
+    detection_confidence: Optional[float] = Field(
+        default=None,
+        description="Detector confidence score (0.0 to 1.0)",
+    )
 
 
 class LiveFaceResult(BaseModel):
@@ -92,6 +112,26 @@ class LiveFaceResult(BaseModel):
     error: Optional[str] = Field(
         default=None,
         description="Error code if live face processing failed",
+    )
+    source: Optional[str] = Field(
+        default="LIVE_CAPTURE",
+        description="Capture source designation ('LIVE_CAPTURE')",
+    )
+    bbox: Optional[Tuple[int, int, int, int]] = Field(
+        default=None,
+        description="Bounding box in live frame pixels: (x, y, width, height)",
+    )
+    normalized_bbox: Optional[Tuple[float, float, float, float]] = Field(
+        default=None,
+        description="Normalized coordinates in [0.0, 1.0]: (ymin, xmin, ymax, xmax)",
+    )
+    landmarks: Optional[List[Tuple[float, float]]] = Field(
+        default=None,
+        description="Detected 5-point facial landmarks mapped to live frame space",
+    )
+    detection_confidence: Optional[float] = Field(
+        default=None,
+        description="Detector confidence score (0.0 to 1.0)",
     )
 
 
@@ -126,6 +166,10 @@ class AntiSpoofResult(BaseModel):
     model: str = Field(
         default="MiniFASNetV2",
         description="Primary deep PAD model identifier",
+    )
+    model_version: Optional[str] = Field(
+        default="2.0.0",
+        description="Deep PAD architecture version identifier",
     )
     status: str = Field(
         ...,
@@ -165,6 +209,14 @@ class FaceMatchResult(BaseModel):
     threshold: float = Field(
         ...,
         description="Operating threshold used for match classification",
+    )
+    threshold_calibration: str = Field(
+        default="UNCALIBRATED_PROFILE_DEFAULT",
+        description="Threshold calibration status and provenance",
+    )
+    similarity_metric: str = Field(
+        default="cosine",
+        description="Mathematical metric used for vector distance/similarity ('cosine')",
     )
     embedding_model: str = Field(
         default="ArcFace-w600k_r50",
@@ -212,7 +264,7 @@ class FaceVerificationResponse(BaseModel):
             "Deterministic biometric assessment: "
             "'FACE_MATCH' | 'FACE_MISMATCH' | 'SUSPECTED_SPOOF' | "
             "'DOCUMENT_FACE_NOT_FOUND' | 'NO_FACE_DETECTED' | 'MULTIPLE_FACES_DETECTED' | "
-            "'POOR_QUALITY' | 'BIOMETRIC_INCONCLUSIVE' | 'MODEL_UNAVAILABLE' | 'PROCESSING_ERROR'"
+            "'POOR_QUALITY' | 'BIOMETRIC_INCONCLUSIVE' | 'MODEL_UNAVAILABLE' | 'NOT_APPLICABLE' | 'PROCESSING_ERROR'"
         ),
     )
     overall_biometric_status: str = Field(
@@ -236,6 +288,48 @@ class FaceVerificationResponse(BaseModel):
         ...,
         description="Officer-facing summary statement explaining the biometric result",
     )
+    # Evidence extensions (Phase 9)
+    document_portrait: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured document portrait evidence bundle",
+    )
+    live_face_evidence: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured live face capture evidence bundle",
+    )
+    pad_evidence: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured presentation attack detection evidence bundle",
+    )
+    comparison_evidence: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured facial vector comparison evidence bundle",
+    )
+    model_metadata: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Loaded neural model and runtime execution metadata",
+    )
+    profile_version: Optional[str] = Field(
+        default=None,
+        description="Active DocumentProfile version driving verification parameters",
+    )
+    biometric_engine_version: str = Field(
+        default="1.0.0",
+        description="Biometric engine implementation version",
+    )
+
+    def to_evidence_dict(self) -> Dict[str, Any]:
+        """Expose structured biometric evidence according to the Phase 9 contract."""
+        return {
+            "status": self.overall_assessment,
+            "document_portrait": self.document_portrait or self.document_face.model_dump(),
+            "live_face": self.live_face_evidence or self.live_face.model_dump(),
+            "pad": self.pad_evidence or self.anti_spoof.model_dump(),
+            "comparison": self.comparison_evidence or self.face_match.model_dump(),
+            "model_metadata": self.model_metadata or {},
+            "profile_version": self.profile_version or "default",
+            "biometric_engine_version": self.biometric_engine_version,
+        }
 
 
 class ModelInfoResponse(BaseModel):

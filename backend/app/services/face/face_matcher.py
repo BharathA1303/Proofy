@@ -29,6 +29,8 @@ class MatchResult:
     similarity: Optional[float]  # Raw float 0.0 to 1.0 or None
     threshold: float
     confidence_score: Optional[float] = None
+    threshold_calibration: str = "UNCALIBRATED_PROFILE_DEFAULT"
+    similarity_metric: str = "cosine"
     explanation: str = ""
 
     @property
@@ -40,6 +42,8 @@ def compare_face_embeddings(
     document_embedding: Optional[np.ndarray],
     live_embedding: Optional[np.ndarray],
     threshold: Optional[float] = None,
+    calibration_status: Optional[str] = None,
+    inconclusive_margin: Optional[float] = None,
 ) -> MatchResult:
     """
     Compare document and live face embeddings using Cosine Similarity.
@@ -48,11 +52,15 @@ def compare_face_embeddings(
         document_embedding: Normalized 1D numpy array.
         live_embedding: Normalized 1D numpy array.
         threshold: Operating threshold. Defaults to settings.FACE_MATCH_THRESHOLD.
+        calibration_status: Calibration provenance identifier.
+        inconclusive_margin: Borderline range delta below threshold.
 
     Returns:
         MatchResult with classification, raw similarity, and threshold.
     """
     operating_threshold = threshold if threshold is not None else settings.FACE_MATCH_THRESHOLD
+    calib = calibration_status or "UNCALIBRATED_PROFILE_DEFAULT"
+    margin = inconclusive_margin if inconclusive_margin is not None else 0.06
 
     if document_embedding is None or live_embedding is None:
         return MatchResult(
@@ -60,6 +68,8 @@ def compare_face_embeddings(
             similarity=None,
             threshold=operating_threshold,
             confidence_score=None,
+            threshold_calibration=calib,
+            similarity_metric="cosine",
             explanation="Biometric embeddings unavailable for comparison.",
         )
 
@@ -88,7 +98,7 @@ def compare_face_embeddings(
         )
 
         # Margin for borderline/inconclusive classification (calibrated for cross-domain scanned IDs)
-        inconclusive_lower = max(0.0, operating_threshold - 0.06)
+        inconclusive_lower = max(0.0, operating_threshold - margin)
 
         if sim_rounded >= operating_threshold:
             # Calibrated confidence for cross-domain match: maps [threshold, 0.60] to [0.76, 0.99]
@@ -121,6 +131,8 @@ def compare_face_embeddings(
             similarity=sim_rounded,
             threshold=operating_threshold,
             confidence_score=confidence_score,
+            threshold_calibration=calib,
+            similarity_metric="cosine",
             explanation=explanation,
         )
 
@@ -130,5 +142,7 @@ def compare_face_embeddings(
             status="unavailable",
             similarity=None,
             threshold=operating_threshold,
+            threshold_calibration=calib,
+            similarity_metric="cosine",
             explanation=f"Error computing face similarity: {exc}",
         )
