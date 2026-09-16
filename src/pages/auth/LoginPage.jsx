@@ -11,12 +11,12 @@ import { useAuth } from '../../state/auth/useAuth.js';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
-  const { initiateLogin, verifyMfa, quickDemoLogin, pendingMfa, cancelMfa } = useAuth();
+  const { initiateLogin, verifyMfa, pendingMfa, cancelMfa } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [identifier, setIdentifier] = useState('rajesh.kumar');
-  const [password, setPassword] = useState('password123');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
@@ -95,24 +95,6 @@ export default function LoginPage() {
     }
   }
 
-  async function handleQuickFillMfa() {
-    const hint = pendingMfa?.mfaCodeHint || '614920';
-    const digits = hint.split('');
-    setMfaDigits(digits);
-    setError('');
-    try {
-      await verifyMfa(hint);
-      navigate('/');
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  function handleQuickDemo() {
-    quickDemoLogin();
-    navigate('/');
-  }
-
   return (
     <div className={styles.pageRoot}>
       {/* ════════════ Left Hero Showcase Panel ════════════ */}
@@ -133,30 +115,17 @@ export default function LoginPage() {
         {/* Center Hero Content */}
         <div className={styles.showcaseHero}>
           <h1 className={styles.showcaseHeading}>
-            Next-Generation <br />
-            <span className={styles.highlightText}>Identity &amp; Credential</span> <br />
-            Clearance.
+            Trusted Identity <br />
+            <span className={styles.highlightText}>Verification &amp; Access</span> <br />
+            Intelligence Platform.
           </h1>
           <p className={styles.showcaseSubheading}>
-            Comprehensive document verification, facial biometric matching, and mandatory multi-factor security
-            protecting every authorized session.
+            Meiyari secures every checkpoint with real-time biometric matching and a mandatory two-step
+            sign-in — built for officers who can't afford a false clearance.
           </p>
 
           {/* Feature Highlights */}
           <div className={styles.featureList}>
-            <div className={styles.featureItem}>
-              <div className={styles.featureIconBox}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  <path d="m9 12 2 2 4-4" />
-                </svg>
-              </div>
-              <div className={styles.featureTextCol}>
-                <span className={styles.featureTitle}>Multi-Document Verification</span>
-                <span className={styles.featureDesc}>Passports, Driving Licences, Aadhaar, and national identity credentials.</span>
-              </div>
-            </div>
-
             <div className={styles.featureItem}>
               <div className={styles.featureIconBox}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -165,8 +134,8 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.featureTextCol}>
-                <span className={styles.featureTitle}>Multi-Factor Authentication (TOTP)</span>
-                <span className={styles.featureDesc}>Time-based one-time passwords protect against unauthorized account access.</span>
+                <span className={styles.featureTitle}>Two-Step Sign-In</span>
+                <span className={styles.featureDesc}>Every sign-in needs your password and a one-time code — no exceptions, no shortcuts.</span>
               </div>
             </div>
 
@@ -178,8 +147,21 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.featureTextCol}>
-                <span className={styles.featureTitle}>Biometric Face Verification</span>
-                <span className={styles.featureDesc}>Real-time webcam matching against high-resolution official document portraits.</span>
+                <span className={styles.featureTitle}>Face Verification</span>
+                <span className={styles.featureDesc}>Live camera matching against the official document photo.</span>
+              </div>
+            </div>
+
+            <div className={styles.featureItem}>
+              <div className={styles.featureIconBox}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </div>
+              <div className={styles.featureTextCol}>
+                <span className={styles.featureTitle}>Full Activity History</span>
+                <span className={styles.featureDesc}>Every check performed is recorded, so nothing goes unaccounted for.</span>
               </div>
             </div>
           </div>
@@ -190,7 +172,7 @@ export default function LoginPage() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className={styles.trustShieldIcon}>
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
-          <span>Approved for Enterprise Border &amp; Identity Clearance · ISO 27001 &amp; ICAO Compliant</span>
+          <span>Trusted for Border &amp; Identity Clearance Nationwide</span>
         </div>
       </section>
 
@@ -251,7 +233,7 @@ export default function LoginPage() {
                     className={styles.textInput}
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="e.g. rajesh.kumar or email@meiyari.gov"
+                    placeholder="Enter your username or email address"
                     required
                     autoFocus
                   />
@@ -320,24 +302,6 @@ export default function LoginPage() {
                 </svg>
               </button>
 
-              <div className={styles.dividerRow}>
-                <span className={styles.dividerLine} />
-                <span className={styles.dividerText}>or quick access</span>
-                <span className={styles.dividerLine} />
-              </div>
-
-              <button
-                type="button"
-                className={styles.demoBtn}
-                onClick={handleQuickDemo}
-                title="Sign in immediately as Demo Officer"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span>1-Click Quick Demo Sign-In</span>
-              </button>
-
               <div className={styles.cardFooter}>
                 <span>Don't have an account?</span>
                 <Link to="/register" className={styles.footerLink}>
@@ -372,17 +336,6 @@ export default function LoginPage() {
                   />
                 ))}
               </div>
-
-              <button
-                type="button"
-                className={styles.demoBtn}
-                onClick={handleQuickFillMfa}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span>Use Demo Code (614920)</span>
-              </button>
 
               <button
                 type="button"

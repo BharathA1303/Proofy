@@ -10,6 +10,7 @@
  */
 import { useVerification } from '../../state/verification/useVerification.js';
 import { DOCUMENT_PROFILES, DOCUMENT_TYPES } from '../../config/documentProfiles.js';
+import { summarizeValidationIssue } from '../../utils/validationIssueSummary.js';
 import styles from './Stage2Inspection.module.css';
 
 export default function Stage2Inspection() {
@@ -23,15 +24,43 @@ export default function Stage2Inspection() {
   const result = session.result || {};
 
   // Status determinations
-  const isDocValid = checks.documentValidation === 'passed';
+  // "warning" is NOT a failure — it means every hard check (ICAO check
+  // digits, structure, expiry, cross-field binding) passed, but a
+  // secondary/low-risk signal was recorded (e.g. safe MRZ filler-padding
+  // recovery from a truncated OCR detection box). Only "failed" blocks
+  // the traveler. isDocPassedClean additionally distinguishes a fully
+  // clean pass from a pass-with-warnings for the card's visual tier.
+  const validationStatus = checks.documentValidation;
+  const isDocValid = validationStatus === 'passed' || validationStatus === 'warning';
+  const isDocPassedClean = validationStatus === 'passed';
   const isTamperClean = checks.tamperingDetection !== 'failed';
   const regStatus = registryDetail?.registry?.status || '';
   const isRegistryCleared = regStatus === 'MATCHED' || checks.registryVerification === 'passed';
   const isBlacklisted = regStatus === 'REVOKED' || regStatus === 'SUSPENDED' || regStatus === 'BLACKLISTED';
 
+  // Specific, per-check validation issues (from Module 2's structured
+  // `issues` list — NOT a flat `.errors` array, which the backend never
+  // sends). Each issue carries its own severity/check/message so the
+  // officer sees exactly which rule fired, not a generic fallback.
+  const validationIssues = Array.isArray(session.validationDetail?.issues)
+    ? session.validationDetail.issues
+    : [];
+  const criticalOrFailureIssues = validationIssues.filter(
+    (i) => i.severity === 'critical' || i.severity === 'failure'
+  );
+  const warningIssues = validationIssues.filter((i) => i.severity === 'warning');
+
   // Overall officer tier
-  const isCleanGenuine = isDocValid && isTamperClean && isRegistryCleared && !isBlacklisted;
-  const hasCriticalWarning = isBlacklisted || checks.tamperingDetection === 'failed' || checks.documentValidation === 'failed';
+  // isCleanGenuine: every check passed with zero notices — the "gold standard" tier.
+  // isCleanWithNotice: every check that matters passed (nothing failed, nothing
+  // blacklisted, registry cleared), but Module 2 recorded a non-blocking warning
+  // (e.g. safe MRZ filler-padding recovery). This still clears the traveler —
+  // it is not a defect — but the officer should see that a minor notice exists
+  // rather than an indistinguishable "fully clean" badge.
+  const isCleanGenuine = isDocPassedClean && isTamperClean && isRegistryCleared && !isBlacklisted;
+  const isCleanWithNotice = !isCleanGenuine && isDocValid && isTamperClean && isRegistryCleared && !isBlacklisted;
+  const isClearedOverall = isCleanGenuine || isCleanWithNotice;
+  const hasCriticalWarning = isBlacklisted || checks.tamperingDetection === 'failed' || validationStatus === 'failed';
 
   // Document photo preview
   const docFile = session.file;
@@ -69,11 +98,13 @@ export default function Stage2Inspection() {
             </p>
           </div>
 
-          <div className={`${styles.officerStatusPill} ${isCleanGenuine ? styles.pillApproved : hasCriticalWarning ? styles.pillAlert : styles.pillReview}`}>
+          <div className={`${styles.officerStatusPill} ${isCleanGenuine ? styles.pillApproved : isCleanWithNotice ? styles.pillReview : hasCriticalWarning ? styles.pillAlert : styles.pillReview}`}>
             <span className={styles.statusDot} />
             <span>
               {isCleanGenuine
                 ? 'DOCUMENT VERIFIED AUTHENTIC'
+                : isCleanWithNotice
+                ? 'VERIFIED · MINOR NOTICE'
                 : isBlacklisted
                 ? 'CRITICAL: WATCHLIST ALERT'
                 : !isTamperClean
@@ -227,15 +258,25 @@ export default function Stage2Inspection() {
         </div>
 
         {/* Check 3: Format & Validity */}
-        <div className={`${styles.securityCard} ${isDocValid ? styles.secPassed : styles.secFailed}`}>
+        <div
+          className={`${styles.securityCard} ${
+            isDocPassedClean ? styles.secPassed : isDocValid ? styles.secReview : styles.secFailed
+          }`}
+        >
           <div className={styles.secTop}>
             <div className={styles.secIcon}>
-              {isDocValid ? (
+              {isDocPassedClean ? (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              ) : isDocValid ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               ) : (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -246,24 +287,36 @@ export default function Stage2Inspection() {
               )}
             </div>
             <span className={styles.secStatusTag}>
-              {isDocValid ? 'VALID & ACTIVE' : 'FORMAT ISSUE DETECTED'}
+              {isDocPassedClean ? 'VALID & ACTIVE' : isDocValid ? 'VALID · MINOR NOTICE' : 'FORMAT ISSUE DETECTED'}
             </span>
           </div>
           <h4 className={styles.secTitle}>Document Validity &amp; Dates</h4>
-          <p className={styles.secDesc}>
-            {isDocValid
-              ? 'Validity dates and document structure verified. All required fields adhere to official standards.'
-              : (session.validationDetail?.errors?.length
-                  ? `Format / validation issues: ${session.validationDetail.errors.join('; ')}`
-                  : 'Issues detected: invalid dates, incorrect format, or missing required fields.')}
-          </p>
+          {isDocPassedClean ? (
+            <p className={styles.secDesc}>
+              Validity dates and document structure verified. All required fields adhere to official standards.
+            </p>
+          ) : (
+            <ul className={styles.secIssueList}>
+              {(criticalOrFailureIssues.length ? criticalOrFailureIssues : warningIssues.length ? warningIssues : null)
+                ?.slice(0, 3)
+                .map((issue, idx) => (
+                  <li key={idx} className={styles.secIssueItem}>
+                    {summarizeValidationIssue(issue)}
+                  </li>
+                )) || (
+                <li className={styles.secIssueItem}>
+                  Document did not fully pass automated validation. See technical audit log for details.
+                </li>
+              )}
+            </ul>
+          )}
         </div>
       </div>
 
       {/* ── Section 3: Officer Directive Callout ── */}
-      <div className={`${styles.directiveBox} ${isCleanGenuine ? styles.dirApproved : styles.dirAlert}`}>
+      <div className={`${styles.directiveBox} ${isClearedOverall ? styles.dirApproved : styles.dirAlert}`}>
         <div className={styles.dirIcon}>
-          {isCleanGenuine ? (
+          {isClearedOverall ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
               <polyline points="22 4 12 14.01 9 11.01" />
@@ -287,6 +340,8 @@ export default function Stage2Inspection() {
               ? 'Officer Directive: Unregistered Document — Not Found in Government Registry'
               : !isDocValid
               ? 'Officer Directive: Document Format / Validity Defect'
+              : isDocValid && !isDocPassedClean
+              ? 'Officer Directive: Document Validated — Minor Notice on Record'
               : 'Officer Directive: Secondary Inspection Advised'}
           </h4>
           <p className={styles.dirDesc}>
@@ -301,7 +356,9 @@ export default function Stage2Inspection() {
               : regStatus === 'NOT_FOUND' || !isRegistryCleared
               ? `The document number (${traveler.docNumber || traveler.licenseNumber || traveler.identityNumber || 'extracted'}) is NOT found in official Government of India records. It cannot be cleared as a legitimate document.`
               : !isDocValid
-              ? (session.validationDetail?.errors?.[0] || 'Required document fields or validity dates fail official government specifications.')
+              ? (criticalOrFailureIssues[0] ? summarizeValidationIssue(criticalOrFailureIssues[0]) : 'Required document fields or validity dates fail official government specifications.')
+              : isDocValid && !isDocPassedClean
+              ? (warningIssues[0] ? summarizeValidationIssue(warningIssues[0]) : 'All required checks passed with a minor, non-blocking notice. Proceed as normal.')
               : 'Discrepancies identified during automated inspection. Refer traveler for secondary verification.'}
           </p>
         </div>

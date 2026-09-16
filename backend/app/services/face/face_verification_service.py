@@ -44,6 +44,7 @@ def _crop_to_b64(crop_np: Optional[np.ndarray]) -> Optional[str]:
     return None
 
 from app.core.config import settings
+from app.schemas.evidence import EvidenceModule, EvidenceSeverity, EvidenceStatus, NormalizedEvidenceItem
 from app.schemas.face_verification import (
     AntiSpoofResult,
     DocumentFaceResult,
@@ -63,8 +64,120 @@ from app.services.face.face_quality import FaceQualityResult, evaluate_face_qual
 from app.services.face.minifasnet_pad import MiniFASNetPAD
 from app.services.face.secondary_pad import SecondaryOpticalPAD
 from app.services.face.session_store import session_document_store
+from app.services.risk.risk_session_store import risk_session_store
 
 logger = logging.getLogger(__name__)
+
+# Forensic/validation severities that trigger Dynamic Risk Tightening
+# (Proprietary Enhancement D) when found in upstream M2/M3 evidence.
+_ELEVATED_SEVERITIES = {"critical", "high"}
+# Validation signal types that indicate the MRZ itself was structurally
+# compromised — always elevation-worthy regardless of severity string casing
+# used by the originating check.
+_ELEVATED_VALIDATION_SIGNALS = {"mrz_auto_correction", "mrz_length_critical", "mrz_length_critical_failure"}
+# Forensic signal/finding types that indicate deliberate digital tampering
+# rather than routine capture-quality noise.
+_ELEVATED_FORENSIC_SIGNALS = {
+    "copy_move_duplication", "ai_tampering_model", "localized_tampering_region",
+    "photo_boundary_fallback_variance_anomaly",
+    "COPY_MOVE_DUPLICATION", "AI_TAMPERING_MODEL",
+}
+
+
+def _assess_upstream_risk(verification_id: str) -> tuple[bool, list[str]]:
+    """
+    Proprietary Enhancement D — Dynamic Risk Tightening.
+
+    Read the shared risk_session_store for this verification session and
+    determine whether M2 (validation) or M3 (forensics) already flagged
+    tampering-relevant evidence. If so, the biometric engine must not treat
+    this document the same as a clean one: the identity-matching threshold
+    is tightened upward (see verify()) rather than left at its baseline.
+
+    This function NEVER raises — a missing or malformed session must not
+    block biometric verification; it simply means no elevation signal was
+    found (fail toward the baseline threshold, not toward blocking
+    processing entirely, since M2/M3 may legitimately not have run yet for
+    some call patterns).
+
+    Returns:
+        (elevated, reasons) — elevated is True if ANY qualifying signal was
+        found; reasons is a list of human-readable strings identifying
+        which upstream module/signal triggered the escalation.
+    """
+    reasons: list[str] = []
+
+    try:
+        session = risk_session_store.get(verification_id)
+    except Exception as exc:
+        logger.debug("Dynamic Risk Tightening: could not read risk session for id=%s: %s", verification_id, exc)
+        return False, reasons
+
+    if not session:
+        return False, reasons
+
+    # ── M2 Validation ────────────────────────────────────────────────────
+    m2 = session.get("m2_validation")
+    if isinstance(m2, dict):
+        for item in (m2.get("critical_evidence") or []):
+            if not isinstance(item, dict):
+                continue
+            signal_type = str(item.get("signal_type", "")).lower()
+            severity = str(item.get("severity", "")).lower()
+            if signal_type in _ELEVATED_VALIDATION_SIGNALS or severity in _ELEVATED_SEVERITIES:
+                reasons.append(f"m2_validation: {item.get('signal_type', 'critical_evidence')}")
+
+        # Fall back to scanning `issues` in case a caller populated m2_validation
+        # via an older/alternate path that predates the critical_evidence key.
+        for issue in (m2.get("issues") or []):
+            if not isinstance(issue, dict):
+                continue
+            check = str(issue.get("check", "")).lower()
+            severity = str(issue.get("severity", "")).lower()
+            if check in _ELEVATED_VALIDATION_SIGNALS and severity in ("critical", "failure"):
+                reasons.append(f"m2_validation: {issue.get('check')}")
+
+    # ── M3 Forensics (classical + advanced) ────────────────────────────────
+    m3 = session.get("m3_forensics")
+    if isinstance(m3, dict):
+        for item in (m3.get("critical_evidence") or []):
+            if not isinstance(item, dict):
+                continue
+            signal_type = str(item.get("signal_type", ""))
+            severity = str(item.get("severity", "")).lower()
+            if signal_type.lower() in {s.lower() for s in _ELEVATED_FORENSIC_SIGNALS} or severity in _ELEVATED_SEVERITIES:
+                reasons.append(f"m3_forensics: {signal_type or 'critical_evidence'}")
+
+        if str(m3.get("overall_assessment", "")).lower() == "high_forensic_concern":
+            reasons.append("m3_forensics: overall_assessment=high_forensic_concern")
+
+        advanced = m3.get("advanced_forensics")
+        if isinstance(advanced, dict):
+            if str(advanced.get("status", "")).lower() == "forensic_suspicious":
+                reasons.append("m3_forensics.advanced: status=FORENSIC_SUSPICIOUS")
+            for model_res in (advanced.get("model_results") or []):
+                if isinstance(model_res, dict) and model_res.get("tampering_detected") is True:
+                    reasons.append(f"m3_forensics.advanced: {model_res.get('model_name', 'ai_tampering_model')} flagged tampering")
+            for finding in (advanced.get("findings") or []):
+                if not isinstance(finding, dict):
+                    continue
+                f_type = str(finding.get("signal_type", ""))
+                f_sev = str(finding.get("severity", "")).lower()
+                if f_type in _ELEVATED_FORENSIC_SIGNALS and f_sev in _ELEVATED_SEVERITIES:
+                    reasons.append(f"m3_forensics.advanced: {f_type}")
+
+    # De-duplicate while preserving order
+    seen: set[str] = set()
+    unique_reasons = [r for r in reasons if not (r in seen or seen.add(r))]
+
+    elevated = len(unique_reasons) > 0
+    if elevated:
+        logger.warning(
+            "TRACKING_EVENT dynamic_risk_tightening: verification_id=%s reasons=%s",
+            verification_id, unique_reasons,
+        )
+
+    return elevated, unique_reasons
 
 
 class FaceVerificationService:
@@ -467,7 +580,7 @@ class FaceVerificationService:
 
         # Profile-driven threshold & calibration overrides
         face_match_threshold = settings.FACE_MATCH_THRESHOLD
-        calib_status = "UNCALIBRATED_PROFILE_DEFAULT"
+        calib_status = settings.FACE_MATCH_CALIBRATION_STATUS
         inconclusive_margin = 0.06
 
         if profile is not None and getattr(profile, "biometric_config", None):
@@ -476,6 +589,26 @@ class FaceVerificationService:
             calib_status = b_cfg.get("calibration_status", calib_status)
             inconclusive_margin = b_cfg.get("inconclusive_margin", inconclusive_margin)
 
+        # ── 8b. Dynamic Risk Tightening (Proprietary Enhancement D) ────
+        # If upstream M2 (validation) already found the MRZ was auto-corrected
+        # or critically malformed, or M3 (forensics — classical or advanced
+        # engine) raised a CRITICAL/HIGH tampering signal, this document is
+        # already known-suspicious. It must clear a materially stricter
+        # identity bar than a clean document before a biometric match is
+        # accepted — never the same uncalibrated baseline. The elevated
+        # threshold is applied as a floor: it can only raise the operating
+        # threshold, never lower a profile-specific threshold that was
+        # already stricter than the elevated ceiling.
+        risk_elevated, risk_reasons = _assess_upstream_risk(verification_id)
+        if risk_elevated:
+            pre_elevation_threshold = face_match_threshold
+            face_match_threshold = max(face_match_threshold, settings.FACE_MATCH_THRESHOLD_ELEVATED)
+            calib_status = "CALIBRATED_RISK_ELEVATED"
+            logger.warning(
+                "Dynamic Risk Tightening applied: id=%s threshold %.2f -> %.2f reasons=%s",
+                verification_id, pre_elevation_threshold, face_match_threshold, risk_reasons,
+            )
+
         # ── 9. Cosine Similarity Matching ─────────────────────────────
         match_result = compare_face_embeddings(
             doc_embedding,
@@ -483,6 +616,8 @@ class FaceVerificationService:
             threshold=face_match_threshold,
             calibration_status=calib_status,
             inconclusive_margin=inconclusive_margin,
+            risk_escalated=risk_elevated,
+            risk_escalation_reasons=risk_reasons,
         )
 
         # ── 10. Decision Hierarchy Resolution ─────────────────────────
@@ -514,13 +649,58 @@ class FaceVerificationService:
             overall_status = "BIOMETRIC_INCONCLUSIVE"
             summary = "Facial comparison inconclusive."
 
+        # ── Requirement #5: escalated evidence for a match failure that occurred
+        # under Dynamic Risk Tightening ────────────────────────────────────────
+        # A NormalizedEvidenceItem is raised specifically (and only) when the
+        # match failed/was inconclusive WHILE the threshold was elevated —
+        # this is the case that most needs an explicit record, since the same
+        # similarity score might have cleared the unelevated baseline. The
+        # evidence explicitly states the failure was escalated by upstream
+        # forensic/validation risk priors, not a routine biometric mismatch.
+        biometric_evidence_items: list[NormalizedEvidenceItem] = []
+        if risk_elevated and match_result.status in ("no_match", "inconclusive"):
+            escalation_desc = (
+                f"Facial biometric {match_result.status.replace('_', ' ')} occurred under a "
+                f"dynamically TIGHTENED identity threshold ({match_result.threshold:.2f}, raised from "
+                f"baseline {settings.FACE_MATCH_THRESHOLD:.2f}) because upstream evidence already flagged "
+                f"this document as elevated risk: {'; '.join(risk_reasons)}. This biometric failure was "
+                f"ESCALATED by upstream forensic/validation risk priors — it is reported as a compounding "
+                f"signal on an already-suspicious document, not an isolated biometric result."
+            )
+            biometric_evidence_items.append(
+                NormalizedEvidenceItem(
+                    document_id=verification_id,
+                    document_type=document_type,
+                    module=EvidenceModule.BIOMETRICS,
+                    signal_type="biometric_match_failed_under_risk_escalation",
+                    status=EvidenceStatus.FAILED if match_result.status == "no_match" else EvidenceStatus.SUSPICIOUS,
+                    severity=EvidenceSeverity.HIGH if match_result.status == "no_match" else EvidenceSeverity.MEDIUM,
+                    confidence=float(match_result.confidence_score) if match_result.confidence_score is not None else 0.5,
+                    description=escalation_desc,
+                    source="face_verification_service.dynamic_risk_tightening",
+                    module_version="1.1.0",
+                    provenance={
+                        "similarity": match_result.similarity,
+                        "baseline_threshold": settings.FACE_MATCH_THRESHOLD,
+                        "elevated_threshold": match_result.threshold,
+                        "escalation_reasons": risk_reasons,
+                    },
+                )
+            )
+            summary += f" [ESCALATED: {escalation_desc}]"
+            logger.warning(
+                "TRACKING_EVENT biometric_failure_escalated_by_risk: id=%s match_status=%s reasons=%s",
+                verification_id, match_result.status, risk_reasons,
+            )
+
         elapsed_ms = (time.time() - t0) * 1000.0
         logger.info(
-            "Biometric verification completed in %.1fms (status=%s, match=%s, pad=%s)",
+            "Biometric verification completed in %.1fms (status=%s, match=%s, pad=%s, risk_elevated=%s)",
             elapsed_ms,
             overall_status,
             match_result.status,
             pad_result.status,
+            risk_elevated,
         )
 
         # Build evidence payloads
@@ -579,6 +759,8 @@ class FaceVerificationService:
             "threshold_calibration": calib_val,
             "similarity_metric": metric_val,
             "explanation": match_expl,
+            "risk_escalated": risk_elevated,
+            "risk_escalation_reasons": risk_reasons,
         }
 
         model_meta = {
@@ -620,6 +802,8 @@ class FaceVerificationService:
                 embedding_model=self.embedding_model.model_info().get("model_name", "ArcFace-w600k_r50"),
                 embedding_dimension=self.embedding_model.get_embedding_dimension(),
                 explanation=match_expl,
+                risk_escalated=risk_elevated,
+                risk_escalation_reasons=risk_reasons,
             ),
             document_face_image=_crop_to_b64(doc_crop),
             live_face_image=_crop_to_b64(live_crop),
@@ -630,7 +814,8 @@ class FaceVerificationService:
             comparison_evidence=comp_ev,
             model_metadata=model_meta,
             profile_version=profile.version if profile else "default",
-            biometric_engine_version="1.0.0",
+            biometric_engine_version="1.1.0",
+            evidence_items=biometric_evidence_items,
         )
 
     # ── Helpers for Non-Nominal Response Scenarios ─────────────────────

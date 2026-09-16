@@ -1,13 +1,14 @@
 /* RegisterPage.module.css — Professional Split-Screen Registration Theme */
 
 .pageRoot {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
   display: flex;
   background-color: #f0f3f8;
   font-family: var(--font-family-base, 'Inter', sans-serif);
   color: #0f172a;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -16,13 +17,23 @@
 .showcaseSide {
   flex: 1.1;
   background: linear-gradient(150deg, #071426 0%, #0c1f38 50%, #08162b 100%);
-  padding: 48px 56px;
+  padding: 40px 56px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 28px;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
   color: #ffffff;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.showcaseSide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .showcaseSide::before {
@@ -122,9 +133,8 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
   max-width: 520px;
-  margin: 28px 0;
 }
 
 .showcaseHeading {
@@ -226,9 +236,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 36px 24px;
+  padding: 28px 24px;
   background-color: #f0f3f8;
   position: relative;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.formSide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .authCard {
@@ -560,30 +580,6 @@
     inset 1px 1px 3px rgba(166, 180, 200, 0.2);
 }
 
-.demoBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  padding: 9px 14px;
-  border-radius: 12px;
-  background: #f0f3f8;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  color: #0066ff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 
-    3px 3px 7px rgba(166, 180, 200, 0.35),
-    -3px -3px 7px rgba(255, 255, 255, 0.95);
-  transition: all 0.15s ease;
-}
-
-.demoBtn:hover {
-  background: #eaf1fb;
-}
-
 .backBtn {
   background: none;
   border: none;
@@ -602,16 +598,23 @@
 @media (max-width: 960px) {
   .pageRoot {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible auto;
   }
 
   .showcaseSide {
-    padding: 36px 24px;
+    padding: 32px 24px;
     flex: none;
+    height: auto;
+    overflow: visible;
+    justify-content: flex-start;
+    gap: 20px;
   }
 
   .showcaseHero {
     max-width: 100%;
-    margin: 16px 0;
   }
 
   .stepsList {
@@ -624,6 +627,8 @@
 
   .formSide {
     padding: 28px 16px 44px;
+    height: auto;
+    overflow: visible;
   }
 }
 

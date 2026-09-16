@@ -32,6 +32,7 @@ schema — it intentionally contains no forensic logic of its own.
 from __future__ import annotations
 
 import logging
+from typing import Optional
 
 import numpy as np
 
@@ -76,17 +77,21 @@ def run_forensic_analysis(
     raw_bytes: bytes,
     image_np_bgr: np.ndarray,
     document_type: str = "passport",
+    verification_id: Optional[str] = None,
 ) -> ForensicAnalysisSummary:
     """
     Execute Module 3 forensic analysis on the original uploaded image.
 
     Args:
-        raw_bytes:     Original file bytes (used for metadata analysis only —
-                        never logged, never persisted).
-        image_np_bgr:  Decoded original image (BGR), NOT the OCR-preprocessed
-                        image — Module 3 must operate on the original upload.
-        document_type: Canonical document type string ('passport', 'visa', etc.)
-                        Configures regional sampling for compression analysis.
+        raw_bytes:        Original file bytes (used for metadata analysis only —
+                           never logged, never persisted).
+        image_np_bgr:      Decoded original image (BGR), NOT the OCR-preprocessed
+                           image — Module 3 must operate on the original upload.
+        document_type:     Canonical document type string ('passport', 'visa', etc.)
+                           Configures regional sampling for compression analysis.
+        verification_id:   Session/document identifier, attached to any escalated
+                           NormalizedEvidenceItem for traceability. Optional —
+                           falls back to "unknown" if not supplied.
     """
     h, w = image_np_bgr.shape[:2]
 
@@ -129,14 +134,23 @@ def run_forensic_analysis(
     )
 
     # ── Photo region + boundary ──────────────────────────────────────────
-    photo_region_result = detect_photo_region(image_np_bgr)
-    boundary_result = analyze_photo_boundary(image_np_bgr, photo_region_result)
+    # detect_photo_region now uses a two-tier strategy: dynamic contour
+    # geometry ("detected"), falling back to the document profile's declared
+    # expected photo region ("fallback") rather than exempting the document
+    # from boundary analysis when contour detection fails. Both tiers yield
+    # a usable region; only "unavailable" (both tiers failed) has none.
+    photo_region_result = detect_photo_region(image_np_bgr, document_type=document_type)
+    boundary_result = analyze_photo_boundary(
+        image_np_bgr, photo_region_result, document_type=document_type, document_id=verification_id,
+    )
+
+    region_available = photo_region_result.status in ("detected", "fallback") and photo_region_result.region is not None
 
     photo_region_schema = (
         PhotoRegionBox(
             x=photo_region_result.region.x, y=photo_region_result.region.y,
             width=photo_region_result.region.width, height=photo_region_result.region.height,
-        ) if photo_region_result.status == "detected" and photo_region_result.region else None
+        ) if region_available else None
     )
 
     boundary_signal = ForensicSignal(
@@ -146,7 +160,10 @@ def run_forensic_analysis(
         confidence=boundary_result.confidence,
         description=boundary_result.description,
         region=photo_region_schema,
-        metrics={"indicator_count": len(boundary_result.indicators)},
+        metrics={
+            "indicator_count": len(boundary_result.indicators),
+            "detection_tier": boundary_result.detection_tier,
+        },
     )
 
     # ── Local compression consistency ────────────────────────────────────
@@ -154,7 +171,7 @@ def run_forensic_analysis(
         RegionBox(
             x=photo_region_result.region.x, y=photo_region_result.region.y,
             width=photo_region_result.region.width, height=photo_region_result.region.height,
-        ) if photo_region_result.status == "detected" and photo_region_result.region else None
+        ) if region_available else None
     )
 
     # Configure regions dynamically based on document profile
@@ -242,9 +259,14 @@ def run_forensic_analysis(
 
     overall_assessment, explanation = aggregate_forensic_signals(votes)
 
+    # Escalated typed evidence items raised by individual techniques (currently:
+    # photo boundary fallback-tier variance anomalies). Additive — signals above
+    # already carry the equivalent status/severity for aggregation purposes.
+    evidence_items = [item for item in (boundary_result.evidence_item,) if item is not None]
+
     logger.info(
-        "Forensic analysis complete: overall=%s signals=%d",
-        overall_assessment, len(signals),
+        "Forensic analysis complete: overall=%s signals=%d evidence_items=%d",
+        overall_assessment, len(signals), len(evidence_items),
     )
 
     return ForensicAnalysisSummary(
@@ -254,4 +276,5 @@ def run_forensic_analysis(
         signals=signals,
         photo_region=photo_region_schema,
         quality_reasons=[],
+        evidence_items=evidence_items,
     )

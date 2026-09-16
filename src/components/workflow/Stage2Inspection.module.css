@@ -374,6 +374,20 @@
   line-height: 1.45;
 }
 
+.secIssueList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secIssueItem {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
 /* Officer Directive Box */
 .directiveBox {
   display: flex;

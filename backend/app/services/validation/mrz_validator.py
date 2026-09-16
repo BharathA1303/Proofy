@@ -46,6 +46,15 @@ class MrzStructureResult:
     line2_length: int
     issues: list[str]
     message: str
+    # True when either line's length is not exactly 44 characters. This is a
+    # CRITICAL structural defect per ICAO Doc 9303 Part 4 — a line of the
+    # wrong length cannot be sliced into its declared fixed-width fields
+    # (document number, DOB, expiry, check digits, composite check digit)
+    # without guessing where each field actually starts. Callers MUST hard-
+    # stop check-digit computation when this is True rather than slicing a
+    # wrong-length line and reporting partial "passed"/"failed" sub-results
+    # — see passport_validation_service.py's length-gate.
+    length_critical_failure: bool = False
 
 
 def normalize_mrz_line(raw: Optional[str]) -> str:
@@ -108,11 +117,26 @@ def validate_td3_structure(
     if not norm_l2:
         issues.append("MRZ Line 2 is missing.")
 
-    # 2. Length check
+    # 2. Length check — CRITICAL, not a soft warning. A TD3 MRZ line is a
+    # fixed-width record; any length other than exactly 44 characters means
+    # every downstream fixed-offset field slice (document number, DOB,
+    # expiry, check digits, composite check digit) is being read from the
+    # wrong position. This is flagged as a critical length failure so the
+    # orchestrator hard-stops check-digit computation entirely rather than
+    # silently slicing a wrong-length line and reporting partial results.
+    length_critical_failure = False
     if norm_l1 and l1_len != 44:
-        issues.append(f"MRZ Line 1 length is {l1_len}; standard TD3 format requires exactly 44 characters.")
+        issues.append(
+            f"CRITICAL: MRZ Line 1 length is {l1_len}; standard TD3 format requires exactly 44 characters. "
+            "Fixed-offset field parsing cannot be trusted at this length."
+        )
+        length_critical_failure = True
     if norm_l2 and l2_len != 44:
-        issues.append(f"MRZ Line 2 length is {l2_len}; standard TD3 format requires exactly 44 characters.")
+        issues.append(
+            f"CRITICAL: MRZ Line 2 length is {l2_len}; standard TD3 format requires exactly 44 characters. "
+            "Fixed-offset field parsing cannot be trusted at this length."
+        )
+        length_critical_failure = True
 
     # 3. Allowed character set check
     if norm_l1 and not MRZ_CHARSET_REGEX.match(norm_l1):
@@ -150,6 +174,12 @@ def validate_td3_structure(
     if is_valid:
         status = "passed"
         message = "MRZ conforms to standard ICAO TD3 (2x44) structure and character set."
+    elif length_critical_failure:
+        status = "failed"
+        message = (
+            "MRZ structural validation failed CRITICALLY: line length is not exactly 44 "
+            "characters. " + "; ".join(issues)
+        )
     elif not norm_l1 or not norm_l2 or l1_len < 30 or l2_len < 30:
         status = "failed"
         message = "MRZ is severely malformed or incomplete."
@@ -168,4 +198,5 @@ def validate_td3_structure(
         line2_length=l2_len,
         issues=issues,
         message=message,
+        length_critical_failure=length_critical_failure,
     )

@@ -254,6 +254,9 @@ class CaseManager:
                     raw_line2=getattr(parsed_passport.mrz_line2, "value", None),
                     confidence_line1=getattr(parsed_passport.mrz_line1, "confidence", 0.95),
                     confidence_line2=getattr(parsed_passport.mrz_line2, "confidence", 0.95),
+                    auto_corrected=getattr(parsed_passport, "mrz_auto_corrected", False),
+                    auto_corrected_tags=getattr(parsed_passport, "mrz_auto_corrected_indices", []),
+                    has_high_risk_correction=getattr(parsed_passport, "mrz_has_high_risk_correction", False),
                 )
 
         # 6. Populate M1 in risk and registry session stores
@@ -306,7 +309,9 @@ class CaseManager:
             elif profile.document_type in ("border_permit", "borderpermit"):
                 val_res = validate_border_permit_document(traveler_fields, None)
             else:
-                val_res = validate_passport_document(mrz_data=mrz_data, traveler=traveler_fields)
+                val_res = validate_passport_document(
+                    mrz_data=mrz_data, traveler=traveler_fields, verification_id=verification_id,
+                )
 
             val_dict = (
                 val_res.model_dump() if hasattr(val_res, "model_dump")

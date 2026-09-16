@@ -1,13 +1,14 @@
 /* LoginPage.module.css — Professional Split-Screen Authentication Theme */
 
 .pageRoot {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
   display: flex;
   background-color: #f0f3f8;
   font-family: var(--font-family-base, 'Inter', sans-serif);
   color: #0f172a;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -16,13 +17,23 @@
 .showcaseSide {
   flex: 1.1;
   background: linear-gradient(150deg, #071426 0%, #0c1f38 50%, #08162b 100%);
-  padding: 48px 56px;
+  padding: 40px 56px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 28px;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
   color: #ffffff;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.showcaseSide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Ambient luminous glow effects behind hero */
@@ -126,9 +137,8 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 22px;
   max-width: 520px;
-  margin: 32px 0;
 }
 
 .showcaseHeading {
@@ -237,9 +247,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 32px 24px;
   background-color: #f0f3f8;
   position: relative;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.formSide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .authCard {
@@ -462,58 +482,6 @@
     inset -2px -2px 4px rgba(255, 255, 255, 0.2);
 }
 
-.dividerRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 2px 0;
-}
-
-.dividerLine {
-  flex: 1;
-  height: 1px;
-  background: #cbd5e1;
-}
-
-.dividerText {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.demoBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: #f0f3f8;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  color: #0066ff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 
-    3px 3px 8px rgba(166, 180, 200, 0.35),
-    -3px -3px 8px rgba(255, 255, 255, 0.95);
-  transition: all 0.15s ease;
-}
-
-.demoBtn:hover {
-  background: #eaf1fb;
-  color: #0052cc;
-}
-
-.demoBtn:active {
-  box-shadow: 
-    inset 2px 2px 4px rgba(166, 180, 200, 0.4),
-    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
-}
-
 .cardFooter {
   text-align: center;
   font-size: 0.8rem;
@@ -609,16 +577,23 @@
 @media (max-width: 960px) {
   .pageRoot {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible auto;
   }
 
   .showcaseSide {
-    padding: 36px 24px;
+    padding: 32px 24px;
     flex: none;
+    height: auto;
+    overflow: visible;
+    justify-content: flex-start;
+    gap: 20px;
   }
 
   .showcaseHero {
     max-width: 100%;
-    margin: 20px 0;
   }
 
   .featureList {
@@ -631,14 +606,17 @@
 
   .formSide {
     padding: 32px 16px 48px;
+    height: auto;
+    overflow: visible;
   }
 
   .authCard {
-    box-shadow: 
+    box-shadow:
       8px 8px 20px rgba(166, 180, 200, 0.4),
       -8px -8px 20px rgba(255, 255, 255, 0.95);
   }
 }
+
 
 @media (max-width: 480px) {
   .authCard {

@@ -19,6 +19,7 @@ import datetime
 import logging
 from typing import Optional
 
+from app.schemas.evidence import EvidenceModule, EvidenceSeverity, EvidenceStatus, NormalizedEvidenceItem
 from app.schemas.ocr import MRZData, TravelerFields
 from app.schemas.validation import (
     CheckDigitEvidence,
@@ -72,6 +73,7 @@ def validate_passport_document(
     mrz_data: Optional[MRZData],
     traveler: Optional[TravelerFields],
     reference_date: Optional[datetime.date] = None,
+    verification_id: Optional[str] = None,
 ) -> DocumentValidationSummary:
     """
     Execute all Module 2 document validation checks on extracted passport data.
@@ -80,6 +82,9 @@ def validate_passport_document(
         mrz_data: MRZ lines extracted during Module 1 OCR.
         traveler: Structured traveler fields extracted from VIZ and MRZ.
         reference_date: Evaluation date for expiration (defaults to today).
+        verification_id: Session/document identifier, attached to any
+            escalated NormalizedEvidenceItem for traceability. Optional —
+            falls back to "unknown" if not supplied.
 
     Returns:
         DocumentValidationSummary with complete check evidence and overall status.
@@ -87,7 +92,9 @@ def validate_passport_document(
     if reference_date is None:
         reference_date = datetime.date.today()
 
+    doc_id = verification_id or "unknown"
     issues: list[ValidationIssue] = []
+    evidence_items: list[NormalizedEvidenceItem] = []
 
     raw_l1 = mrz_data.line1 if mrz_data else None
     raw_l2 = mrz_data.line2 if mrz_data else None
@@ -116,6 +123,167 @@ def validate_passport_document(
     if struct_res.status == "insufficient_data":
         logger.info("Validation completed: status=insufficient_data (no MRZ found)")
         return _build_insufficient_data_response(struct_res.message)
+
+    # ─────────────────────────────────────────────────────────────
+    # Requirement #2: MRZ auto-correction gate.
+    # If Module 1 (passport_parser._extract_mrz) had to adjust either MRZ
+    # line to reach a nominally valid shape, that correction MUST NOT be
+    # silently discarded — but it must also not be treated as uniformly
+    # suspicious. Two distinct cases:
+    #
+    #   HIGH-RISK (mrz_data.has_high_risk_correction): a genuine
+    #   character-level guess about content OCR did not actually detect
+    #   (e.g. inserting a filler between two detected characters because a
+    #   position looked wrong). This is a hard, critical failure — the
+    #   corrected line is NOT accepted as clean, regardless of whether
+    #   check digits subsequently compute successfully against the guessed
+    #   text, because the guess itself could coincidentally launder a
+    #   tampered field.
+    #
+    #   SAFE-ONLY (auto_corrected but NOT high-risk): every correction was
+    #   pure trailing-filler ('<') padding recovering from a truncated OCR
+    #   detection box — a common, benign PaddleOCR artifact on any MRZ line
+    #   ending in a long run of filler characters. No detected character was
+    #   altered or guessed. This is recorded as a low-severity warning and
+    #   a MEDIUM-severity evidence item for audit visibility, but does NOT
+    #   by itself force the document to "failed" — the actual proof of
+    #   authenticity (ICAO check digits, computed below) still applies.
+    # ─────────────────────────────────────────────────────────────
+    if mrz_data is not None and mrz_data.auto_corrected:
+        is_high_risk = mrz_data.has_high_risk_correction
+        tags_str = ", ".join(mrz_data.auto_corrected_tags) if mrz_data.auto_corrected_tags else "unspecified"
+
+        if is_high_risk:
+            auto_correct_msg = (
+                "MRZ layout structure was compromised and required algorithmic correction "
+                "(a character-level guess about content OCR did not detect) before it reached a "
+                "nominally valid shape. This is treated as a tampering-relevant signal — the "
+                "corrected line(s) are NOT accepted as a clean extraction, regardless of whether "
+                f"check digits subsequently compute successfully against the corrected text. "
+                f"Correction operations applied: {tags_str}."
+            )
+            issues.append(ValidationIssue(severity="critical", check="mrz_auto_correction", message=auto_correct_msg))
+            evidence_status, evidence_severity = EvidenceStatus.FAILED, EvidenceSeverity.HIGH
+        else:
+            auto_correct_msg = (
+                "MRZ line length was recovered via safe trailing-filler padding after the OCR text "
+                "detector's bounding box truncated before the end of a filler run — a common, benign "
+                "capture artifact. No detected character was altered or guessed; this does not by itself "
+                f"indicate tampering. Correction operations applied: {tags_str}."
+            )
+            issues.append(ValidationIssue(severity="warning", check="mrz_auto_correction", message=auto_correct_msg))
+            evidence_status, evidence_severity = EvidenceStatus.WARNING, EvidenceSeverity.MEDIUM
+
+        evidence_items.append(
+            NormalizedEvidenceItem(
+                document_id=doc_id,
+                document_type="passport",
+                module=EvidenceModule.VALIDATION,
+                signal_type="mrz_auto_correction",
+                status=evidence_status,
+                severity=evidence_severity,
+                confidence=1.0,
+                description=auto_correct_msg,
+                source="passport_validation_service.mrz_auto_correction_gate",
+                module_version="2.2.0",
+                provenance={
+                    "auto_corrected_tags": mrz_data.auto_corrected_tags,
+                    "high_risk": is_high_risk,
+                },
+            )
+        )
+        logger.warning(
+            "TRACKING_EVENT mrz_auto_corrected: verification_id=%s tags=%s high_risk=%s",
+            doc_id, mrz_data.auto_corrected_tags, is_high_risk,
+        )
+
+    # ─────────────────────────────────────────────────────────────
+    # Requirement #3: MRZ length-critical hard-stop.
+    # A line whose length is not exactly 44 characters cannot be trusted at
+    # ANY fixed offset — computing check digits against slices of a
+    # wrong-length line does not "gracefully degrade", it produces
+    # meaningless pass/fail results at the wrong character positions. When
+    # this fires, check-digit computation is skipped entirely (all four
+    # sub-checks report "failed", not "unknown") rather than partially
+    # executed — see the branch below.
+    # ─────────────────────────────────────────────────────────────
+    if struct_res.length_critical_failure:
+        length_fail_msg = (
+            "MRZ line length is not exactly 44 characters (TD3 standard). Fixed-offset "
+            "field parsing — document number, date of birth, date of expiry, and all "
+            "check digits — cannot be trusted at this length, so check-digit computation "
+            "was skipped entirely rather than run against misaligned data."
+        )
+        issues.append(
+            ValidationIssue(
+                severity="critical",
+                check="mrz_length_critical",
+                message=length_fail_msg,
+            )
+        )
+        evidence_items.append(
+            NormalizedEvidenceItem(
+                document_id=doc_id,
+                document_type="passport",
+                module=EvidenceModule.VALIDATION,
+                signal_type="mrz_length_critical_failure",
+                status=EvidenceStatus.FAILED,
+                severity=EvidenceSeverity.HIGH,
+                confidence=1.0,
+                description=length_fail_msg,
+                source="passport_validation_service.length_critical_gate",
+                module_version="2.1.0",
+                provenance={
+                    "line1_length": struct_res.line1_length,
+                    "line2_length": struct_res.line2_length,
+                },
+            )
+        )
+        logger.warning(
+            "TRACKING_EVENT mrz_length_critical_failure: verification_id=%s line1_length=%d line2_length=%d",
+            doc_id, struct_res.line1_length, struct_res.line2_length,
+        )
+
+        failed_chk = CheckDigitEvidence(
+            status="failed",
+            valid=False,
+            computed=0,
+            actual=None,
+            message="Skipped: MRZ line length is not exactly 44 characters — see mrz_length_critical issue.",
+        )
+        return DocumentValidationSummary(
+            status="failed",
+            summary=(
+                "Document validation failed. MRZ line length is critically malformed; "
+                "check-digit computation was not attempted against untrustworthy data."
+            ),
+            checks=ValidationChecks(
+                mrz_structure=mrz_check_item,
+                document_number_checksum=failed_chk,
+                dob_checksum=failed_chk,
+                expiry_checksum=failed_chk,
+                composite_checksum=failed_chk,
+                expiry_date=ExpiryCheckEvidence(
+                    status="unknown", valid=False, expired=None, expiry_date=None,
+                    message="Not evaluated: MRZ length-critical failure.",
+                ),
+                validity_period=ValidityPeriodEvidence(
+                    status="unknown", valid=False, issue_date=None, expiry_date=None,
+                    validity_years=None, exceeds_standard_term=False,
+                    message="Not evaluated: MRZ length-critical failure.",
+                ),
+                passport_number_binding=PassportBindingEvidence(
+                    status="unknown", valid=False, viz_value=None, mrz_value=None, match=None,
+                    message="Not evaluated: MRZ length-critical failure.",
+                ),
+                viz_mrz_consistency=VizMrzConsistencyReport(
+                    status="unknown", fields={},
+                    message="Not evaluated: MRZ length-critical failure.",
+                ),
+            ),
+            issues=issues,
+            evidence_items=evidence_items,
+        )
 
     norm_l1 = struct_res.normalized_line1 or ""
     norm_l2 = struct_res.normalized_line2 or ""
@@ -544,6 +712,7 @@ def validate_passport_document(
             viz_mrz_consistency=consistency_report,
         ),
         issues=issues,
+        evidence_items=evidence_items,
     )
 
 

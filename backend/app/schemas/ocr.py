@@ -106,6 +106,21 @@ class MRZData(BaseModel):
     # Per-line OCR confidence
     confidence_line1: Optional[float] = None
     confidence_line2: Optional[float] = None
+    # Set by Module 1 (passport_parser._extract_mrz) when either line required
+    # ANY structural adjustment — including safe, unambiguous trailing-filler
+    # padding — to reach a nominally valid TD3 shape. This is tracking
+    # metadata, not a validation verdict by itself.
+    auto_corrected: bool = False
+    auto_corrected_tags: list[str] = Field(default_factory=list)
+    # True only when at least one correction was a genuine character-level
+    # guess about content OCR did not detect (e.g. inserting a filler
+    # character between two detected characters) — as opposed to pure
+    # trailing-filler padding after a truncated OCR detection box, which is
+    # a common, benign PaddleOCR artifact and does not alter any detected
+    # character. Module 2 MUST treat a high-risk correction as a
+    # tampering-relevant signal; a safe-only correction should be recorded
+    # as evidence but must NOT by itself force the document to "failed".
+    has_high_risk_correction: bool = False
 
 
 class OCRMeta(BaseModel):

@@ -16,6 +16,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.ocr import MRZData, TravelerFields
+from app.schemas.evidence import NormalizedEvidenceItem
 
 
 class CheckItem(BaseModel):
@@ -113,6 +114,14 @@ class DocumentValidationSummary(BaseModel):
     summary: str
     checks: Union[ValidationChecks, dict[str, Any]]
     issues: list[ValidationIssue] = Field(default_factory=list)
+    evidence_items: list[NormalizedEvidenceItem] = Field(
+        default_factory=list,
+        description=(
+            "Escalated, typed evidence items raised by individual validation "
+            "checks (e.g. an MRZ auto-correction hard failure). Additive to "
+            "`issues` — never removes or replaces an issue entry."
+        ),
+    )
 
     @model_validator(mode="before")
     @classmethod

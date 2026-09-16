@@ -86,6 +86,12 @@ from app.schemas.validation import (
 from app.services.validation.passport_validation_service import validate_passport_document
 from app.schemas.forensics import ForensicAnalysisResponse
 from app.services.forensics.forensic_service import run_forensic_analysis
+from app.services.document_forensics.service import DocumentForensicsService
+from app.services.document_forensics.schema import (
+    ModelStatus as AdvModelStatus,
+    SignalType as AdvSignalType,
+)
+from app.schemas.evidence import EvidenceModule, EvidenceSeverity, EvidenceStatus, NormalizedEvidenceItem
 from app.schemas.face_verification import FaceVerificationResponse, ModelInfoResponse
 from app.services.face.face_verification_service import face_verification_service, verify_passport_biometrics
 from app.services.face.session_store import session_document_store
@@ -103,6 +109,13 @@ from app.services.quality.document_quality import evaluate_document_quality
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/verification", tags=["Verification"])
+
+# Advanced M3 engine (copy-move, splicing, deep-learning tampering telemetry,
+# spatial localization). Instantiated once and reused across requests, same
+# lifecycle pattern as face_verification_service. Degrades safely to
+# MODEL_UNAVAILABLE if no tampering-model weights are configured — classical
+# signals (ELA, compression, copy-move, splicing, boundary) still run.
+advanced_forensics_service = DocumentForensicsService()
 
 
 @router.post(
@@ -316,6 +329,9 @@ async def ocr_document(
             raw_line2=parsed_passport.mrz_line2.value,
             confidence_line1=parsed_passport.mrz_line1.confidence,
             confidence_line2=parsed_passport.mrz_line2.confidence,
+            auto_corrected=parsed_passport.mrz_auto_corrected,
+            auto_corrected_tags=parsed_passport.mrz_auto_corrected_indices,
+            has_high_risk_correction=parsed_passport.mrz_has_high_risk_correction,
         )
 
         primary_fields_found = sum(1 for v in [
@@ -1188,6 +1204,7 @@ async def validate_document(payload: DocumentValidationRequest) -> DocumentValid
         validation_summary = validate_passport_document(
             mrz_data=payload.mrz,
             traveler=payload.traveler,
+            verification_id=payload.verification_id,
         )
     elif profile.document_type == "visa":
         summary_dict = validate_visa_document(
@@ -1249,6 +1266,7 @@ async def validate_document(payload: DocumentValidationRequest) -> DocumentValid
                 "status": validation_summary.status,
                 "summary": validation_summary.summary,
                 "checks": checks_dict,
+                "critical_evidence": [item.to_canonical_dict() for item in validation_summary.evidence_items],
             },
         )
     except Exception as _risk_exc:
@@ -1309,23 +1327,153 @@ async def forensic_analysis(
     # Refresh ephemeral session store for downstream Module 4 biometrics
     session_document_store.set(verification_id, ingested.raw_bytes)
 
+    # ── Run classical (primary/response-contract) and advanced (copy-move,
+    # splicing, deep-learning tampering, spatial localization) engines
+    # concurrently. Both are synchronous/CPU-bound, so each runs in its own
+    # worker thread. The classical engine's result remains the authoritative
+    # ForensicAnalysisResponse payload (API contract unchanged); the advanced
+    # engine's findings are merged into the M3 risk-session evidence and can
+    # independently escalate a CRITICAL evidence item.
     try:
-        forensic_summary = await asyncio.to_thread(
-            run_forensic_analysis,
-            ingested.raw_bytes,
-            ingested.image_np,
-            document_type=profile.document_type,
+        forensic_summary, advanced_result = await asyncio.gather(
+            asyncio.to_thread(
+                run_forensic_analysis,
+                ingested.raw_bytes,
+                ingested.image_np,
+                document_type=profile.document_type,
+                verification_id=verification_id,
+            ),
+            asyncio.to_thread(
+                advanced_forensics_service.analyze,
+                ingested.image_np,
+                document_type=profile.document_type,
+                raw_bytes=ingested.raw_bytes,
+            ),
+            return_exceptions=True,
         )
     except Exception as exc:
         logger.error("Forensic analysis failure for id=%s: %s", verification_id, exc, exc_info=True)
         raise ForensicAnalysisError() from exc
 
+    # The classical engine is on the API's response contract — a failure there
+    # is a hard error, same as before this change.
+    if isinstance(forensic_summary, BaseException):
+        logger.error(
+            "Classical forensic analysis failure for id=%s: %s",
+            verification_id, forensic_summary, exc_info=forensic_summary,
+        )
+        raise ForensicAnalysisError() from forensic_summary
+
+    # The advanced engine is an additive enhancement — if it errors, log and
+    # degrade gracefully rather than failing a request the classical engine
+    # was able to complete.
+    if isinstance(advanced_result, BaseException):
+        logger.warning(
+            "Advanced document_forensics engine failed for id=%s (continuing with classical result only): %s",
+            verification_id, advanced_result, exc_info=advanced_result,
+        )
+        advanced_result = None
+
     logger.info(
-        "Forensic analysis complete: id=%s status=%s overall=%s",
+        "Forensic analysis complete: id=%s status=%s overall=%s advanced_status=%s advanced_anomaly=%s",
         verification_id, forensic_summary.status, forensic_summary.overall_assessment,
+        getattr(advanced_result, "status", "unavailable"),
+        getattr(advanced_result, "anomaly_state", "unavailable"),
     )
 
+    # ── Build CRITICAL-severity evidence from the advanced engine ─────────────────
+    # Fires when copy-move duplication is flagged suspicious/anomalous, or the
+    # deep-learning tampering model reports a positive detection. Either signal
+    # is a strong, independent indicator that a classical-only pipeline (ELA +
+    # compression + boundary heuristics) can miss entirely — see Critical
+    # Exposure #1 in the M1-M4 diagnosis.
+    advanced_evidence_items: list[NormalizedEvidenceItem] = []
+    critical_flags: list[str] = []
+
+    if advanced_result is not None:
+        copy_move_findings = [
+            f for f in advanced_result.findings
+            if f.signal_type == AdvSignalType.COPY_MOVE_DUPLICATION
+            and str(f.status.value if hasattr(f.status, "value") else f.status).upper() in ("SUSPICIOUS", "ANOMALOUS")
+        ]
+        for f in copy_move_findings:
+            critical_flags.append("copy_move_duplication")
+            advanced_evidence_items.append(NormalizedEvidenceItem(
+                document_id=verification_id,
+                document_type=profile.document_type,
+                module=EvidenceModule.FORENSICS,
+                signal_type="copy_move_duplication",
+                status=EvidenceStatus.SUSPICIOUS,
+                severity=EvidenceSeverity.CRITICAL,
+                confidence=float(f.confidence),
+                description=(
+                    f"Advanced forensic engine detected duplicated/copy-moved image regions: {f.explanation}"
+                ),
+                source="document_forensics.classical_engine",
+                module_version=advanced_result.forensic_engine_version,
+                provenance={"finding_id": f.finding_id, "metrics": f.metrics, "bbox": f.bbox},
+            ))
+
+        ai_tampering_hits = [
+            m for m in advanced_result.model_results
+            if m.status == AdvModelStatus.MODEL_AVAILABLE and m.tampering_detected is True
+        ]
+        for m in ai_tampering_hits:
+            critical_flags.append("ai_tampering_model")
+            advanced_evidence_items.append(NormalizedEvidenceItem(
+                document_id=verification_id,
+                document_type=profile.document_type,
+                module=EvidenceModule.FORENSICS,
+                signal_type="ai_tampering_model",
+                status=EvidenceStatus.SUSPICIOUS,
+                severity=EvidenceSeverity.CRITICAL,
+                confidence=float(m.confidence) if m.confidence is not None else 0.0,
+                description=(
+                    f"Deep-learning tampering model ({m.model_name} v{m.version}) flagged this document "
+                    f"as tampered: {m.explanation}"
+                ),
+                source="document_forensics.tampering_model",
+                module_version=advanced_result.forensic_engine_version,
+                model_version=m.version,
+                provenance={"model_name": m.model_name, "weights_path": m.weights_path},
+            ))
+
+        # High localized tampering confidence via spatial localization, even
+        # without an outright copy-move/AI hit above, is also escalated.
+        high_conf_regions = [r for r in advanced_result.suspicious_regions if r.score >= 0.80]
+        for r in high_conf_regions:
+            critical_flags.append("localized_tampering_region")
+            advanced_evidence_items.append(NormalizedEvidenceItem(
+                document_id=verification_id,
+                document_type=profile.document_type,
+                module=EvidenceModule.FORENSICS,
+                signal_type="localized_tampering_region",
+                status=EvidenceStatus.SUSPICIOUS,
+                severity=EvidenceSeverity.CRITICAL,
+                confidence=float(r.score),
+                description=(
+                    f"High-confidence localized tampering region '{r.region_name}': {r.explanation}"
+                ),
+                source="document_forensics.localization_engine",
+                module_version=advanced_result.forensic_engine_version,
+                provenance={"region_id": r.region_id, "signals": r.signals, "bbox": r.bbox},
+            ))
+
+        if critical_flags:
+            logger.warning(
+                "Advanced forensic engine raised CRITICAL evidence for id=%s: %s",
+                verification_id, ", ".join(sorted(set(critical_flags))),
+            )
+
+    # Classical engine's own escalated evidence (e.g. photo-boundary
+    # fallback-tier variance anomaly from detect_photo_region's two-tier
+    # strategy) — merged alongside the advanced engine's items so M6 sees a
+    # single combined list regardless of which engine raised it.
+    combined_evidence_items = list(forensic_summary.evidence_items) + advanced_evidence_items
+
     # ── Populate Risk Session Store for Module 6 (M3 evidence) ────────────────────
+    # Merges classical + advanced signals into one m3_forensics payload so the
+    # M6 risk aggregator sees both engines' evidence for this document.
     try:
         risk_session_store.update_module(
             verification_id, "m3_forensics",
@@ -1342,6 +1490,19 @@ async def forensic_analysis(
                     }
                     for s in forensic_summary.signals
                 ],
+                "advanced_forensics": (
+                    {
+                        "status":        advanced_result.status.value,
+                        "anomaly_state": advanced_result.anomaly_state.value,
+                        "explanation":   advanced_result.overall_explanation,
+                        "engine_version": advanced_result.forensic_engine_version,
+                        "findings": [f.to_dict() for f in advanced_result.findings],
+                        "suspicious_regions": [r.to_dict() for r in advanced_result.suspicious_regions],
+                        "model_results": [m.to_dict() for m in advanced_result.model_results],
+                    }
+                    if advanced_result is not None else None
+                ),
+                "critical_evidence": [item.to_canonical_dict() for item in combined_evidence_items],
             },
         )
     except Exception as _risk_exc:

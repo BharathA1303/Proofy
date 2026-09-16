@@ -7,6 +7,7 @@
  */
 import { useVerification } from '../../state/verification/useVerification.js';
 import { DOCUMENT_PROFILES, DOCUMENT_TYPES } from '../../config/documentProfiles.js';
+import { summarizeValidationIssue } from '../../utils/validationIssueSummary.js';
 import styles from './Stage4Clearance.module.css';
 
 export default function Stage4Clearance() {
@@ -18,7 +19,11 @@ export default function Stage4Clearance() {
   const isMock = Boolean(session.isMockVector);
   const durationSeconds = verificationDuration || '1.8';
 
-  const isDocValid = checks.documentValidation === 'passed';
+  // "warning" is not a failure — see Stage2Inspection.jsx for the full
+  // rationale (a non-blocking Module 2 notice, e.g. safe MRZ filler-padding
+  // recovery, must not deny final clearance on its own).
+  const validationStatus = checks.documentValidation;
+  const isDocValid = validationStatus === 'passed' || validationStatus === 'warning';
   const isTamperClean = checks.tamperingDetection !== 'failed';
   const regStatus = registryDetail?.registry?.status || '';
   const isRegistryCleared = regStatus === 'MATCHED' || checks.registryVerification === 'passed';
@@ -183,8 +188,8 @@ export default function Stage4Clearance() {
                 ? 'FACE MISMATCH: Live face does not match the document photograph.'
                 : !isStampClean
                 ? 'IMMIGRATION STAMP FORGERY: The official immigration entry stamp on this document is counterfeit and does not match registered movement in Government of India records.'
-                : session.validationDetail?.errors?.length
-                ? `Document validation defect: ${session.validationDetail.errors[0]}`
+                : session.validationDetail?.issues?.find((i) => i.severity === 'critical' || i.severity === 'failure')
+                ? `Document validation defect: ${summarizeValidationIssue(session.validationDetail.issues.find((i) => i.severity === 'critical' || i.severity === 'failure'))}`
                 : 'Document or format integrity tests failed during automated screening.'}
             </p>
           </div>
@@ -367,10 +372,12 @@ export default function Stage4Clearance() {
                 <div className={styles.checkContent}>
                   <span className={styles.checkName}>Document Format &amp; Validity</span>
                   <span className={styles.checkStatus}>
-                    {isDocValid
+                    {validationStatus === 'passed'
                       ? 'Passed · Valid format & dates'
-                      : (session.validationDetail?.errors?.[0]
-                          ? `Failed · ${session.validationDetail.errors[0]}`
+                      : validationStatus === 'warning'
+                      ? `Passed · ${session.validationDetail?.issues?.find((i) => i.severity === 'warning') ? summarizeValidationIssue(session.validationDetail.issues.find((i) => i.severity === 'warning')) : 'Minor non-blocking notice'}`
+                      : (session.validationDetail?.issues?.find((i) => i.severity === 'critical' || i.severity === 'failure')
+                          ? `Failed · ${summarizeValidationIssue(session.validationDetail.issues.find((i) => i.severity === 'critical' || i.severity === 'failure'))}`
                           : 'Failed · Format issue')}
                   </span>
                 </div>

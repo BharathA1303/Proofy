@@ -16,6 +16,8 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, Field
 
+from app.schemas.evidence import NormalizedEvidenceItem
+
 
 class PhotoRegionBox(BaseModel):
     """Coordinates are relative to the original uploaded image."""
@@ -47,6 +49,14 @@ class ForensicAnalysisSummary(BaseModel):
     signals: list[ForensicSignal] = Field(default_factory=list)
     photo_region: Optional[PhotoRegionBox] = None
     quality_reasons: list[str] = Field(default_factory=list)
+    evidence_items: list[NormalizedEvidenceItem] = Field(
+        default_factory=list,
+        description=(
+            "Escalated, typed evidence items raised by individual forensic "
+            "techniques (e.g. a fallback-tier photo boundary variance anomaly). "
+            "Additive to `signals` — never removes or replaces a signal entry."
+        ),
+    )
 
 
 class ForensicAnalysisResponse(BaseModel):

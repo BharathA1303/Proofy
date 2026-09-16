@@ -7,7 +7,6 @@
  *   - Multi-Factor Authentication (MFA / 6-digit TOTP)
  *   - New user registration with visual QR code and secret key setup
  *   - Persistent registered user accounts in localStorage
- *   - 1-Click quick demo access for reviewer evaluation
  */
 import { createContext, useState, useEffect, useMemo } from 'react';
 import { verifyTotp, generateBase32Secret, buildOtpauthUri } from '../../utils/totp.js';
@@ -17,68 +16,24 @@ export const AuthContext = createContext(null);
 const SESSION_STORAGE_KEY = 'meiyari_user_session';
 const USERS_STORAGE_KEY = 'meiyari_registered_users';
 
-export const DEFAULT_OFFICER = {
-  id: 'USR-001',
-  name: 'Insp. Rajesh Kumar',
-  username: 'rajesh.kumar',
-  email: 'r.kumar@bordercontrol.gov.in',
-  role: 'Senior Verification Officer',
-  station: 'Terminal 3 · Checkpoint Gate 4',
-  clearanceLevel: 'Level 3 — Biometric Authority',
-};
-
-const INITIAL_USERS = [
-  {
-    id: 'USR-001',
-    name: 'Insp. Rajesh Kumar',
-    username: 'rajesh.kumar',
-    email: 'r.kumar@bordercontrol.gov.in',
-    password: 'password123',
-    role: 'Senior Verification Officer',
-    station: 'Terminal 3 · Checkpoint Gate 4',
-    clearanceLevel: 'Level 3 — Biometric Authority',
-    mfaSecret: 'JBSWY3DPEHPK3PXP',
-  },
-  {
-    id: 'USR-002',
-    name: 'Officer Bharath A',
-    username: 'bharath',
-    email: 'bharath@meiyari.gov',
-    password: 'password123',
-    role: 'Border Inspection Officer',
-    station: 'Terminal 3 · Checkpoint Gate 4',
-    clearanceLevel: 'Level 3 — Identity Authority',
-    mfaSecret: 'MEIYARI7K92PTOTP',
-  },
-  {
-    id: 'USR-003',
-    name: 'Security Admin',
-    username: 'admin',
-    email: 'admin@meiyari.gov',
-    password: 'password123',
-    role: 'Terminal Administrator',
-    station: 'Central Operations Hub',
-    clearanceLevel: 'Level 4 — Administrative Access',
-    mfaSecret: 'JBSWY3DPEHPK3PXP',
-  },
-];
-
 export function AuthProvider({ children }) {
-  // Load registered users from localStorage or initialize with seed accounts
+  // Load registered users from localStorage (accounts are created via Register)
   const [users, setUsers] = useState(() => {
     try {
       const savedUsers = localStorage.getItem(USERS_STORAGE_KEY);
       if (savedUsers) {
         const parsed = JSON.parse(savedUsers);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.warn('Failed to parse registered users list:', e);
     }
-    return INITIAL_USERS;
+    return [];
   });
 
   // Current logged in officer session
+  // Must default to `null` when there is no saved session — otherwise a fresh
+  // browser session would be treated as already authenticated, bypassing login.
   const [officer, setOfficer] = useState(() => {
     try {
       const saved = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -88,7 +43,7 @@ export function AuthProvider({ children }) {
     } catch (e) {
       console.warn('Failed to parse saved user session:', e);
     }
-    return DEFAULT_OFFICER;
+    return null;
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(officer));
@@ -133,16 +88,6 @@ export function AuthProvider({ children }) {
     );
 
     if (!matchedUser) {
-      // Allow demo username 'admin' or 'officer' fallback
-      if (cleanId === 'admin' || cleanId === 'officer' || cleanId === 'rajesh') {
-        const demo = { ...DEFAULT_OFFICER };
-        setPendingMfa({
-          user: demo,
-          timestamp: Date.now(),
-          mfaCodeHint: '614920',
-        });
-        return { mfaRequired: true, hint: '614920' };
-      }
       throw new Error('No account found matching this username or email.');
     }
 
@@ -150,13 +95,16 @@ export function AuthProvider({ children }) {
       throw new Error('Incorrect password. Please verify your credentials and try again.');
     }
 
+    if (!matchedUser.mfaSecret) {
+      throw new Error('This account has no authenticator configured. Please contact your administrator.');
+    }
+
     setPendingMfa({
       user: matchedUser,
       timestamp: Date.now(),
-      mfaCodeHint: '614920',
     });
 
-    return { mfaRequired: true, hint: '614920' };
+    return { mfaRequired: true };
   }
 
   /**
@@ -168,12 +116,14 @@ export function AuthProvider({ children }) {
       throw new Error('Please enter a complete 6-digit authentication code.');
     }
 
-    const activeUser = pendingMfa?.user || DEFAULT_OFFICER;
-    const secret = activeUser.mfaSecret || 'JBSWY3DPEHPK3PXP';
+    if (!pendingMfa?.user) {
+      throw new Error('Your session has expired. Please sign in again.');
+    }
 
-    const isValid = await verifyTotp(cleanToken, secret);
+    const activeUser = pendingMfa.user;
+    const isValid = await verifyTotp(cleanToken, activeUser.mfaSecret);
     if (!isValid) {
-      throw new Error('Invalid code. Please check your authenticator app (or use demo code 614920) and try again.');
+      throw new Error('Invalid code. Please check your authenticator app and try again.');
     }
 
     setOfficer(activeUser);
@@ -228,7 +178,6 @@ export function AuthProvider({ children }) {
       user: newUserObj,
       secret: mfaSecret,
       qrUri,
-      hint: '614920',
     });
 
     return {
@@ -254,7 +203,7 @@ export function AuthProvider({ children }) {
     const secret = pendingRegistration.secret;
     const isValid = await verifyTotp(cleanToken, secret);
     if (!isValid) {
-      throw new Error('Invalid code. Please enter the current 6-digit code from your authenticator app (or use demo code 614920).');
+      throw new Error('Invalid code. Please enter the current 6-digit code from your authenticator app.');
     }
 
     const newUser = pendingRegistration.user;
@@ -267,17 +216,6 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
     setPendingRegistration(null);
     return newUser;
-  }
-
-  /**
-   * 1-Click Quick Demo Sign-In
-   */
-  function quickDemoLogin() {
-    setOfficer(DEFAULT_OFFICER);
-    setIsAuthenticated(true);
-    setPendingMfa(null);
-    setPendingRegistration(null);
-    return DEFAULT_OFFICER;
   }
 
   /**
@@ -301,7 +239,6 @@ export function AuthProvider({ children }) {
       verifyMfa,
       startRegistration,
       completeRegistrationMfa,
-      quickDemoLogin,
       logout,
       cancelMfa: () => setPendingMfa(null),
       cancelRegistration: () => setPendingRegistration(null),

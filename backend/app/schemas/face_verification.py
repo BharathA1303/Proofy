@@ -15,6 +15,8 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
+from app.schemas.evidence import NormalizedEvidenceItem
+
 
 class FaceQualityDetail(BaseModel):
     """
@@ -211,8 +213,21 @@ class FaceMatchResult(BaseModel):
         description="Operating threshold used for match classification",
     )
     threshold_calibration: str = Field(
-        default="UNCALIBRATED_PROFILE_DEFAULT",
+        default="CALIBRATED_CROSS_DOMAIN_V1",
         description="Threshold calibration status and provenance",
+    )
+    risk_escalated: bool = Field(
+        default=False,
+        description=(
+            "True when the operating threshold was dynamically tightened above the "
+            "baseline FACE_MATCH_THRESHOLD because upstream M2 (validation) or M3 "
+            "(forensics) evidence already flagged this document as elevated risk "
+            "(Dynamic Risk Tightening)."
+        ),
+    )
+    risk_escalation_reasons: List[str] = Field(
+        default_factory=list,
+        description="Upstream M2/M3 signals that triggered the threshold escalation, if any.",
     )
     similarity_metric: str = Field(
         default="cosine",
@@ -316,6 +331,14 @@ class FaceVerificationResponse(BaseModel):
     biometric_engine_version: str = Field(
         default="1.0.0",
         description="Biometric engine implementation version",
+    )
+    evidence_items: List[NormalizedEvidenceItem] = Field(
+        default_factory=list,
+        description=(
+            "Escalated, typed evidence items raised by biometric matching under "
+            "Dynamic Risk Tightening (e.g. a face mismatch that occurred only "
+            "because the threshold was tightened due to upstream M2/M3 risk)."
+        ),
     )
 
     def to_evidence_dict(self) -> Dict[str, Any]:

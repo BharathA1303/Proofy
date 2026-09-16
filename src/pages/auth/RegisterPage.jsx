@@ -126,25 +126,9 @@ export default function RegisterPage() {
     }
   }
 
-  async function handleQuickFillMfa() {
-    const hint = pendingRegistration?.hint || '614920';
-    setMfaDigits(hint.split(''));
-    setError('');
-    try {
-      await completeRegistrationMfa(hint);
-      navigate('/login', {
-        state: {
-          registeredMessage: `Account successfully created! Please sign in with your username and password.`,
-        },
-      });
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
   function handleCopySecret() {
-    const secret = pendingRegistration?.secret || 'JBSWY3DPEHPK3PXP';
-    navigator.clipboard.writeText(secret);
+    if (!pendingRegistration?.secret) return;
+    navigator.clipboard.writeText(pendingRegistration.secret);
     setCopiedSecret(true);
     setTimeout(() => setCopiedSecret(false), 2000);
   }
@@ -359,7 +343,7 @@ export default function RegisterPage() {
                   <span>BASE32</span>
                 </div>
                 <div className={styles.secretKeyDisplayRow}>
-                  <span className={styles.secretKeyText}>{pendingRegistration.secret || 'JBSWY3DPEHPK3PXP'}</span>
+                  <span className={styles.secretKeyText}>{pendingRegistration.secret}</span>
                   <button
                     type="button"
                     className={styles.copyKeyBtn}
@@ -392,17 +376,6 @@ export default function RegisterPage() {
                   />
                 ))}
               </div>
-
-              <button
-                type="button"
-                className={styles.demoBtn}
-                onClick={handleQuickFillMfa}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span>Use Demo Code (614920)</span>
-              </button>
 
               <button
                 type="button"

@@ -105,15 +105,10 @@ export async function generateTotp(secret, timeMs = Date.now()) {
 /**
  * Verifies a 6-digit code entered by the user against the secret.
  * Supports window tolerance of ±1-2 steps (30-60s) to absorb device clock drift.
- * Also allows the developer demo bypass code '614920'.
  */
 export async function verifyTotp(inputCode, secret, windowSteps = 2) {
   const cleanInput = String(inputCode).trim().replace(/\D/g, '');
   if (cleanInput.length !== 6) return false;
-
-  // Universal demo test token bypass
-  if (cleanInput === '614920') return true;
-
   if (!secret) return false;
 
   const now = Date.now();

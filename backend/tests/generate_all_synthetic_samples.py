@@ -94,7 +94,15 @@ def create_passport_image(
     authority: str,
     is_blacklist: bool = False,
     is_defective: bool = False,
+    issue_dmy: str = "10/01/2020",
 ) -> Image.Image:
+    """
+    dob_dmy / exp_dmy / issue_dmy MUST be DD/MM/YYYY — the one VIZ date
+    format the live validator's VIZ<->MRZ cross-consistency check
+    (_normalize_date_to_dmy in viz_mrz_checker.py) can parse. A month-name
+    format like "15 MAY 1990" renders fine but always mismatches against
+    the MRZ-derived date, since that normalizer never parses month names.
+    """
     W, H = 850, 1200
     img = Image.new("RGB", (W, H), (246, 242, 228))
     draw = ImageDraw.Draw(img)
@@ -103,7 +111,11 @@ def create_passport_image(
     f_hdr = try_font(20)
     f_lbl = try_font(13)
     f_val = try_font(17)
-    f_mono = try_font(18, mono=True)
+    # 26pt (not 18pt): at 18pt PaddleOCR intermittently drops the single '<'
+    # filler between the 9-char document number and its check digit,
+    # producing a false "high-risk" mrz_auto_correction on a genuine
+    # document. Verified empirically against the real OCR engine.
+    f_mono = try_font(26, mono=True)
     f_badge = try_font(14)
 
     # Top Banner
@@ -144,12 +156,14 @@ def create_passport_image(
 
     fld("Surname / Nom", surname, rx, 205)
     fld("Given Name(s) / Prénoms", given, rx, 260)
-    fld("Nationality / Nationalité", "INDIAN", rx, 315)
+    # "IND" (not "INDIAN"): _NATIONALITY_PATTERN only matches 3-letter ISO
+    # codes, so "INDIAN" never extracts as a VIZ nationality value at all.
+    fld("Nationality / Nationalité", "IND", rx, 315)
     fld("Date of Birth", dob_dmy, rx, 370)
     fld("Sex", sex, rx + 240, 370)
 
     fld("Place of Birth", "NEW DELHI, INDIA", 40, 425)
-    fld("Date of Issue", "10 JAN 2020", 40, 480)
+    fld("Date of Issue", issue_dmy, 40, 480)
     fld("Date of Expiry", exp_dmy, 270, 480)
     fld("Issuing Authority", authority, 40, 535)
 
@@ -218,7 +232,8 @@ def create_visa_image(
     f_sub = try_font(18)
     f_lbl = try_font(13)
     f_val = try_font(17)
-    f_mono = try_font(18, mono=True)
+    # 26pt (not 18pt) — see create_passport_image for why.
+    f_mono = try_font(26, mono=True)
     f_badge = try_font(14)
 
     # Banner
@@ -492,41 +507,48 @@ def generate_all():
     print("Beginning generation of 15 synthetic sample document images...")
 
     # 1. PASSPORTS
+    # dob_dmy / exp_dmy / issue_dmy are DD/MM/YYYY (see create_passport_image
+    # docstring) — must stay in exact sync with the corresponding _yymmdd
+    # value, since both are cross-checked against each other by the live
+    # validator's VIZ<->MRZ consistency check.
     p1 = create_passport_image(
         doc_number="Z1234567",
         name="AARAV SHARMA",
-        dob_dmy="15 MAY 1990",
+        dob_dmy="15/05/1990",
         dob_yymmdd="900515",
         sex="M",
-        exp_dmy="09 JAN 2030",
+        exp_dmy="09/01/2030",
         exp_yymmdd="300109",
         authority="REGIONAL PASSPORT OFFICE DELHI",
+        issue_dmy="10/01/2020",
     )
     save_to_destinations(p1, "passport_official.jpg", "passport")
 
     p2 = create_passport_image(
         doc_number="Z7654321",
         name="VIKRAM MALHOTRA",
-        dob_dmy="20 NOV 1982",
+        dob_dmy="20/11/1982",
         dob_yymmdd="821120",
         sex="M",
-        exp_dmy="11 APR 2028",
+        exp_dmy="11/04/2028",
         exp_yymmdd="280411",
         authority="REGIONAL PASSPORT OFFICE MUMBAI",
         is_blacklist=True,
+        issue_dmy="12/04/2018",
     )
     save_to_destinations(p2, "passport_blacklist.jpg", "passport")
 
     p3 = create_passport_image(
         doc_number="Z9999999",
         name="ROHIT VERMA",
-        dob_dmy="25 AUG 1995",
+        dob_dmy="25/08/1995",
         dob_yymmdd="950825",
         sex="M",
-        exp_dmy="01 JUN 2019", # Expired / preceding issue date
+        exp_dmy="01/06/2019",  # Expired / preceding issue date
         exp_yymmdd="190601",
         authority="[AUTHORITY OMITTED]",
         is_defective=True,
+        issue_dmy="01/06/2009",
     )
     save_to_destinations(p3, "passport_defective.jpg", "passport")
 
