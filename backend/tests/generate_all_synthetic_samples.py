@@ -67,6 +67,19 @@ def try_font(size: int, mono: bool = False) -> ImageFont.FreeTypeFont:
                 continue
     return ImageFont.load_default()
 
+def try_devanagari_font(size: int) -> ImageFont.FreeTypeFont:
+    """Devanagari-capable font for the Hindi header text, falling back to the
+    plain Latin font (which renders Devanagari as tofu boxes) if unavailable."""
+    for fn, idx in [("Nirmala.ttc", 0), ("mangal.ttf", None), ("NotoSansDevanagari-Regular.ttf", None)]:
+        for prefix in ["C:/Windows/Fonts/", "/usr/share/fonts/truetype/noto/", "/usr/share/fonts/", ""]:
+            try:
+                if idx is not None:
+                    return ImageFont.truetype(prefix + fn, size, index=idx)
+                return ImageFont.truetype(prefix + fn, size)
+            except Exception:
+                continue
+    return try_font(size)
+
 def save_to_destinations(img: Image.Image, filename: str, doc_category: str):
     root = Path(__file__).parent.parent.parent
     destinations = [
@@ -107,7 +120,8 @@ def create_passport_image(
     img = Image.new("RGB", (W, H), (246, 242, 228))
     draw = ImageDraw.Draw(img)
 
-    f_title = try_font(28)
+    f_title = try_font(24)
+    f_hindi = try_devanagari_font(24)
     f_hdr = try_font(20)
     f_lbl = try_font(13)
     f_val = try_font(17)
@@ -117,60 +131,106 @@ def create_passport_image(
     # document. Verified empirically against the real OCR engine.
     f_mono = try_font(26, mono=True)
     f_badge = try_font(14)
+    f_ghost_lbl = try_font(12)
 
-    # Top Banner
-    bar_color = (180, 40, 40) if is_blacklist else (20, 60, 110)
-    draw.rectangle([0, 0, W, 75], fill=bar_color)
-    draw.text((W // 2, 38), "REPUBLIC OF INDIA", font=f_title, fill="white", anchor="mm")
+    # ── Header Zone: dark-blue band with bilingual country name ────────────
+    # Hindi and English segments are measured and drawn separately since no
+    # single installed font reliably covers both Devanagari and Latin glyphs.
+    bar_color = (180, 40, 40) if is_blacklist else (16, 40, 90)
+    draw.rectangle([0, 0, W, 68], fill=bar_color)
+    hindi_text = "भारत गणराज्य"
+    english_text = " / REPUBLIC OF INDIA"
+    hindi_w = draw.textlength(hindi_text, font=f_hindi)
+    english_w = draw.textlength(english_text, font=f_title)
+    start_x = (W - (hindi_w + english_w)) / 2
+    draw.text((start_x, 34), hindi_text, font=f_hindi, fill="white", anchor="lm")
+    draw.text((start_x + hindi_w, 34), english_text, font=f_title, fill="white", anchor="lm")
 
-    # Document Type Header
-    draw.text((W // 2, 105), "PASSPORT / PASSEPORT", font=f_hdr, fill=(30, 40, 60), anchor="mm")
+    # Secondary white section: document type, centered.
+    # Off-white (240,240,240) rather than pure (255,255,255): the document
+    # quality gate flags any large cluster of near-white (gray>=248) pixels
+    # as a specular-glare hotspot, and a full-width pure-white band here
+    # previously covered ~3.7% of the page and false-triggered that gate.
+    draw.rectangle([0, 68, W, 112], fill=(240, 240, 240))
+    draw.text((W // 2, 90), "PASSPORT / PASSEPORT", font=f_hdr, fill=(20, 30, 60), anchor="mm")
+    draw.line([0, 112, W, 112], fill=(180, 185, 195), width=1)
 
-    # Sub-status watermark / ribbon
+    # Sub-status ribbon
     if is_blacklist:
-        draw.rectangle([W - 240, 85, W - 20, 115], fill=(220, 38, 38))
-        draw.text((W - 130, 100), "STATUS: REVOKED / WATCHLIST", font=f_badge, fill="white", anchor="mm")
+        draw.rectangle([W - 280, 120, W - 20, 150], fill=(220, 38, 38))
+        draw.text((W - 150, 135), "STATUS: REVOKED / WATCHLIST", font=f_badge, fill="white", anchor="mm")
     elif is_defective:
-        draw.rectangle([W - 240, 85, W - 20, 115], fill=(217, 119, 6))
-        draw.text((W - 130, 100), "TAMPERED / DEFECTIVE VECTOR", font=f_badge, fill="white", anchor="mm")
+        draw.rectangle([W - 280, 120, W - 20, 150], fill=(217, 119, 6))
+        draw.text((W - 150, 135), "TAMPERED / DEFECTIVE VECTOR", font=f_badge, fill="white", anchor="mm")
     else:
-        draw.rectangle([W - 240, 85, W - 20, 115], fill=(22, 101, 52))
-        draw.text((W - 130, 100), "OFFICIAL REGISTERED VECTOR", font=f_badge, fill="white", anchor="mm")
+        draw.rectangle([W - 280, 120, W - 20, 150], fill=(22, 101, 52))
+        draw.text((W - 150, 135), "OFFICIAL REGISTERED VECTOR", font=f_badge, fill="white", anchor="mm")
 
-    # Photo Box
-    draw.rectangle([40, 140, 240, 360], fill=(210, 215, 225), outline=(60, 70, 90), width=2)
-    draw.text((140, 250), "[ BEARER PORTRAIT ]\nICAO TD3 SPEC", font=f_lbl, fill=(80, 90, 110), anchor="mm", align="center")
+    # Strict anchor: Passport No. printed near top-right
+    draw.text((W - 240, 165), "PASSPORT NO. / PASSEPORT NO.", font=f_lbl, fill=(100, 110, 130))
+    draw.text((W - 240, 183), doc_number, font=f_val, fill=(15, 25, 45))
+
+    # ── Primary Portrait Block: left margin, balanced under the header ─────
+    photo_rect = [40, 175, 240, 395]
+    draw.rectangle(photo_rect, fill=(210, 215, 225), outline=(60, 70, 90), width=2)
+    draw.text((140, 285), "[ BEARER PORTRAIT ]\nICAO TD3 SPEC", font=f_lbl, fill=(80, 90, 110), anchor="mm", align="center")
+
+    # ── Ghost Photo Panel (right column): semi-transparent duplicate ───────
+    # Rendered on an RGBA overlay so the light-blue tint composites instead
+    # of covering the portrait frame outright, then flattened back to RGB.
+    # Colours are kept well below gray==248 after compositing over the cream
+    # background — the document quality gate flags clusters of near-white
+    # (>=248) pixels covering >1.5% of the image as a specular-glare
+    # hotspot, and a too-light/too-opaque panel here previously blew out to
+    # a false glare rejection on an otherwise clean synthetic sample.
+    ghost_rect = [610, 175, 810, 395]
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ghost_draw = ImageDraw.Draw(overlay)
+    ghost_draw.rectangle(ghost_rect, fill=(120, 165, 205, 90), outline=(70, 110, 150, 160), width=2)
+    ghost_draw.ellipse(
+        [ghost_rect[0] + 35, ghost_rect[1] + 30, ghost_rect[2] - 35, ghost_rect[1] + 150],
+        fill=(150, 185, 215, 110),
+    )
+    ghost_draw.rectangle(
+        [ghost_rect[0] + 20, ghost_rect[1] + 150, ghost_rect[2] - 20, ghost_rect[3] - 20],
+        fill=(150, 185, 215, 90),
+    )
+    img.paste(Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB"), (0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.text(
+        ((ghost_rect[0] + ghost_rect[2]) // 2, ghost_rect[3] + 15),
+        "GHOST PHOTO / IMAGE FANTÔME",
+        font=f_ghost_lbl,
+        fill=(80, 110, 150),
+        anchor="mm",
+    )
 
     # Fields
     def fld(label, val, x, y):
         draw.text((x, y), label.upper(), font=f_lbl, fill=(100, 110, 130))
         draw.text((x, y + 18), str(val), font=f_val, fill=(15, 25, 45))
 
-    rx = 270
+    lx = 40
     surname = name.split()[-1]
     given = " ".join(name.split()[:-1]) if len(name.split()) > 1 else name
 
-    fld("Type / Type", "P", rx, 145)
-    fld("Country Code", "IND", rx + 120, 145)
-    fld("Passport No.", doc_number, rx + 260, 145)
-
-    fld("Surname / Nom", surname, rx, 205)
-    fld("Given Name(s) / Prénoms", given, rx, 260)
+    fld("Surname / Nom", surname, lx, 410)
+    fld("Given Name(s) / Prénoms", given, lx, 460)
     # "IND" (not "INDIAN"): _NATIONALITY_PATTERN only matches 3-letter ISO
     # codes, so "INDIAN" never extracts as a VIZ nationality value at all.
-    fld("Nationality / Nationalité", "IND", rx, 315)
-    fld("Date of Birth", dob_dmy, rx, 370)
-    fld("Sex", sex, rx + 240, 370)
+    fld("Nationality / Nationalité", "IND", lx, 510)
+    fld("Date of Birth / Date de naissance (DD/MM/YYYY)", dob_dmy, lx, 560)
+    fld("Sex / Sexe (M/F)", sex, lx + 380, 560)
 
-    fld("Place of Birth", "NEW DELHI, INDIA", 40, 425)
-    fld("Date of Issue", issue_dmy, 40, 480)
-    fld("Date of Expiry", exp_dmy, 270, 480)
-    fld("Issuing Authority", authority, 40, 535)
+    fld("Place of Birth / Lieu de naissance", "NEW DELHI, INDIA", lx, 610)
+    fld("Date of Issue / Date de délivrance", issue_dmy, lx, 660)
+    fld("Date of Expiry / Date d'expiration", exp_dmy, lx + 380, 660)
+    fld("Issuing Authority", authority, lx, 710)
 
     # Separator
-    draw.line([30, 620, W - 30, 620], fill=(180, 185, 195), width=1)
-    draw.text((40, 635), "Holder's Signature:", font=f_lbl, fill=(100, 110, 130))
-    draw.line([40, 690, 320, 690], fill=(30, 40, 60), width=2)
+    draw.line([30, 780, W - 30, 780], fill=(180, 185, 195), width=1)
+    draw.text((40, 795), "Holder's Signature:", font=f_lbl, fill=(100, 110, 130))
+    draw.line([40, 850, 320, 850], fill=(30, 40, 60), width=2)
 
     # MRZ Strip (bottom)
     mrz_y = H - 150
