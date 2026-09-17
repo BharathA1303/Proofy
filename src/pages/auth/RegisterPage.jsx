@@ -47,7 +47,7 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [field]: val }));
   }
 
-  function handleStep1Submit(e) {
+  async function handleStep1Submit(e) {
     e.preventDefault();
     setError('');
 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      startRegistration({
+      await startRegistration({
         fullName: formData.fullName,
         username: formData.username,
         email: formData.email,

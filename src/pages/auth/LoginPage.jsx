@@ -36,13 +36,13 @@ export default function LoginPage() {
     }
   }, [pendingMfa]);
 
-  function handleCredentialSubmit(e) {
+  async function handleCredentialSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      initiateLogin(identifier, password);
+      await initiateLogin(identifier, password);
     } catch (err) {
       setError(err.message);
     } finally {

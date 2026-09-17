@@ -356,7 +356,25 @@ def parse_aadhaar(
             to_idx = idx
             break
     if to_idx >= 0:
-        for idx in range(to_idx + 2, min(to_idx + 12, len(lines))):
+        # The 'To' block on a letter-style Aadhaar repeats the bearer's name one or
+        # more times (e.g. "To" / "A.SAINATH" / "A.SAINATH" / "S/O Sudha A, ...").
+        # Skip every leading line that duplicates the already-extracted name (or is
+        # itself just a bare name token) so the address doesn't start with "NAME, S/O ...".
+        addr_start_idx = to_idx + 1
+        name_upper = (result.name.value or "").strip().upper()
+        while addr_start_idx < len(lines):
+            candidate = lines[addr_start_idx][0].strip()
+            candidate_upper = candidate.upper()
+            is_repeated_name = bool(name_upper) and candidate_upper == name_upper
+            is_bare_name_line = not is_repeated_name and _is_valid_name_token(candidate) and not re.match(
+                r"^(C/O|S/O|D/O|W/O)\b", candidate_upper
+            )
+            if is_repeated_name or is_bare_name_line:
+                addr_start_idx += 1
+                continue
+            break
+
+        for idx in range(addr_start_idx, min(addr_start_idx + 12, len(lines))):
             t = lines[idx][0]
             tu = t.upper()
             if any(kw in tu for kw in ("YOUR AADHAAR", "AADHAAR NO", "ENROLMENT", "KD4", "MOBILE", "PIN CODE")):

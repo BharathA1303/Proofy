@@ -305,9 +305,6 @@ export default function FloatingAutoVerify() {
         {/* Rotating spinner ring when processing */}
         {isProcessing && <span className={styles.scanSpinner} />}
 
-        {/* Small AI badge */}
-        <span className={styles.aiBadge}>AI</span>
-
         {/* Icon: Document + Lightning Bolt */}
         <span className={styles.fabIcon}>
           {isProcessing ? (

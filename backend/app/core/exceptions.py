@@ -289,6 +289,40 @@ class MaxDocumentsExceededError(CaseError):
 
 
 # ──────────────────────────────────────────────
+#  Officer Account / Authentication exceptions
+# ──────────────────────────────────────────────
+
+class AuthError(DVSBaseError):
+    """Base error for officer account authentication failures."""
+    status_code = 400
+    user_message = "Authentication error."
+
+
+class AccountAlreadyExistsError(AuthError):
+    """Raised when registering a username/email that is already taken."""
+    status_code = 409
+    user_message = "An account with this username or email already exists. Please sign in."
+
+
+class InvalidCredentialsError(AuthError):
+    """Raised when login identifier/password do not match any account."""
+    status_code = 401
+    user_message = "Invalid username/email or password."
+
+
+class InvalidMfaCodeError(AuthError):
+    """Raised when a submitted TOTP code fails verification."""
+    status_code = 401
+    user_message = "Invalid code. Please check your authenticator app and try again."
+
+
+class RegistrationSessionExpiredError(AuthError):
+    """Raised when completing MFA setup without a valid pending registration."""
+    status_code = 410
+    user_message = "Registration session expired. Please start registration again."
+
+
+# ──────────────────────────────────────────────
 #  FastAPI exception handler registration
 # ──────────────────────────────────────────────
 

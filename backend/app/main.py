@@ -111,6 +111,7 @@ app.add_middleware(
 register_exception_handlers(app)
 
 from app.api.v1.audit import router as audit_router  # noqa: E402
+from app.api.v1.auth import router as auth_router  # noqa: E402
 from app.api.v1.cases import router as cases_router  # noqa: E402
 from app.api.v1.documents import router as documents_router  # noqa: E402
 from app.api.v1.system import router as system_router  # noqa: E402
@@ -121,6 +122,7 @@ app.include_router(cases_router, prefix=settings.API_V1_PREFIX)
 app.include_router(documents_router, prefix=settings.API_V1_PREFIX)
 app.include_router(audit_router, prefix=settings.API_V1_PREFIX)
 app.include_router(system_router, prefix=settings.API_V1_PREFIX)
+app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 
 
 # ── Health check ──────────────────────────────────────────────────────────────

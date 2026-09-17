@@ -6,31 +6,31 @@
  *   - Standard username/email and password credential authentication
  *   - Multi-Factor Authentication (MFA / 6-digit TOTP)
  *   - New user registration with visual QR code and secret key setup
- *   - Persistent registered user accounts in localStorage
+ *
+ * Credential validation, password hashing, and TOTP secret storage all
+ * happen server-side (see backend/app/api/v1/auth.py) in an encrypted
+ * database table. Only the resulting officer session profile — never a
+ * password or MFA secret — is cached in localStorage for UI convenience.
  */
 import { createContext, useState, useEffect, useMemo } from 'react';
-import { verifyTotp, generateBase32Secret, buildOtpauthUri } from '../../utils/totp.js';
+import * as authApi from '../../services/authApi.js';
 
 export const AuthContext = createContext(null);
 
 const SESSION_STORAGE_KEY = 'meiyari_user_session';
-const USERS_STORAGE_KEY = 'meiyari_registered_users';
+
+// Legacy pre-migration key that stored the full account list — including
+// plaintext passwords and MFA secrets — directly in localStorage. Accounts
+// now live server-side in an encrypted database table; this key is purged
+// on load so it never lingers in a browser that ran the old client-only code.
+const LEGACY_USERS_STORAGE_KEY = 'meiyari_registered_users';
+try {
+  localStorage.removeItem(LEGACY_USERS_STORAGE_KEY);
+} catch {
+  // localStorage unavailable (e.g. private browsing) — nothing to clean up.
+}
 
 export function AuthProvider({ children }) {
-  // Load registered users from localStorage (accounts are created via Register)
-  const [users, setUsers] = useState(() => {
-    try {
-      const savedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-      if (savedUsers) {
-        const parsed = JSON.parse(savedUsers);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch (e) {
-      console.warn('Failed to parse registered users list:', e);
-    }
-    return [];
-  });
-
   // Current logged in officer session
   // Must default to `null` when there is no saved session — otherwise a fresh
   // browser session would be treated as already authenticated, bypassing login.
@@ -38,7 +38,15 @@ export function AuthProvider({ children }) {
     try {
       const saved = localStorage.getItem(SESSION_STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // A session written by a pre-migration client-only build may still carry
+        // a raw password / MFA secret. Never trust or keep such a session — force
+        // the browser back to a clean sign-in through the real backend instead.
+        if (parsed && ('password' in parsed || 'mfaSecret' in parsed)) {
+          localStorage.removeItem(SESSION_STORAGE_KEY);
+          return null;
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn('Failed to parse saved user session:', e);
@@ -50,15 +58,6 @@ export function AuthProvider({ children }) {
   const [pendingMfa, setPendingMfa] = useState(null);
   const [pendingRegistration, setPendingRegistration] = useState(null);
 
-  // Sync users to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    } catch (e) {
-      console.warn('Could not save users to localStorage:', e);
-    }
-  }, [users]);
-
   // Sync active session with localStorage
   useEffect(() => {
     if (officer && isAuthenticated) {
@@ -69,38 +68,18 @@ export function AuthProvider({ children }) {
   }, [officer, isAuthenticated]);
 
   /**
-   * Step 1 of Login: validate username/email and password credentials
+   * Step 1 of Login: validate username/email and password credentials against the backend.
    */
-  function initiateLogin(identifier, password) {
+  async function initiateLogin(identifier, password) {
     if (!identifier || !password) {
       throw new Error('Please enter your username or email address and password.');
     }
 
-    const cleanId = identifier.trim().toLowerCase();
-    const cleanPass = password.trim();
-
-    // Check in registered users list
-    const matchedUser = users.find(
-      (u) =>
-        u.username?.toLowerCase() === cleanId ||
-        u.email?.toLowerCase() === cleanId ||
-        u.id?.toLowerCase() === cleanId
-    );
-
-    if (!matchedUser) {
-      throw new Error('No account found matching this username or email.');
-    }
-
-    if (matchedUser.password && matchedUser.password !== cleanPass) {
-      throw new Error('Incorrect password. Please verify your credentials and try again.');
-    }
-
-    if (!matchedUser.mfaSecret) {
-      throw new Error('This account has no authenticator configured. Please contact your administrator.');
-    }
+    const { loginToken } = await authApi.login(identifier.trim(), password.trim());
 
     setPendingMfa({
-      user: matchedUser,
+      loginToken,
+      identifier: identifier.trim(),
       timestamp: Date.now(),
     });
 
@@ -108,7 +87,7 @@ export function AuthProvider({ children }) {
   }
 
   /**
-   * Step 2 of Login: verify 6-digit TOTP code
+   * Step 2 of Login: verify 6-digit TOTP code against the backend.
    */
   async function verifyMfa(token) {
     const cleanToken = String(token).replace(/\D/g, '');
@@ -116,26 +95,23 @@ export function AuthProvider({ children }) {
       throw new Error('Please enter a complete 6-digit authentication code.');
     }
 
-    if (!pendingMfa?.user) {
+    if (!pendingMfa?.loginToken) {
       throw new Error('Your session has expired. Please sign in again.');
     }
 
-    const activeUser = pendingMfa.user;
-    const isValid = await verifyTotp(cleanToken, activeUser.mfaSecret);
-    if (!isValid) {
-      throw new Error('Invalid code. Please check your authenticator app and try again.');
-    }
+    const activeOfficer = await authApi.loginVerifyMfa(pendingMfa.loginToken, cleanToken);
 
-    setOfficer(activeUser);
+    setOfficer(activeOfficer);
     setIsAuthenticated(true);
     setPendingMfa(null);
-    return activeUser;
+    return activeOfficer;
   }
 
   /**
-   * Step 1 of Registration: collect user info and prepare MFA TOTP QR Code & Secret Key
+   * Step 1 of Registration: submit account fields, receive MFA TOTP QR Code & Secret Key.
+   * The account is NOT yet persisted — only created after MFA confirmation.
    */
-  function startRegistration(formData) {
+  async function startRegistration(formData) {
     const { fullName, username, email, password } = formData;
     if (!fullName || !username || !email || !password) {
       throw new Error('Please fill in all required registration fields.');
@@ -145,50 +121,24 @@ export function AuthProvider({ children }) {
       throw new Error('Password must be at least 6 characters in length.');
     }
 
-    const cleanUsername = username.trim().toLowerCase();
-    const cleanEmail = email.trim().toLowerCase();
-
-    // Check for existing user
-    const existing = users.find(
-      (u) => u.username?.toLowerCase() === cleanUsername || u.email?.toLowerCase() === cleanEmail
-    );
-    if (existing) {
-      throw new Error('An account with this username or email already exists. Please sign in.');
-    }
-
-    // Generate unique Base32 TOTP secret for the user
-    const mfaSecret = generateBase32Secret(16);
-    const qrUri = buildOtpauthUri(cleanUsername, mfaSecret, 'Meiyari');
-
-    const newUserObj = {
-      id: `USR-${Math.floor(100 + Math.random() * 900)}`,
-      name: fullName.trim(),
-      username: cleanUsername,
-      email: cleanEmail,
-      password: password.trim(),
-      role: 'Verification Officer',
-      station: 'Terminal 3 · Checkpoint Gate 4',
-      clearanceLevel: 'Level 2 — Verification Officer',
-      mfaSecret,
-      mfaEnabled: true,
-      registeredAt: new Date().toISOString(),
-    };
+    const { registrationToken, secret, qrUri } = await authApi.registerStart({
+      fullName: fullName.trim(),
+      username: username.trim(),
+      email: email.trim(),
+      password,
+    });
 
     setPendingRegistration({
-      user: newUserObj,
-      secret: mfaSecret,
+      registrationToken,
+      secret,
       qrUri,
     });
 
-    return {
-      success: true,
-      secret: mfaSecret,
-      qrUri,
-    };
+    return { success: true, secret, qrUri };
   }
 
   /**
-   * Step 2 of Registration: confirm 6-digit TOTP code from user authenticator app
+   * Step 2 of Registration: confirm 6-digit TOTP code, persisting the encrypted account server-side.
    */
   async function completeRegistrationMfa(token) {
     const cleanToken = String(token).replace(/\D/g, '');
@@ -196,26 +146,17 @@ export function AuthProvider({ children }) {
       throw new Error('Please enter the 6-digit code displayed in your authenticator app.');
     }
 
-    if (!pendingRegistration || !pendingRegistration.user) {
+    if (!pendingRegistration?.registrationToken) {
       throw new Error('Registration session expired. Please start registration again.');
     }
 
-    const secret = pendingRegistration.secret;
-    const isValid = await verifyTotp(cleanToken, secret);
-    if (!isValid) {
-      throw new Error('Invalid code. Please enter the current 6-digit code from your authenticator app.');
-    }
-
-    const newUser = pendingRegistration.user;
-
-    // Save to users list
-    setUsers((prev) => [...prev.filter((u) => u.username !== newUser.username), newUser]);
+    const newOfficer = await authApi.registerComplete(pendingRegistration.registrationToken, cleanToken);
 
     // Sign in the newly registered user immediately
-    setOfficer(newUser);
+    setOfficer(newOfficer);
     setIsAuthenticated(true);
     setPendingRegistration(null);
-    return newUser;
+    return newOfficer;
   }
 
   /**
