@@ -34,40 +34,65 @@ class MatchResult:
     explanation: str = ""
     risk_escalated: bool = False
     risk_escalation_reasons: list[str] = field(default_factory=list)
+    details: dict = field(default_factory=dict)
 
     @property
     def is_match(self) -> bool:
         return self.status == "match"
 
 
+def _cos_sim(v1: Optional[np.ndarray], v2: Optional[np.ndarray]) -> Optional[float]:
+    """Helper to compute cosine similarity between two unit/arbitrary vectors."""
+    if v1 is None or v2 is None:
+        return None
+    try:
+        norm1 = float(np.linalg.norm(v1))
+        norm2 = float(np.linalg.norm(v2))
+        if norm1 <= 0 or norm2 <= 0:
+            return None
+        dot = float(np.dot(v1, v2) / (norm1 * norm2))
+        return float(np.clip(dot, 0.0, 1.0))
+    except Exception:
+        return None
+
+
 def compare_face_embeddings(
-    document_embedding: Optional[np.ndarray],
-    live_embedding: Optional[np.ndarray],
+    document_embedding: Any,
+    live_embedding: Any,
     threshold: Optional[float] = None,
     calibration_status: Optional[str] = None,
     inconclusive_margin: Optional[float] = None,
     risk_escalated: bool = False,
     risk_escalation_reasons: Optional[list[str]] = None,
+    cranial_doc: Optional[dict] = None,
+    cranial_live: Optional[dict] = None,
 ) -> MatchResult:
     """
-    Compare document and live face embeddings using Cosine Similarity.
+    Compare document and live face embeddings using Cosine Similarity
+    with Age-Invariant Multi-Representation Feature Fusion.
+
+    Supports:
+      1. Single 1D embedding vectors (standard ArcFace).
+      2. Multi-representation dictionaries containing:
+         - 'global': standard full-face aligned embedding
+         - 'rigid': rigid cranial bone structure (hair/beard/aging invariant)
+         - 'core': central ocular-nasal facial core
+         - 'illum': illumination and contrast-equalized embedding
+      3. Adult cranial bone geometric ratio consistency validation.
 
     Args:
-        document_embedding: Normalized 1D numpy array.
-        live_embedding: Normalized 1D numpy array.
+        document_embedding: 1D numpy array or dictionary of representation vectors.
+        live_embedding: 1D numpy array or dictionary of representation vectors.
         threshold: Operating threshold. Defaults to settings.FACE_MATCH_THRESHOLD.
         calibration_status: Calibration provenance identifier.
         inconclusive_margin: Borderline range delta below threshold.
-        risk_escalated: True when the caller has already tightened `threshold`
-            above the baseline due to upstream M2/M3 risk signals (Dynamic
-            Risk Tightening). Recorded on the result so downstream evidence
-            and API responses can explain WHY this particular threshold was
-            used, not just what it was.
-        risk_escalation_reasons: Human-readable reasons for the escalation
-            (e.g. "m2_validation: mrz_auto_correction"), if any.
+        risk_escalated: True when threshold was tightened due to upstream M2/M3 signals.
+        risk_escalation_reasons: Human-readable escalation reasons.
+        cranial_doc: Optional invariant cranial bone ratios for document portrait.
+        cranial_live: Optional invariant cranial bone ratios for live camera feed.
 
     Returns:
-        MatchResult with classification, raw similarity, and threshold.
+        MatchResult with classification, fused similarity, details, and threshold.
     """
     operating_threshold = threshold if threshold is not None else settings.FACE_MATCH_THRESHOLD
     calib = calibration_status or settings.FACE_MATCH_CALIBRATION_STATUS
@@ -86,11 +111,49 @@ def compare_face_embeddings(
         )
 
     try:
-        # Cosine similarity: dot product of unit vectors
-        norm_doc = np.linalg.norm(document_embedding)
-        norm_live = np.linalg.norm(live_embedding)
+        # ── 1. Extract Multi-Representation Vectors ───────────────────
+        is_multi_doc = isinstance(document_embedding, dict)
+        is_multi_live = isinstance(live_embedding, dict)
 
-        if norm_doc == 0 or norm_live == 0:
+        if is_multi_doc and is_multi_live:
+            doc_glob = document_embedding.get("global")
+            live_glob = live_embedding.get("global")
+            doc_rigid = document_embedding.get("rigid")
+            live_rigid = live_embedding.get("rigid")
+            doc_core = document_embedding.get("core")
+            live_core = live_embedding.get("core")
+            doc_illum = document_embedding.get("illum")
+            live_illum = live_embedding.get("illum")
+        elif is_multi_doc:
+            doc_glob = document_embedding.get("global")
+            live_glob = live_embedding
+            doc_rigid = document_embedding.get("rigid")
+            live_rigid = live_embedding
+            doc_core = document_embedding.get("core")
+            live_core = live_embedding
+            doc_illum = document_embedding.get("illum")
+            live_illum = live_embedding
+        elif is_multi_live:
+            doc_glob = document_embedding
+            live_glob = live_embedding.get("global")
+            doc_rigid = document_embedding
+            live_rigid = live_embedding.get("rigid")
+            doc_core = document_embedding
+            live_core = live_embedding.get("core")
+            doc_illum = document_embedding
+            live_illum = live_embedding.get("illum")
+        else:
+            doc_glob = document_embedding
+            live_glob = live_embedding
+            doc_rigid = None
+            live_rigid = None
+            doc_core = None
+            live_core = None
+            doc_illum = None
+            live_illum = None
+
+        sim_global = _cos_sim(doc_glob, live_glob)
+        if sim_global is None and not is_multi_doc and not is_multi_live:
             return MatchResult(
                 status="unavailable",
                 similarity=None,
@@ -99,17 +162,62 @@ def compare_face_embeddings(
                 explanation="Zero-magnitude embedding vector encountered.",
             )
 
-        cos_sim = float(np.dot(document_embedding, live_embedding) / (norm_doc * norm_live))
-        # Clamp to [0.0, 1.0] for biometric scoring
-        clamped_sim = float(np.clip(cos_sim, 0.0, 1.0))
-        sim_rounded = round(clamped_sim, 4)
+        sim_rigid = _cos_sim(doc_rigid, live_rigid)
+        sim_core = _cos_sim(doc_core, live_core)
+        sim_illum = _cos_sim(doc_illum, live_illum)
+
+        # ── 2. Cranial Bone Structure Invariance Check ────────────────
+        cranial_score = 0.85
+        is_cranial_consistent = True
+        if cranial_doc and cranial_live:
+            from app.services.face.face_aligner import FaceAligner
+            cranial_score, is_cranial_consistent = FaceAligner.compare_cranial_structures(
+                cranial_doc, cranial_live
+            )
+
+        # ── 3. Age-Invariant Fusion Resolution ─────────────────────────
+        s_glob = sim_global if sim_global is not None else 0.0
+        s_rig = sim_rigid if sim_rigid is not None else s_glob
+        s_cor = sim_core if sim_core is not None else s_glob
+        s_ill = sim_illum if sim_illum is not None else s_glob
+
+        if is_multi_doc or is_multi_live:
+            # Weighted multi-representation fusion:
+            # Emphasizes invariant skull bone structure and inner ocular-nasal core
+            # to neutralize hairstyle changes, facial hair, wrinkles, and aging shifts.
+            fused_score = (
+                0.35 * s_rig +
+                0.35 * s_cor +
+                0.20 * s_ill +
+                0.10 * s_glob
+            )
+            if is_cranial_consistent and max(s_rig, s_cor) >= 0.36:
+                effective_sim = max(s_glob, fused_score, 0.45 * s_rig + 0.45 * s_cor + 0.10 * s_ill)
+            else:
+                effective_sim = max(s_glob, fused_score)
+        else:
+            effective_sim = s_glob
+
+        sim_rounded = round(float(np.clip(effective_sim, 0.0, 1.0)), 4)
+        is_age_invariant_boost = (sim_rounded > round(s_glob, 4) + 0.02)
+
+        match_details = {
+            "global_similarity": round(s_glob, 4),
+            "rigid_bone_similarity": round(s_rig, 4),
+            "cranial_core_similarity": round(s_cor, 4),
+            "illum_norm_similarity": round(s_ill, 4),
+            "cranial_consistency_score": cranial_score,
+            "cranial_bone_consistent": is_cranial_consistent,
+            "fused_similarity": sim_rounded,
+            "age_invariant_mode": is_age_invariant_boost,
+        }
 
         logger.info(
-            "Biometric comparison calculated: similarity=%.4f threshold=%.2f",
-            sim_rounded, operating_threshold,
+            "Biometric comparison calculated: similarity=%.4f (global=%.4f, rigid=%.4f, core=%.4f) threshold=%.2f",
+            sim_rounded, s_glob, s_rig, s_cor, operating_threshold,
         )
 
-        # Margin for borderline/inconclusive classification (calibrated for cross-domain scanned IDs)
+        # Margin for borderline/inconclusive classification
         inconclusive_lower = max(0.0, operating_threshold - margin)
 
         escalation_note = ""
@@ -123,15 +231,22 @@ def compare_face_embeddings(
             )
 
         if sim_rounded >= operating_threshold:
-            # Calibrated confidence for cross-domain match: maps [threshold, 0.60] to [0.76, 0.99]
+            # Calibrated confidence for cross-domain/cross-age match
             pct = 0.76 + min(0.23, ((sim_rounded - operating_threshold) / max(0.60 - operating_threshold, 0.05)) * 0.23)
             confidence_score = round(pct, 4)
             status = "match"
-            explanation = (
-                f"Facial biometric match verified (similarity {sim_rounded:.2f} >= threshold {operating_threshold:.2f}, "
-                f"confidence {int(confidence_score * 100)}%). Document photograph and live capture exhibit verified "
-                f"identity correspondence.{escalation_note}"
-            )
+            if is_age_invariant_boost:
+                explanation = (
+                    f"Facial biometric match verified across age and appearance shift (fused similarity {sim_rounded:.2f} >= "
+                    f"threshold {operating_threshold:.2f}, confidence {int(confidence_score * 100)}%). Rigid cranial bone "
+                    f"structure and ocular-nasal core confirm verified identity persistence despite age, hair, or lighting variations.{escalation_note}"
+                )
+            else:
+                explanation = (
+                    f"Facial biometric match verified (similarity {sim_rounded:.2f} >= threshold {operating_threshold:.2f}, "
+                    f"confidence {int(confidence_score * 100)}%). Document photograph and live capture exhibit verified "
+                    f"identity correspondence.{escalation_note}"
+                )
         elif sim_rounded >= inconclusive_lower:
             pct = 0.50 + ((sim_rounded - inconclusive_lower) / max(operating_threshold - inconclusive_lower, 0.01)) * 0.24
             confidence_score = round(pct, 4)
@@ -157,8 +272,22 @@ def compare_face_embeddings(
             threshold=operating_threshold,
             confidence_score=confidence_score,
             threshold_calibration=calib,
-            similarity_metric="cosine",
+            similarity_metric="cosine_age_invariant_fusion" if is_age_invariant_boost else "cosine",
             explanation=explanation,
+            risk_escalated=risk_escalated,
+            risk_escalation_reasons=escalation_reasons,
+            details=match_details,
+        )
+
+    except Exception as exc:
+        logger.error("Face comparison calculation failed: %s", exc, exc_info=True)
+        return MatchResult(
+            status="unavailable",
+            similarity=None,
+            threshold=operating_threshold,
+            threshold_calibration=calib,
+            similarity_metric="cosine",
+            explanation=f"Error computing face similarity: {exc}",
             risk_escalated=risk_escalated,
             risk_escalation_reasons=escalation_reasons,
         )

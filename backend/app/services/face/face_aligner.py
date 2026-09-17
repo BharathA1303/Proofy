@@ -117,26 +117,18 @@ class FaceAligner:
     @staticmethod
     def enhance_document_face(face_bgr: np.ndarray) -> np.ndarray:
         """
-        Normalize illumination, boost edge contrast, and suppress print halftone/scanning raster
-        from low-resolution or aged printed credential portraits.
+        Normalize illumination and suppress print halftone/scanning raster
+        from low-resolution or printed credential portraits without introducing
+        destructive CLAHE boundary halos or high-pass ringing artifacts that degrade
+        ArcFace deep feature manifold alignment.
         """
         if face_bgr is None or face_bgr.size == 0:
             return face_bgr
 
         try:
-            # 1. Bilateral filter: smooths scanning halftone print noise while preserving facial edges
-            denoised = cv2.bilateralFilter(face_bgr, d=5, sigmaColor=35, sigmaSpace=35)
-
-            # 2. CLAHE on L-channel in LAB color space: local contrast equalization
-            lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
-            clahe = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8, 8))
-            lab[:, :, 0] = clahe.apply(lab[:, :, 0])
-            enhanced = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
-
-            # 3. Unsharp masking: restores crisp facial landmark contours (eyes, nose, mouth)
-            blurred = cv2.GaussianBlur(enhanced, (0, 0), sigmaX=1.5)
-            sharpened = cv2.addWeighted(enhanced, 1.35, blurred, -0.35, 0)
-            return sharpened
+            # Mild edge-preserving bilateral filter: smooths print halftone dots while preserving true facial landmarks
+            denoised = cv2.bilateralFilter(face_bgr, d=3, sigmaColor=10, sigmaSpace=10)
+            return denoised
         except Exception:
             return face_bgr
 
@@ -195,6 +187,46 @@ class FaceAligner:
         bg = np.full_like(img_f, float(background_fill))
         blended = img_f * mask + bg * (1.0 - mask)
         return np.clip(blended, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def extract_cranial_core_crop(
+        aligned_bgr: np.ndarray,
+        target_size: Tuple[int, int] = (112, 112),
+    ) -> np.ndarray:
+        """
+        Extract inner cranial core (orbits, nose bridge, maxilla, mouth)
+        excluding peripheral hairline, ears, and lower jawline.
+        Improves cross-age face matching where hairstyles, beards, or age-related
+        soft tissue changes otherwise degrade global embedding similarity.
+        """
+        if aligned_bgr is None or aligned_bgr.size == 0:
+            return aligned_bgr
+        h, w = aligned_bgr.shape[:2]
+        y1, y2 = int(h * 0.12), int(h * 0.88)
+        x1, x2 = int(w * 0.12), int(w * 0.88)
+        core = aligned_bgr[y1:y2, x1:x2]
+        if core.size == 0:
+            return aligned_bgr
+        return cv2.resize(core, target_size, interpolation=cv2.INTER_LANCZOS4)
+
+    @staticmethod
+    def normalize_facial_illumination(aligned_bgr: np.ndarray) -> np.ndarray:
+        """
+        Equalize illumination across spectral bands using LAB CLAHE.
+        Eliminates color temperature, contrast, and sensor disparity
+        between old scanned credential prints and modern live video feeds.
+        """
+        if aligned_bgr is None or aligned_bgr.size == 0:
+            return aligned_bgr
+        try:
+            lab = cv2.cvtColor(aligned_bgr, cv2.COLOR_BGR2LAB)
+            l_channel, a_channel, b_channel = cv2.split(lab)
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
+            l_eq = clahe.apply(l_channel)
+            lab_eq = cv2.merge([l_eq, a_channel, b_channel])
+            return cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+        except Exception:
+            return aligned_bgr
 
     @staticmethod
     def compute_cranial_bone_ratios(

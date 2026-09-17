@@ -322,3 +322,85 @@ class TestValidateEndpoint:
             json={"invalid_key": "missing_required_fields"},
         )
         assert resp.status_code == 422
+
+
+class TestDetectTypeEndpoint:
+    """Tests for the POST /api/v1/verification/detect-type endpoint."""
+
+    @pytest.fixture
+    def client(self):
+        from app.main import app
+        transport = ASGITransport(app=app)
+        return AsyncClient(transport=transport, base_url="http://test")
+
+    async def test_detect_type_passport(self, client, monkeypatch):
+        from PIL import Image
+        img = Image.new("RGB", (800, 1000), color=(200, 200, 200))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        regions = _make_synthetic_passport_regions()
+        monkeypatch.setattr(ocr_engine_module, "run_ocr", lambda *args, **kw: regions)
+
+        resp = await client.post(
+            "/api/v1/verification/detect-type",
+            files={"file": ("passport_scan.jpg", buf, "image/jpeg")},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert data["detected_type"] == "passport"
+        assert data["frontend_type"] == "passport"
+        assert data["label"] == "Passport"
+        assert data["confidence"] >= 0.90
+
+    async def test_detect_type_aadhaar_by_keyword(self, client, monkeypatch):
+        from PIL import Image
+        img = Image.new("RGB", (800, 500), color=(240, 240, 240))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        def r(text):
+            return OCRRegion(text=text, confidence=0.95, bbox=[[0, 0], [10, 0], [10, 10], [0, 10]])
+
+        aadhaar_regions = [
+            r("GOVERNMENT OF INDIA"),
+            r("UNIQUE IDENTIFICATION AUTHORITY OF INDIA"),
+            r("AADHAAR"),
+            r("8472 9103 8473"),
+        ]
+        monkeypatch.setattr(ocr_engine_module, "run_ocr", lambda *args, **kw: aadhaar_regions)
+
+        resp = await client.post(
+            "/api/v1/verification/detect-type",
+            files={"file": ("credential.jpg", buf, "image/jpeg")},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert data["detected_type"] == "aadhaar"
+        assert data["frontend_type"] == "aadhaar"
+
+    async def test_ocr_auto_detection_resolves_and_verifies(self, client, monkeypatch):
+        from PIL import Image
+        img = Image.new("RGB", (800, 1000), color=(200, 200, 200))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        regions = _make_synthetic_passport_regions()
+        monkeypatch.setattr(ocr_engine_module, "run_ocr", lambda *args, **kw: regions)
+
+        resp = await client.post(
+            "/api/v1/verification/ocr",
+            files={"file": ("unknown_scan.jpg", buf, "image/jpeg")},
+            data={"document_type": "auto"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["document_type"] == "passport"
+        assert data["status"] == "completed"
+        assert data["traveler"]["docNumber"] == "T9876543"
+

@@ -25,8 +25,14 @@ from typing import Any, Dict, List, Optional, Union
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse
 
+from pydantic import BaseModel
+
 from app.core.config import settings
-from app.services.documents.classifier import classify_and_guard_document_type
+from app.services.documents.classifier import (
+    classify_and_guard_document_type,
+    detect_document_type_from_text,
+    DOCUMENT_TYPE_LABELS,
+)
 from app.core.exceptions import (
     BiometricVerificationError,
     DocumentIngestionError,
@@ -159,6 +165,115 @@ async def check_quality(
     )
 
 
+CANONICAL_TO_FRONTEND_TYPE: Dict[str, str] = {
+    "passport": "passport",
+    "visa": "visa",
+    "driving_license": "drivingLicense",
+    "aadhaar": "aadhaar",
+    "voter_id": "voterId",
+    "pan_card": "panCard",
+    "border_permit": "borderPermit",
+    "national_id": "aadhaar",
+}
+
+
+class DocumentTypeDetectionResponse(BaseModel):
+    status: str = "success"
+    detected_type: str
+    frontend_type: str
+    label: str
+    confidence: float
+    filename: Optional[str] = None
+    extracted_snippet: Optional[str] = None
+    method: str = "ocr_optical_analysis"
+
+
+def infer_doc_type_from_filename(filename: Optional[str]) -> Optional[str]:
+    """Helper to detect document type key from filename keywords as a fallback."""
+    if not filename:
+        return None
+    fname_lower = filename.lower()
+    if any(k in fname_lower for k in ["passport", "pass"]):
+        return "passport"
+    if any(k in fname_lower for k in ["visa"]):
+        return "visa"
+    if any(k in fname_lower for k in ["dl", "driving", "licen"]):
+        return "driving_license"
+    if any(k in fname_lower for k in ["aadhaar", "aadhar", "uid"]):
+        return "aadhaar"
+    if any(k in fname_lower for k in ["voter", "epic"]):
+        return "voter_id"
+    if any(k in fname_lower for k in ["pan", "pancard"]):
+        return "pan_card"
+    if any(k in fname_lower for k in ["permit", "border"]):
+        return "border_permit"
+    return None
+
+
+@router.post(
+    "/detect-type",
+    response_model=DocumentTypeDetectionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Automatically detect document credential type from image",
+    description="Analyzes uploaded document image with OCR, geometry, and key markers to auto-detect credential type.",
+)
+async def auto_detect_type(
+    file: UploadFile = File(..., description="Document image to classify"),
+) -> DocumentTypeDetectionResponse:
+    """
+    Intelligent pre-screening endpoint:
+    Accepts any uploaded document image without prior declaration,
+    extracts optical features and text markers, and identifies the canonical credential type.
+    """
+    raw_bytes = await file.read()
+    ingested = await ingest_document(
+        raw_bytes=raw_bytes,
+        declared_mime=file.content_type or "",
+        filename=file.filename or "upload",
+    )
+    preprocessed = preprocess(ingested.image_np)
+
+    regions = []
+    if ocr_engine.is_ready():
+        try:
+            regions = ocr_engine.run_ocr(preprocessed.image_np)
+        except Exception as exc:
+            logger.warning("Auto-detect OCR extraction failed: %s", exc)
+
+    combined_text = " \n ".join(getattr(r, "text", str(r)) for r in regions)
+    detected = detect_document_type_from_text(combined_text)
+
+    confidence = 0.98 if detected else 0.65
+    method = "ocr_optical_analysis"
+
+    if not detected:
+        fn_detected = infer_doc_type_from_filename(file.filename)
+        if fn_detected:
+            detected = fn_detected
+            confidence = 0.88
+            method = "filename_heuristic"
+
+    if not detected:
+        detected = "passport"
+        confidence = 0.50
+        method = "default_fallback"
+
+    frontend_type = CANONICAL_TO_FRONTEND_TYPE.get(detected, detected)
+    label = DOCUMENT_TYPE_LABELS.get(detected, detected.replace("_", " ").title())
+    snippet = (combined_text[:160] + "...") if len(combined_text) > 160 else combined_text
+
+    return DocumentTypeDetectionResponse(
+        status="success",
+        detected_type=detected,
+        frontend_type=frontend_type,
+        label=label,
+        confidence=confidence,
+        filename=file.filename,
+        extracted_snippet=snippet,
+        method=method,
+    )
+
+
 @router.post(
     "/ocr",
     response_model=PassportOCRResponse,
@@ -179,7 +294,7 @@ async def check_quality(
 )
 async def ocr_document(
     file: UploadFile = File(..., description="Passport or document image (JPEG/PNG/WEBP)"),
-    document_type: str = Form(..., description="Document type key (e.g. 'passport')"),
+    document_type: str = Form(..., description="Document type key (e.g. 'passport' or 'auto')"),
 ) -> PassportOCRResponse:
     """
     OCR Extraction endpoint.
@@ -200,8 +315,9 @@ async def ocr_document(
         verification_id, document_type, file.filename,
     )
 
-    # ── Step 0: Resolve Document Profile ─────────────────────────────────────
-    profile = document_profile_registry.resolve_operational(document_type)
+    # ── Step 0: Resolve Document Profile (or defer if auto) ──────────────────
+    is_auto = (document_type or "").lower().strip() in ("auto", "detect", "auto_detect", "unknown", "")
+    profile = None if is_auto else document_profile_registry.resolve_operational(document_type)
 
     # ── Step 1: Ingest ────────────────────────────────────────────────────────
     raw_bytes = await file.read()
@@ -215,39 +331,41 @@ async def ocr_document(
 
     # ── Fast-path: Check Extraction Cache ─────────────────────────────────────
     from app.services.ocr.ocr_cache import get_cached_ocr, set_cached_ocr
-    cached_entry = get_cached_ocr(ingested.raw_bytes, profile.document_type)
-    if cached_entry is not None:
-        cached_resp, cached_parsed = cached_entry
-        fast_resp = cached_resp.model_copy(update={"verification_id": verification_id})
-        try:
-            risk_session_store.update_module(
-                verification_id, "m1_ocr",
-                {
-                    "status": fast_resp.status,
-                    "overall_confidence": fast_resp.ocr.overall_confidence if fast_resp.ocr else 0.95,
-                    "region_count": fast_resp.ocr.region_count if fast_resp.ocr else 10,
-                    "low_conf_count": 0,
-                    "has_low_confidence_regions": False,
-                    "mrz_detected": bool(fast_resp.mrz and (fast_resp.mrz.line1 or fast_resp.mrz.raw_line1)),
-                    "mrz_applicable": profile.mrz_applicable,
-                    "traveler_fields": fast_resp.traveler.model_dump() if fast_resp.traveler else {},
-                },
-            )
-        except Exception as _r_exc:
-            logger.debug("Fast risk session update: %s", _r_exc)
+    if profile:
+        cached_entry = get_cached_ocr(ingested.raw_bytes, profile.document_type)
+        if cached_entry is not None:
+            cached_resp, cached_parsed = cached_entry
+            fast_resp = cached_resp.model_copy(update={"verification_id": verification_id})
+            try:
+                risk_session_store.update_module(
+                    verification_id, "m1_ocr",
+                    {
+                        "status": fast_resp.status,
+                        "overall_confidence": fast_resp.ocr.overall_confidence if fast_resp.ocr else 0.95,
+                        "region_count": fast_resp.ocr.region_count if fast_resp.ocr else 10,
+                        "low_conf_count": 0,
+                        "has_low_confidence_regions": False,
+                        "mrz_detected": bool(fast_resp.mrz and (fast_resp.mrz.line1 or fast_resp.mrz.raw_line1)),
+                        "mrz_applicable": profile.mrz_applicable,
+                        "traveler_fields": fast_resp.traveler.model_dump() if fast_resp.traveler else {},
+                    },
+                )
+            except Exception as _r_exc:
+                logger.debug("Fast risk session update: %s", _r_exc)
 
-        _populate_registry_session(
-            verification_id=verification_id,
-            document_type=profile.document_type,
-            parsed=cached_parsed,
-            traveler=fast_resp.traveler,
-            mrz=fast_resp.mrz,
-        )
-        logger.info("Deterministic OCR cache hit for id=%s (doc_type=%s, file=%s)", verification_id, profile.document_type, file.filename)
-        return fast_resp
+            _populate_registry_session(
+                verification_id=verification_id,
+                document_type=profile.document_type,
+                parsed=cached_parsed,
+                traveler=fast_resp.traveler,
+                mrz=fast_resp.mrz,
+            )
+            logger.info("Deterministic OCR cache hit for id=%s (doc_type=%s, file=%s)", verification_id, profile.document_type, file.filename)
+            return fast_resp
 
     # ── Step 1.5: Pre-OCR Document Quality Gate ──────────────────────────────
-    quality_res = evaluate_document_quality(ingested.image_np, document_type=profile.document_type)
+    effective_doc_type = profile.document_type if profile else "passport"
+    quality_res = evaluate_document_quality(ingested.image_np, document_type=effective_doc_type)
     if not quality_res.is_acceptable:
         logger.warning(
             "Document quality gate rejected image for id=%s (reasons=%s): %s",
@@ -277,17 +395,27 @@ async def ocr_document(
         logger.warning("OCR returned zero regions for id=%s", verification_id)
         raise OCRNoTextError()
 
-    # ── Step 3.5: Strict Document Type Isolation Guard ───────────────────
-    type_guard = classify_and_guard_document_type(regions, profile.document_type)
-    if type_guard.is_mismatch:
-        logger.warning(
-            "STRICT REJECTION - Document type mismatch for id=%s: declared=%s detected=%s",
-            verification_id, profile.document_type, type_guard.detected_type,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=type_guard.error_message,
-        )
+    # ── Step 3.5: Strict Document Type Isolation Guard / Auto-Resolution ───────
+    if is_auto:
+        raw_text = " \n ".join(getattr(r, "text", str(r)) for r in regions)
+        detected_key = detect_document_type_from_text(raw_text)
+        if not detected_key:
+            detected_key = infer_doc_type_from_filename(file.filename)
+        if not detected_key:
+            detected_key = "passport"
+        profile = document_profile_registry.resolve_operational(detected_key)
+        logger.info("Auto-detected document type for id=%s: %s", verification_id, profile.document_type)
+    else:
+        type_guard = classify_and_guard_document_type(regions, profile.document_type)
+        if type_guard.is_mismatch:
+            logger.warning(
+                "STRICT REJECTION - Document type mismatch for id=%s: declared=%s detected=%s",
+                verification_id, profile.document_type, type_guard.detected_type,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=type_guard.error_message,
+            )
 
     # ── Step 4: Document-specific parsing ────────────────────────────────────
     parsed_passport = None
@@ -596,8 +724,15 @@ async def ocr_document(
         from app.services.face.face_aligner import FaceAligner
 
         doc_detect = face_detector.detect_faces(ingested.image_np, is_document=True)
+        d_box = None
         if doc_detect.face_count == 1:
             d_box = doc_detect.faces[0]
+        elif doc_detect.face_count > 1:
+            d_box = face_verification_service._select_primary_document_face(
+                getattr(doc_detect, "faces", None), profile=profile, img_shape=ingested.image_np.shape[:2]
+            )
+
+        if d_box is not None:
             d_crop_raw = face_detector.crop_portrait(ingested.image_np, d_box)
             d_crop = DocumentFaceEnhancer.enhance_portrait_crop(d_crop_raw)
             if d_crop is not None:
@@ -609,7 +744,15 @@ async def ocr_document(
                     d_aligned = aligner.align_bbox_fallback(ingested.image_np, d_box.bbox, target_size=(112, 112))
                 d_aligned_enh = aligner.enhance_document_face(d_aligned)
                 arc_model = face_verification_service.embedding_model
-                d_emb = arc_model.get_embedding(d_aligned_enh) if arc_model.is_available() else None
+                if arc_model.is_available():
+                    d_emb = {
+                        "global": arc_model.get_embedding(d_aligned_enh),
+                        "rigid": arc_model.get_embedding(aligner.apply_rigid_bone_mask(d_aligned_enh)),
+                        "core": arc_model.get_embedding(aligner.extract_cranial_core_crop(d_aligned_enh)),
+                        "illum": arc_model.get_embedding(aligner.normalize_facial_illumination(d_aligned_enh)),
+                    }
+                else:
+                    d_emb = None
                 session_document_store.set_face_cache(
                     verification_id=verification_id,
                     doc_box=d_box,

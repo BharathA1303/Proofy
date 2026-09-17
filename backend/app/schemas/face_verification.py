@@ -257,6 +257,10 @@ class FaceMatchResult(BaseModel):
         default=None,
         description="Detailed rigid cranial bone ratio breakdown (interocular, facial height, triangle ratio, symmetry)",
     )
+    details: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Detailed multi-representation breakdown (global, rigid bone, ocular-nasal core, illumination)",
+    )
 
 
 class FaceVerificationResponse(BaseModel):

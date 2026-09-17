@@ -443,8 +443,7 @@ DRIVING_LICENSE_PROFILE = DocumentProfile(
     biometric_config={
         "applicable": True,
         "portrait_applicable": True,
-        "portrait_required": False,
-        "portrait_source_preference": ["semantic_region", "detector_fallback"],
+        "portrait_source_preference": ["detector_fallback", "semantic_region"],
         "expected_portrait_region": NormalizedBBox(0.04, 0.20, 0.28, 0.52),
         "face_match_threshold": 0.40,
         "inconclusive_margin": 0.06,

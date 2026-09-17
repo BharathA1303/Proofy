@@ -1,0 +1,410 @@
+/* FloatingAutoVerify.module.css
+   High-end tactile glassmorphism with dynamic cyan/blue glow for the Floating AI Auto-Verify component
+*/
+
+.floatingContainer {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none; /* children enable pointer events */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Floating Action Button (FAB)
+   ───────────────────────────────────────────────────────────── */
+.fabButton {
+  pointer-events: auto;
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0A1931 0%, #0047BA 50%, #00A3FF 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 25px -4px rgba(0, 102, 255, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+  overflow: visible;
+}
+
+.fabButton:hover {
+  transform: translateY(-4px) scale(1.06);
+  box-shadow:
+    0 16px 32px -4px rgba(0, 102, 255, 0.6),
+    0 0 20px rgba(0, 210, 255, 0.5),
+    inset 0 1px 3px rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.fabButton:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.fabDragging {
+  transform: scale(1.15) !important;
+  border-color: #00D2FF !important;
+  box-shadow:
+    0 0 35px rgba(0, 210, 255, 0.8),
+    0 10px 25px rgba(0, 102, 255, 0.5) !important;
+  background: linear-gradient(135deg, #0052CC 0%, #0099FF 50%, #00F0FF 100%) !important;
+}
+
+.fabProcessing {
+  pointer-events: none;
+  background: linear-gradient(135deg, #06152B 0%, #0B2545 100%);
+  border-color: rgba(0, 210, 255, 0.5);
+}
+
+/* Ambient Pulsing Halo around the FAB */
+.pulseRing {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 210, 255, 0.5);
+  animation: ripple 2.6s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+}
+
+/* Rotating Glow Aura during Processing */
+.scanSpinner {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: #00D2FF;
+  border-right-color: #0066FF;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Icon inside FAB */
+.fabIcon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.25s ease;
+}
+
+.fabButton:hover .fabIcon {
+  transform: scale(1.1);
+}
+
+/* Small AI badge over the button */
+.aiBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #00D2FF, #0066FF);
+  color: #ffffff;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  z-index: 3;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Hover Tooltip Pill
+   ───────────────────────────────────────────────────────────── */
+.fabTooltip {
+  pointer-events: none;
+  position: absolute;
+  right: 76px;
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  background: rgba(10, 25, 49, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.22s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fabButton:hover .fabTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+.tooltipSparkle {
+  color: #00D2FF;
+  display: inline-flex;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Live Status Card (Floats directly above the button)
+   ───────────────────────────────────────────────────────────── */
+.statusCard {
+  pointer-events: auto;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 102, 255, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 16px 36px -4px rgba(10, 25, 49, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.25s ease;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusIndicatorDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #0066FF;
+  box-shadow: 0 0 8px #0066FF;
+  animation: pulseDot 1.4s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+.statusTitle {
+  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.statusCloseBtn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.statusCloseBtn:hover {
+  color: #0F172A;
+}
+
+/* Step Progress Indicator */
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  color: #64748B;
+  transition: all 0.2s ease;
+}
+
+.stepActive {
+  color: #0F172A;
+  font-weight: 600;
+}
+
+.stepComplete {
+  color: #16A34A;
+  font-weight: 600;
+}
+
+.stepIconSlot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.stepActive .stepIconSlot {
+  background: rgba(0, 102, 255, 0.12);
+  color: #0066FF;
+}
+
+.stepComplete .stepIconSlot {
+  background: #DCFCE7;
+  color: #16A34A;
+}
+
+/* Detection Pill Result inside Card */
+.detectedPill {
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.08), rgba(0, 210, 255, 0.12));
+  border: 1px solid rgba(0, 102, 255, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detectedPillLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detectedLabel {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0052CC;
+}
+
+.detectedMeta {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.confidenceBadge {
+  background: #16A34A;
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* Error State in Card */
+.errorBox {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #991B1B;
+  font-size: 0.8125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.errorTitle {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.errorActionBtn {
+  align-self: flex-end;
+  background: #DC2626;
+  color: #ffffff;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.errorActionBtn:hover {
+  background: #B91C1C;
+}
+
+/* Hidden File Input */
+.hiddenInput {
+  display: none;
+}

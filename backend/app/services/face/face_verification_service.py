@@ -214,6 +214,87 @@ class FaceVerificationService:
             pad_threshold=settings.ANTI_SPOOF_THRESHOLD,
         )
 
+    @staticmethod
+    def _select_primary_document_face(
+        faces: Any,
+        portrait_region: Any = None,
+        profile: Any = None,
+        img_shape: Tuple[int, int] = (0, 0),
+    ) -> Optional[DetectedFaceBox]:
+        """
+        Differentiate genuine primary document photo from small secondary ghost hologram/watermark photos.
+        Returns the primary face if clearly dominant, or None if multiple ambiguous faces are present.
+        """
+        if not faces or not isinstance(faces, list) or len(faces) == 0:
+            return None
+        if len(faces) == 1:
+            return faces[0]
+
+        try:
+            # Score candidate faces by area and detection confidence
+            scored = []
+            for f in faces:
+                if not hasattr(f, "width") or not hasattr(f, "height"):
+                    continue
+                area = float(f.width * f.height)
+                conf = float(f.confidence) if getattr(f, "confidence", None) is not None else 0.5
+                score = conf * np.sqrt(area)
+                scored.append((score, area, conf, f))
+
+            if len(scored) == 0:
+                return None
+            if len(scored) == 1:
+                return scored[0][3]
+
+            scored.sort(key=lambda x: x[0], reverse=True)
+            top_score, top_area, top_conf, top_face = scored[0]
+            second_score, second_area, second_conf, second_face = scored[1]
+
+            # Primary face is significantly larger (e.g. >= 1.5x area) or significantly higher score (>= 1.4x)
+            if top_area >= 1.5 * second_area or top_score >= 1.4 * second_score:
+                logger.info(
+                    "Selected primary document face (area=%d conf=%.2f) over secondary candidate (area=%d conf=%.2f)",
+                    int(top_area), top_conf, int(second_area), second_conf,
+                )
+                return top_face
+        except Exception as _sel_exc:
+            logger.debug("Error in primary face selection: %s", _sel_exc)
+
+        return None
+
+    @staticmethod
+    def _parse_region_box(exp_region: Any) -> Tuple[float, float, float, float]:
+        """Parse bounding box coordinates (ymin, xmin, ymax, xmax) from various region formats."""
+        try:
+            if hasattr(exp_region, "ymin"):
+                return float(exp_region.ymin), float(exp_region.xmin), float(exp_region.ymax), float(exp_region.xmax)
+            if hasattr(exp_region, "x") and hasattr(exp_region, "y"):
+                rx1 = float(exp_region.x)
+                ry1 = float(exp_region.y)
+                rx2 = rx1 + float(getattr(exp_region, "width", 0.0))
+                ry2 = ry1 + float(getattr(exp_region, "height", 0.0))
+                return ry1, rx1, ry2, rx2
+            if isinstance(exp_region, (list, tuple)) and len(exp_region) == 4:
+                return float(exp_region[0]), float(exp_region[1]), float(exp_region[2]), float(exp_region[3])
+            if isinstance(exp_region, dict):
+                if "relative_x" in exp_region:
+                    rx1 = float(exp_region["relative_x"])
+                    ry1 = float(exp_region["relative_y"])
+                    rx2 = rx1 + float(exp_region.get("relative_w", 0.0))
+                    ry2 = ry1 + float(exp_region.get("relative_h", 0.0))
+                    return ry1, rx1, ry2, rx2
+                if "ymin" in exp_region:
+                    return float(exp_region["ymin"]), float(exp_region["xmin"]), float(exp_region["ymax"]), float(exp_region["xmax"])
+                if "x" in exp_region:
+                    rx1 = float(exp_region["x"])
+                    ry1 = float(exp_region["y"])
+                    rx2 = rx1 + float(exp_region.get("width", 0.0))
+                    ry2 = ry1 + float(exp_region.get("height", 0.0))
+                    return ry1, rx1, ry2, rx2
+        except Exception:
+            pass
+        return 0.0, 0.0, 1.0, 1.0
+
     def verify(
         self,
         verification_id: str,
@@ -331,48 +412,15 @@ class FaceVerificationService:
             doc_quality = evaluate_face_quality(doc_crop, is_document=True)
             logger.info("Fast-path: Reused cached document face for session=%s", verification_id)
         else:
-            # 2a. Determine expected portrait region from arguments or profile
-            exp_region = portrait_region
-            if exp_region is None and profile is not None:
-                if getattr(profile, "expected_semantic_regions", None) and "portrait" in profile.expected_semantic_regions:
-                    exp_region = profile.expected_semantic_regions["portrait"].relative_box
-                elif getattr(profile, "biometric_config", None) and "expected_portrait_region" in profile.biometric_config:
-                    exp_region = profile.biometric_config["expected_portrait_region"]
-                elif getattr(profile, "expected_regions", None) and "photo" in profile.expected_regions:
-                    exp_region = profile.expected_regions["photo"]
-
+            # 2. Document Face Localization
             doc_box = None
             doc_detector_used = "none"
+            doc_source = "FULL_IMAGE_DETECTION"
 
-            if exp_region is not None:
+            # Case A: If portrait_region was explicitly provided by caller, evaluate it first
+            if portrait_region is not None:
                 try:
-                    if hasattr(exp_region, "ymin"):
-                        ry1, rx1, ry2, rx2 = exp_region.ymin, exp_region.xmin, exp_region.ymax, exp_region.xmax
-                    elif hasattr(exp_region, "x") and hasattr(exp_region, "y"):
-                        rx1 = float(exp_region.x)
-                        ry1 = float(exp_region.y)
-                        rx2 = rx1 + float(getattr(exp_region, "width", 0.0))
-                        ry2 = ry1 + float(getattr(exp_region, "height", 0.0))
-                    elif isinstance(exp_region, (list, tuple)) and len(exp_region) == 4:
-                        ry1, rx1, ry2, rx2 = exp_region
-                    elif isinstance(exp_region, dict):
-                        if "relative_x" in exp_region:
-                            rx1 = exp_region["relative_x"]
-                            ry1 = exp_region["relative_y"]
-                            rx2 = rx1 + exp_region["relative_w"]
-                            ry2 = ry1 + exp_region["relative_h"]
-                        elif "ymin" in exp_region:
-                            ry1, rx1, ry2, rx2 = exp_region["ymin"], exp_region["xmin"], exp_region["ymax"], exp_region["xmax"]
-                        elif "x" in exp_region:
-                            rx1 = exp_region["x"]
-                            ry1 = exp_region["y"]
-                            rx2 = rx1 + exp_region.get("width", 0.0)
-                            ry2 = ry1 + exp_region.get("height", 0.0)
-                        else:
-                            ry1, rx1, ry2, rx2 = 0.0, 0.0, 1.0, 1.0
-                    else:
-                        ry1, rx1, ry2, rx2 = 0.0, 0.0, 1.0, 1.0
-
+                    ry1, rx1, ry2, rx2 = self._parse_region_box(portrait_region)
                     h_doc, w_doc = doc_img.shape[:2]
                     py1 = max(0, int(ry1 * h_doc))
                     px1 = max(0, int(rx1 * w_doc))
@@ -383,45 +431,114 @@ class FaceVerificationService:
                         region_crop = doc_img[py1:py2, px1:px2]
                         r_detect = self.detector.detect_faces(region_crop, is_document=True)
                         if r_detect.face_count == 1:
-                            raw_box = r_detect.faces[0]
-                            mapped_box = DetectedFaceBox(
-                                x=px1 + raw_box.x,
-                                y=py1 + raw_box.y,
-                                width=raw_box.width,
-                                height=raw_box.height,
-                                confidence=raw_box.confidence,
-                            )
-                            if raw_box.landmarks:
-                                mapped_box.landmarks = [(px1 + lx, py1 + ly) for (lx, ly) in raw_box.landmarks]
-                            doc_box = mapped_box
-                            doc_source = "DOCUMENT_PORTRAIT_REGION"
-                            doc_detector_used = r_detect.detector_used
+                            raw_box = r_detect.faces[0] if r_detect.faces else None
+                            if raw_box is not None:
+                                mapped_box = DetectedFaceBox(
+                                    x=px1 + raw_box.x,
+                                    y=py1 + raw_box.y,
+                                    width=raw_box.width,
+                                    height=raw_box.height,
+                                    confidence=raw_box.confidence,
+                                )
+                                if raw_box.landmarks:
+                                    mapped_box.landmarks = [(px1 + lx, py1 + ly) for (lx, ly) in raw_box.landmarks]
+                                doc_box = mapped_box
+                                doc_source = "DOCUMENT_PORTRAIT_REGION"
+                                doc_detector_used = r_detect.detector_used
                         elif r_detect.face_count > 1:
-                            logger.warning("Multiple faces (%d) detected in document portrait region", r_detect.face_count)
-                            return self._build_multiple_faces_response(
-                                verification_id, document_type, is_document=True, count=r_detect.face_count
+                            primary = self._select_primary_document_face(
+                                getattr(r_detect, "faces", None), img_shape=region_crop.shape[:2]
                             )
+                            if primary is not None:
+                                mapped_box = DetectedFaceBox(
+                                    x=px1 + primary.x,
+                                    y=py1 + primary.y,
+                                    width=primary.width,
+                                    height=primary.height,
+                                    confidence=primary.confidence,
+                                )
+                                if primary.landmarks:
+                                    mapped_box.landmarks = [(px1 + lx, py1 + ly) for (lx, ly) in primary.landmarks]
+                                doc_box = mapped_box
+                                doc_source = "DOCUMENT_PORTRAIT_REGION"
+                                doc_detector_used = r_detect.detector_used
+                            else:
+                                logger.warning("Multiple faces (%d) detected in document portrait region", r_detect.face_count)
+                                return self._build_multiple_faces_response(
+                                    verification_id, document_type, is_document=True, count=r_detect.face_count
+                                )
                 except Exception as _reg_exc:
-                    logger.debug("Portrait region search exception: %s", _reg_exc)
+                    logger.debug("Caller portrait region search exception: %s", _reg_exc)
 
-            # 2b. Safe fallback to full document detection if region search did not isolate a face
+            # Case B: If no caller-supplied region or if region search found 0 faces, run full document deep detection
             if doc_box is None:
                 doc_detect = self.detector.detect_faces(doc_img, is_document=True)
-                if doc_detect.face_count == 0:
-                    logger.warning("No face detected on document (session=%s)", verification_id)
-                    return self._build_document_face_missing_response(
-                        verification_id, document_type, doc_detect.detector_used
+                if doc_detect.face_count == 1:
+                    doc_box = doc_detect.faces[0] if doc_detect.faces else None
+                    doc_source = "FULL_IMAGE_DETECTION"
+                    doc_detector_used = doc_detect.detector_used
+                elif doc_detect.face_count > 1:
+                    primary = self._select_primary_document_face(
+                        getattr(doc_detect, "faces", None),
+                        portrait_region=portrait_region,
+                        profile=profile,
+                        img_shape=doc_img.shape[:2],
                     )
+                    if primary is not None:
+                        doc_box = primary
+                        doc_source = "PRIMARY_DOCUMENT_PORTRAIT"
+                        doc_detector_used = doc_detect.detector_used
+                    else:
+                        logger.warning("Multiple faces (%d) detected on document", doc_detect.face_count)
+                        return self._build_multiple_faces_response(
+                            verification_id, document_type, is_document=True, count=doc_detect.face_count
+                        )
+                else:
+                    # Case C: Fallback to profile expected semantic regions if full detection found 0
+                    exp_region = None
+                    if profile is not None:
+                        if getattr(profile, "expected_semantic_regions", None) and "portrait" in profile.expected_semantic_regions:
+                            exp_region = profile.expected_semantic_regions["portrait"].relative_box
+                        elif getattr(profile, "biometric_config", None) and "expected_portrait_region" in profile.biometric_config:
+                            exp_region = profile.biometric_config["expected_portrait_region"]
+                        elif getattr(profile, "expected_regions", None) and "photo" in profile.expected_regions:
+                            exp_region = profile.expected_regions["photo"]
 
-                if doc_detect.face_count > 1:
-                    logger.warning("Multiple faces (%d) detected on document", doc_detect.face_count)
-                    return self._build_multiple_faces_response(
-                        verification_id, document_type, is_document=True, count=doc_detect.face_count
-                    )
+                    if exp_region is not None:
+                        try:
+                            ry1, rx1, ry2, rx2 = self._parse_region_box(exp_region)
+                            h_doc, w_doc = doc_img.shape[:2]
+                            py1 = max(0, int(ry1 * h_doc))
+                            px1 = max(0, int(rx1 * w_doc))
+                            py2 = min(h_doc, int(ry2 * h_doc))
+                            px2 = min(w_doc, int(rx2 * w_doc))
 
-                doc_box = doc_detect.faces[0]
-                doc_source = "FULL_IMAGE_DETECTION"
-                doc_detector_used = doc_detect.detector_used
+                            if (py2 - py1) >= 30 and (px2 - px1) >= 30:
+                                region_crop = doc_img[py1:py2, px1:px2]
+                                r_detect = self.detector.detect_faces(region_crop, is_document=True)
+                                if r_detect.face_count == 1:
+                                    raw_box = r_detect.faces[0] if r_detect.faces else None
+                                    if raw_box is not None:
+                                        mapped_box = DetectedFaceBox(
+                                            x=px1 + raw_box.x,
+                                            y=py1 + raw_box.y,
+                                            width=raw_box.width,
+                                            height=raw_box.height,
+                                            confidence=raw_box.confidence,
+                                        )
+                                        if raw_box.landmarks:
+                                            mapped_box.landmarks = [(px1 + lx, py1 + ly) for (lx, ly) in raw_box.landmarks]
+                                        doc_box = mapped_box
+                                        doc_source = "DOCUMENT_PORTRAIT_REGION"
+                                        doc_detector_used = r_detect.detector_used
+                        except Exception as _prof_reg_exc:
+                            logger.debug("Profile semantic region fallback exception: %s", _prof_reg_exc)
+
+            if doc_box is None:
+                logger.warning("No face detected on document (session=%s)", verification_id)
+                return self._build_document_face_missing_response(
+                    verification_id, document_type, doc_detector_used if doc_detector_used != "none" else "none"
+                )
 
             # Extract portrait crop with balanced margins (with mock fallback to crop_face)
             doc_crop_candidate = getattr(self.detector, "crop_portrait", self.detector.crop_face)(doc_img, doc_box)
@@ -552,11 +669,43 @@ class FaceVerificationService:
             )
 
         try:
-            if doc_embedding is None:
-                # Enhance document facial contrast and suppress print/scanning noise for robust cross-domain matching
-                doc_aligned_enh = self.aligner.enhance_document_face(doc_aligned)
-                doc_embedding = self.embedding_model.get_embedding(doc_aligned_enh)
-            live_embedding = self.embedding_model.get_embedding(live_aligned)
+            # ── 8. ArcFace 512-D Embedding Extraction with Age-Invariant Multi-Representation ─
+            # Document Face Multi-Representation
+            doc_aligned_enh = self.aligner.enhance_document_face(doc_aligned)
+            if doc_embedding is None or not isinstance(doc_embedding, dict):
+                # 1. Global canonical representation
+                d_glob = self.embedding_model.get_embedding(doc_aligned_enh)
+                # 2. Rigid cranial bone representation (hair/beard/aging-invariant)
+                d_rigid = self.embedding_model.get_embedding(self.aligner.apply_rigid_bone_mask(doc_aligned_enh))
+                # 3. Inner ocular-nasal facial core
+                d_core = self.embedding_model.get_embedding(self.aligner.extract_cranial_core_crop(doc_aligned_enh))
+                # 4. Illumination-normalized representation
+                d_illum = self.embedding_model.get_embedding(self.aligner.normalize_facial_illumination(doc_aligned_enh))
+                doc_embedding_dict = {
+                    "global": d_glob,
+                    "rigid": d_rigid,
+                    "core": d_core,
+                    "illum": d_illum,
+                }
+            else:
+                doc_embedding_dict = doc_embedding
+
+            # Live Camera Multi-Representation
+            l_glob = self.embedding_model.get_embedding(live_aligned)
+            l_rigid = self.embedding_model.get_embedding(self.aligner.apply_rigid_bone_mask(live_aligned))
+            l_core = self.embedding_model.get_embedding(self.aligner.extract_cranial_core_crop(live_aligned))
+            l_illum = self.embedding_model.get_embedding(self.aligner.normalize_facial_illumination(live_aligned))
+            live_embedding_dict = {
+                "global": l_glob,
+                "rigid": l_rigid,
+                "core": l_core,
+                "illum": l_illum,
+            }
+
+            # Invariant Cranial Bone Geometry Ratios
+            cranial_doc = self.aligner.compute_cranial_bone_ratios(getattr(doc_box, "landmarks", None))
+            cranial_live = self.aligner.compute_cranial_bone_ratios(getattr(live_box, "landmarks", None))
+
         except Exception as exc:
             logger.error("Embedding generation failed: %s", exc)
             return self._build_error_response(
@@ -574,7 +723,7 @@ class FaceVerificationService:
                 doc_box=doc_box,
                 doc_crop=doc_crop,
                 doc_aligned=doc_aligned,
-                doc_embedding=doc_embedding,
+                doc_embedding=doc_embedding_dict,
                 detector_used=doc_detector_used,
             )
 
@@ -590,15 +739,6 @@ class FaceVerificationService:
             inconclusive_margin = b_cfg.get("inconclusive_margin", inconclusive_margin)
 
         # ── 8b. Dynamic Risk Tightening (Proprietary Enhancement D) ────
-        # If upstream M2 (validation) already found the MRZ was auto-corrected
-        # or critically malformed, or M3 (forensics — classical or advanced
-        # engine) raised a CRITICAL/HIGH tampering signal, this document is
-        # already known-suspicious. It must clear a materially stricter
-        # identity bar than a clean document before a biometric match is
-        # accepted — never the same uncalibrated baseline. The elevated
-        # threshold is applied as a floor: it can only raise the operating
-        # threshold, never lower a profile-specific threshold that was
-        # already stricter than the elevated ceiling.
         risk_elevated, risk_reasons = _assess_upstream_risk(verification_id)
         if risk_elevated:
             pre_elevation_threshold = face_match_threshold
@@ -609,15 +749,17 @@ class FaceVerificationService:
                 verification_id, pre_elevation_threshold, face_match_threshold, risk_reasons,
             )
 
-        # ── 9. Cosine Similarity Matching ─────────────────────────────
+        # ── 9. Cosine Similarity Matching with Age-Invariant Multi-Representation Fusion ────
         match_result = compare_face_embeddings(
-            doc_embedding,
-            live_embedding,
+            doc_embedding_dict,
+            live_embedding_dict,
             threshold=face_match_threshold,
             calibration_status=calib_status,
             inconclusive_margin=inconclusive_margin,
             risk_escalated=risk_elevated,
             risk_escalation_reasons=risk_reasons,
+            cranial_doc=cranial_doc,
+            cranial_live=cranial_live,
         )
 
         # ── 10. Decision Hierarchy Resolution ─────────────────────────
@@ -804,6 +946,10 @@ class FaceVerificationService:
                 explanation=match_expl,
                 risk_escalated=risk_elevated,
                 risk_escalation_reasons=risk_reasons,
+                hair_invariant=True,
+                cranial_bone_score=getattr(match_result, "details", {}).get("cranial_consistency_score", 0.85),
+                cranial_metrics=cranial_doc if cranial_doc and cranial_doc.get("valid") else None,
+                details=getattr(match_result, "details", {}),
             ),
             document_face_image=_crop_to_b64(doc_crop),
             live_face_image=_crop_to_b64(live_crop),

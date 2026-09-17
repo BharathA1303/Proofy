@@ -12,6 +12,7 @@ import { useVerification } from '../state/verification/useVerification.js';
 import { useAuth } from '../state/auth/useAuth.js';
 import DocumentWorkspace from '../components/document/DocumentWorkspace.jsx';
 import SidebarDrawer from '../components/navigation/SidebarDrawer.jsx';
+import FloatingAutoVerify from '../components/common/FloatingAutoVerify.jsx';
 import styles from './VerificationPage.module.css';
 
 export default function VerificationPage() {
@@ -128,6 +129,9 @@ export default function VerificationPage() {
       <main className={styles.main} id="main-content">
         <DocumentWorkspace />
       </main>
+
+      {/* Floating AI Auto-Detection & Instant Verification FAB */}
+      <FloatingAutoVerify />
 
       {/* Responsive Left Navigation Drawer */}
       <SidebarDrawer
